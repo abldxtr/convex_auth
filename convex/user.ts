@@ -19,9 +19,9 @@ export const getUser = query({
     // }
     // console.log({ email });
     const user = await ctx.db.get(userId);
-    console.log({ user });
+    // console.log({ user });
 
-    console.log({ userId });
+    // console.log({ userId });
 
     return user;
     // ...

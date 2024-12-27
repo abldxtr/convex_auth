@@ -16,6 +16,7 @@ import { Separator } from "@/components/ui/separator";
 import { TriangleAlert } from "lucide-react";
 import { useState } from "react";
 import { SignInFlow } from "../types";
+import { redirect } from "next/dist/server/api-utils";
 
 interface SignInCardProps {
   setState: (state: SignInFlow) => void;
@@ -37,8 +38,11 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
   const handlePasswordSignIn = form.handleSubmit(({ email, password }) => {
     setSigningIn(true);
     //  signIn(provider:"password", param:{ email, password, flow: "signIn" })
-    void signIn("password",{ email, password, flow: "signIn" })
-
+    void signIn("password", {
+      email,
+      password,
+      flow: "signIn",
+    })
       .catch(() => {
         setError("Invalid email or password");
       })
