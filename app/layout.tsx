@@ -6,8 +6,10 @@ import { ConvexClientProvider } from "./ConvexClientProvider";
 
 import { GlobalProvider } from "@/context/globalContext";
 import { EmojiProvider } from "@/context/EmojiContext";
-import { MessageProvider } from "@/hooks/use-message";
+// import { MessageProvider } from "@/hooks/use-message";
 // import { EdgeStoreProvider } from "@/lib/edgestore";
+
+import { ConvexQueryCacheProvider } from "convex-helpers/react/cache";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,19 +28,19 @@ export default function RootLayout({
       <html lang="en" suppressHydrationWarning>
         <body className="">
           <ConvexClientProvider>
-            <MessageProvider>
-              <GlobalProvider>
-                <EmojiProvider>
-                  {/* <EdgeStoreProvider> */}
-                  <div className="w-full max-w-[2400px] isolate mx-auto flex h-dvh  overflow-hidden">
-                    <div className=" overflow-auto  h-full scrl flex w-full  ">
-                      {children}
-                    </div>
+            {/* <MessageProvider> */}
+            <GlobalProvider>
+              <EmojiProvider>
+                {/* <ConvexQueryCacheProvider> */}
+                <div className="w-full max-w-[2400px] isolate mx-auto flex h-dvh  overflow-hidden">
+                  <div className=" overflow-auto  h-full scrl flex w-full  ">
+                    {children}
                   </div>
-                  {/* </EdgeStoreProvider> */}
-                </EmojiProvider>
-              </GlobalProvider>
-            </MessageProvider>
+                </div>
+                {/* </ConvexQueryCacheProvider> */}
+              </EmojiProvider>
+            </GlobalProvider>
+            {/* </MessageProvider> */}
           </ConvexClientProvider>
         </body>
       </html>

@@ -2,8 +2,6 @@
 
 import { useGlobalContext } from "@/context/globalContext";
 import { cn, formatMessageDate, formatPersianDate } from "@/lib/utils";
-import classNames from "classnames";
-import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useMediaQuery } from "usehooks-ts";
@@ -15,7 +13,6 @@ import { User } from "../message.list";
 import { AnimatePresence, motion } from "framer-motion";
 import usePresence from "@/hooks/usePresence";
 import { TypingLeft } from "../scroll-down";
-// import { user } from "../message.list";
 
 export type userList = {
   name: string | null;
@@ -116,7 +113,7 @@ export default function UserList({ user }: { user: userList }) {
       }}
     >
       <div
-        className={classNames(
+        className={cn(
           "flex  min-h-[74px]  items-center cursor-pointer p-[12px] relative justify-between group transition-all  ",
           chatIdActive === user.id
             ? "bg-[rgba(0,184,147,0.15)] "
@@ -127,7 +124,7 @@ export default function UserList({ user }: { user: userList }) {
         )}
       >
         <div
-          className={classNames(
+          className={cn(
             " absolute bottom-2 flex items-center justify-center right-4 size-6 rounded-full bg-green-400 text-white font-semibold  ",
             user.unReadMess === 0 && "hidden "
           )}
@@ -144,7 +141,7 @@ export default function UserList({ user }: { user: userList }) {
             />
           )}
           <div
-            className={classNames(
+            className={cn(
               " size-3 rounded-full absolute top-[30px] right-0   "
               // Active && "bg-green-400"
             )}
@@ -203,7 +200,7 @@ export function UserListLoading() {
       }}
     >
       <div
-        className={classNames(
+        className={cn(
           "flex gap-3    min-h-[40px] items-center cursor-pointer p-[12px] relative justify-between  "
         )}
       >
@@ -256,7 +253,7 @@ export function Account({ user }: { user?: User }) {
       onClick={() => copyToClipboard(user._id)}
     >
       <div
-        className={classNames(
+        className={cn(
           "flex  min-h-[40px] items-center cursor-pointer  border-y  p-[12px] justify-between group transition-all hover:bg-[#f7f9f9] "
         )}
       >
@@ -268,7 +265,7 @@ export function Account({ user }: { user?: User }) {
             fill
           />
           <div
-            className={classNames(
+            className={cn(
               " size-3 rounded-full absolute top-[30px] right-0   "
             )}
           />

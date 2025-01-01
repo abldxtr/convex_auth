@@ -8,7 +8,7 @@ import { useGlobalContext } from "@/context/globalContext";
 import { CirclePlus } from "lucide-react";
 import { useOnClickOutside } from "usehooks-ts";
 import { BeatLoader } from "react-spinners";
-import { useQueryClient } from "@tanstack/react-query";
+// import { useQueryClient } from "@tanstack/react-query";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
@@ -20,7 +20,7 @@ export function CreateChat({ id }: { id: User }) {
   const [userId, setUserId] = useState("");
   const router = useRouter();
   const ref = useRef<HTMLDivElement | null>(null);
-  const queryClient = useQueryClient();
+  // const queryClient = useQueryClient();
   const createChat = useMutation(api.chat.createChat);
 
   const handleClickOutside = () => {
