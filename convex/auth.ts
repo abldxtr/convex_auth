@@ -3,12 +3,14 @@ import { convexAuth } from "@convex-dev/auth/server";
 import { ConvexError } from "convex/values";
 
 import { DataModel } from "./_generated/dataModel";
+import { faker } from "@faker-js/faker";
 
 const CustomPassword = Password<DataModel>({
   profile(params) {
     return {
       email: params.email as string,
       name: params.name as string,
+      image: faker.image.avatar(),
     };
   },
   validatePasswordRequirements: (password: string) => {
@@ -18,6 +20,6 @@ const CustomPassword = Password<DataModel>({
   },
 });
 
-export const { auth, signIn, signOut, store,isAuthenticated } = convexAuth({
+export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   providers: [CustomPassword],
 });
