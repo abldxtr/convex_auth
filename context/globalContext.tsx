@@ -1,11 +1,11 @@
 "use client";
 
 import { userList } from "@/components/message/m-list";
-import { MessageData } from "@/lib/definitions";
+// import { MessageData } from "@/lib/definitions";
 import React, { createContext, useContext, useEffect, useState } from "react";
-export type final = {
-  [key: string]: MessageData[];
-}[];
+// export type final = {
+//   [key: string]: MessageData[];
+// }[];
 export type FileState = {
   file: File | string;
   key: string; // used to identify the file in the progress callback
@@ -26,8 +26,8 @@ interface CounterContextType {
   setChatIdActive: React.Dispatch<React.SetStateAction<string | null>>;
   unreadCount: number;
   setUnreadCount: React.Dispatch<React.SetStateAction<number>>;
-  unreadMessages: MessageData[];
-  setUnreadMessages: React.Dispatch<React.SetStateAction<MessageData[]>>;
+  // unreadMessages: MessageData[];
+  // setUnreadMessages: React.Dispatch<React.SetStateAction<MessageData[]>>;
   unreadCountMenue: {
     id: string;
     count: number;
@@ -40,8 +40,8 @@ interface CounterContextType {
       }[]
     >
   >;
-  final: final;
-  setFinal: React.Dispatch<React.SetStateAction<final>>;
+  // final: final;
+  // setFinal: React.Dispatch<React.SetStateAction<final>>;
   files: FileList | null;
   setFiles: React.Dispatch<React.SetStateAction<FileList | null>>;
   imgTemp: FileState[];
@@ -73,9 +73,9 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
     { id: string; count: number }[]
   >([]);
 
-  const [unreadMessages, setUnreadMessages] = useState<MessageData[]>([]);
+  // const [unreadMessages, setUnreadMessages] = useState<MessageData[]>([]);
 
-  const [final, setFinal] = useState<final>([]);
+  // const [final, setFinal] = useState<final>([]);
 
   return (
     <GlobalContext.Provider
@@ -92,12 +92,12 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
         setChatIdActive,
         unreadCount,
         setUnreadCount,
-        unreadMessages,
-        setUnreadMessages,
+        // unreadMessages,
+        // setUnreadMessages,
         unreadCountMenue,
         setUnreadCountMenue,
-        final,
-        setFinal,
+        // final,
+        // setFinal,
         files,
         setFiles,
         imgTemp,

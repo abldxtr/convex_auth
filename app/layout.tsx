@@ -4,6 +4,11 @@ import "./globals.css";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import { ConvexClientProvider } from "./ConvexClientProvider";
 
+import { GlobalProvider } from "@/context/globalContext";
+import { EmojiProvider } from "@/context/EmojiContext";
+import { MessageProvider } from "@/hooks/use-message";
+// import { EdgeStoreProvider } from "@/lib/edgestore";
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -18,9 +23,23 @@ export default function RootLayout({
 }) {
   return (
     <ConvexAuthNextjsServerProvider>
-      <html lang="en">
-        <body className={inter.className}>
-          <ConvexClientProvider>{children}</ConvexClientProvider>
+      <html lang="en" suppressHydrationWarning>
+        <body className="">
+          <ConvexClientProvider>
+            <MessageProvider>
+              <GlobalProvider>
+                <EmojiProvider>
+                  {/* <EdgeStoreProvider> */}
+                  <div className="w-full max-w-[2400px] isolate mx-auto flex h-dvh  overflow-hidden">
+                    <div className=" overflow-auto  h-full scrl flex w-full  ">
+                      {children}
+                    </div>
+                  </div>
+                  {/* </EdgeStoreProvider> */}
+                </EmojiProvider>
+              </GlobalProvider>
+            </MessageProvider>
+          </ConvexClientProvider>
         </body>
       </html>
     </ConvexAuthNextjsServerProvider>
