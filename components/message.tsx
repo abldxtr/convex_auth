@@ -14,10 +14,9 @@ import ChatMessage, { ScrollDown, TypingLeft } from "./scroll-down";
 import { api } from "@/convex/_generated/api";
 import usePresence from "@/hooks/usePresence";
 import { User } from "./message.list";
-import { useQuery } from "@tanstack/react-query";
-import { convexQuery } from "@convex-dev/react-query";
 import { useChatScroll } from "@/hooks/use-chat-scroll";
-// import { useQuery } from "convex/react";
+import { usePaginatedQuery } from "convex/react";
+import { InView, useInView } from "react-intersection-observer";
 
 export default function Messages({
   chatId,
@@ -52,22 +51,15 @@ export default function Messages({
   useLayoutEffect(() => {
     const storedScrollPosition = sessionStorage.getItem(`scrollPos-${chatId}`);
 
-    // ذخیره مقدار اولیه chatRef.current
     const chatElement = chatRef.current;
     const unReadElement = chatRef.current;
 
     if (storedScrollPosition && chatElement) {
       chatElement.scrollTop = parseInt(storedScrollPosition, 10);
     } else if (storedScrollPosition && unReadElement) {
-      // chatElement?.scrollTo(0, unReadElement?.getBoundingClientRect().top)
-      // unReadElement.scrollIntoView({ behavior: "instant" });
-      // const unreadMessageElement = document.getElementById("uuuu");
-      // if (unreadMessageElement) {
-      //   unreadMessageElement.scrollIntoView({
-      //     behavior: "instant",
-      //     block: "center",
-      //   });
-      // }
+      bottomRef.current?.scrollIntoView({
+        behavior: "instant",
+      });
     }
 
     return () => {
@@ -85,9 +77,36 @@ export default function Messages({
   const chatIdd = chatId ? chatId : "";
   const cc = chatIdd;
 
-  const { data: messages, isPending } = useQuery(
-    convexQuery(api.message.messages, { chatId: cc })
+  // const { data: messages, isPending } = useQuery(
+  //   convexQuery(api.message.messages, { chatId: cc })
+  // );
+
+  const {
+    results: messages,
+    status,
+    loadMore,
+    isLoading,
+  } = usePaginatedQuery(
+    api.message.messages,
+    { chatId: cc },
+    { initialNumItems: 10 }
   );
+
+  const isloadingData = status === "LoadingMore";
+
+  const { ref, inView, entry } = useInView({
+    /* Optional options */
+    threshold: 0,
+  });
+
+  useEffect(() => {
+    if (inView && status === "CanLoadMore") {
+      console.log("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
+      loadMore(10);
+    }
+  }, [InView]);
+
+  console.log({ messages, inView, status });
 
   const groupedMessages = useMemo(() => {
     if (!messages) return {};
@@ -110,7 +129,7 @@ export default function Messages({
 
   // if (status === "pending") {
   // if (!messages) {
-  if (isPending) {
+  if (isLoading) {
     return (
       <div className=" w-full h-full flex justify-center my-2 ">
         <Loader2 className="size-8 text-zinc-500 animate-spin " />
@@ -132,6 +151,32 @@ export default function Messages({
         )}
         ref={chatRef}
       >
+        {/* <div ref={ref} className="h-4 bg-green-500 w-full"></div> */}
+        <div
+          className="h-1"
+          ref={(el) => {
+            if (el) {
+              const observer = new IntersectionObserver(
+                ([entry]) => {
+                  if (entry.isIntersecting && status === "CanLoadMore") {
+                    loadMore(10);
+                  }
+                },
+                {
+                  threshold: 1.0,
+                }
+              );
+              observer.observe(el);
+              return () => observer.disconnect();
+            }
+          }}
+        ></div>
+        {isloadingData && (
+          <div className="flex justify-center">
+            <Loader2 className="h-6 w-6 text-zinc-500 animate-spin my-4" />
+          </div>
+        )}
+
         {Object.entries(groupedMessages).map(([date, msgs]) => (
           <div key={date} className="mb-4 isolate">
             <div className="text-center text-sm text-gray-500 my-2 sticky top-0 rtlDir z-[200] w-full flex items-center justify-center">

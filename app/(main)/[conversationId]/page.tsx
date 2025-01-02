@@ -25,35 +25,35 @@ const ConversationId = async (props: {
   // const userId = current.user!.id!;
 
   const token = await convexAuthNextjsToken();
-  const user = await fetchQuery(api.user.getUser, {}, { token });
-  // const chatList = await fetchQuery(
+  // const user = await fetchQuery(api.user.getUser, {}, { token });
+  // // const chatList = await fetchQuery(
+  // //   api.chat.chatList,
+  // //   { id: user?._id!, chatId: param as Id<"chats"> },
+  // //   { token }
+  // // );
+  // if (!user?._id) {
+  //   return null;
+  // }
+  // const chat = await fetchQuery(api.chat.getChat, { id: param as Id<"chats"> });
+  // const preloadedChatList = await preloadQuery(
   //   api.chat.chatList,
-  //   { id: user?._id!, chatId: param as Id<"chats"> },
-  //   { token }
-  // );
-  if (!user?._id) {
-    return null;
-  }
-  const chat = await fetchQuery(api.chat.getChat, { id: param as Id<"chats"> });
-  const preloadedChatList = await preloadQuery(
-    api.chat.chatList,
-    // { id: user?._id!, chatId: param as Id<"chats"> }
-    { id: user?._id }
+  //   // { id: user?._id!, chatId: param as Id<"chats"> }
+  //   { id: user?._id }
 
-    // { token }
-    // پاس دادن headers به preloadQuery
-  );
+  //   // { token }
+  //   // پاس دادن headers به preloadQuery
+  // );
 
   // const test = useQuery();
 
   return (
     <>
-      <Message_list
+      {/* <Message_list
         user={user}
         // chatlist={chatList}
         chat={chat}
         preloadedChatList={preloadedChatList}
-      />
+      /> */}
 
       <div className="w-full h-full">
         <Main param={param} />

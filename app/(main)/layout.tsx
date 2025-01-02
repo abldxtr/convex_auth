@@ -10,7 +10,11 @@ import { redirect } from "next/navigation";
 import { fetchQuery, preloadQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
 
-export default async function Home() {
+export default async function ChatLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const token = await convexAuthNextjsToken();
   const isAuth = await isAuthenticatedNextjs();
   // console.log({ token });
@@ -34,17 +38,17 @@ export default async function Home() {
     // { token }
     // پاس دادن headers به preloadQuery
   );
-
   return (
+    // <div className="w-full max-w-[2400px] isolate mx-auto flex h-dvh  overflow-hidden">
     <>
       <Message_list
         user={user}
         // chatlist={chatList}
         preloadedChatList={preloadedChatList}
       />
-      <div className="w-full isolate mx-auto flex h-dvh  overflow-hidden">
-        <Main param="" />
-      </div>
+
+      {children}
     </>
+    // </div>
   );
 }

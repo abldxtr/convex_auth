@@ -1,8 +1,8 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
+import { paginationOptsValidator } from "convex/server";
 
-// نمونه استفاده در یک تابع mutation
 export const createMessage = mutation({
   args: {
     content: v.string(),
@@ -10,10 +10,7 @@ export const createMessage = mutation({
     images: v.array(v.string()),
     senderId: v.string(),
     recieverId: v.string(),
-    // status:v.string(),
     opupId: v.string(),
-
-    // سایر پارامترها
   },
   handler: async (ctx, args) => {
     const messageId = await ctx.db.insert("messages", {
@@ -33,17 +30,6 @@ export const createMessage = mutation({
       throw new Error(`Chat with id ${args.chatId} not found.`);
     }
 
-    // const AmInit = chat.initiatorId === args.senderId;
-    // if (AmInit) {
-    //   await ctx.db.patch(args.chatId, {
-    //     unreadMessagesCountParticipant: chat.unreadMessagesCountParticipant + 1,
-    //   });
-    // } else {
-    //   await ctx.db.patch(args.chatId, {
-    //     unreadMessagesCountInitiator: chat.unreadMessagesCountInitiator + 1,
-    //   });
-    // }
-
     return messageId;
   },
 });
@@ -51,31 +37,22 @@ export const createMessage = mutation({
 export const messages = query({
   args: {
     chatId: v.string(),
-    limit: v.optional(v.number()), // تعداد پیام‌ها (اختیاری)
-    cursor: v.optional(v.id("messages")), // برای Pagination
+    limit: v.optional(v.number()),
+    cursor: v.optional(v.id("messages")),
+    paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args) => {
-    let query = ctx.db
+    let res = await ctx.db
       .query("messages")
-      .withIndex("by_chatId", (q) => q.eq("chatId", args.chatId));
-    // .order("asc"); // مرتب‌سازی بر اساس جدیدترین پیام
-
-    // استفاده از Cursor برای Pagination
-    // if (args.cursor) {
-    //   query = query.gt("_id", args.cursor); // پیام‌ها بعد از این Cursor
-    // }
-
-    // محدود کردن تعداد پیام‌ها
-    const limit = args.limit || 300; // پیش‌فرض 30 پیام
-    const res = await query.take(limit);
+      .withIndex("by_chatId", (q) => q.eq("chatId", args.chatId))
+      .paginate(args.paginationOpts);
 
     return res;
   },
 });
 export const seenMessage = mutation({
   args: {
-    id: v.id("messages"), // شناسه پیام
-    // class : v.array()
+    id: v.id("messages"),
 
     chatId: v.id("chats"),
     userId: v.string(),
@@ -92,35 +69,5 @@ export const seenMessage = mutation({
     if (!chat) {
       throw new Error(`Chat with id ${chatId} not found.`);
     }
-
-    // const AmInit = chat.initiatorId === userId;
-    // if (AmInit) {
-    //   await ctx.db.patch(chatId, {
-    //     unreadMessagesCountParticipant:
-    //       chat.unreadMessagesCountParticipant > 0
-    //         ? chat.unreadMessagesCountParticipant - 1
-    //         : 0,
-    //   });
-    // } else {
-    //   await ctx.db.patch(chatId, {
-    //     unreadMessagesCountInitiator:
-    //       chat.unreadMessagesCountInitiator > 0
-    //         ? chat.unreadMessagesCountInitiator - 1
-    //         : 0,
-    //   });
-    // }
-
-    // await ctx.db.patch(chatId, {
-    //   unreadMessagesCountParticipant: chat.unreadMessagesCountParticipant - 1,
-    // });
-
-    // بررسی موفقیت‌آمیز بودن آپدیت
-    // if (!updatedMessage) {
-    //   throw new Error(
-    //     `Message with id ${id} not found or could not be updated.`
-    //   );
-    // }
-
-    // return updatedMessage;
   },
 });

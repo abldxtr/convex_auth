@@ -214,39 +214,19 @@ const MessLeft: React.FC<{
   message: messageItem;
   children: React.ReactNode;
 }> = ({ message, children }) => {
-  const queryClient = useQueryClient();
-  const { setUnreadMessages, setFinal } = useGlobalContext();
   const other = message.senderId;
   const seenMess = useMutation(api.message.seenMessage);
 
-  const seenMessagesRef = useRef(new Set<string>());
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const queryKey = `chat:${message.chatId}`;
-  // const { markMessageAsSeen, pendingUpdates, qkey, setQKey, oth, setOth } =
-  //   useChatSeen();
-
-  // setQKey(queryKey);
-  // setOth(other);
-  // const { markMessageAsSeen } = useChatSeen({
-  //   queryKey,
-  //   other,
-  // });
 
   const { ref, inView } = useInView({
     threshold: 0.5,
     triggerOnce: true,
   });
 
-  // useEffect(() => {
-  //   if (message.status === "SENT" && inView) {
-  //     markMessageAsSeen(message.id, message.chatId);
-  //   }
-  // }, []);
   useEffect(() => {
     if (message.status === "SENT" && inView) {
       console.log("wwwwwwwwwwwwwwwwwwwwwww");
-
-      // markMessageAsSeen(message._id);
 
       seenMess({
         id: message._id,
@@ -262,13 +242,6 @@ const MessLeft: React.FC<{
     };
   }, [message.status, inView, message._id, message.chatId]);
 
-  // useEffect(() => {
-  //   return () => {
-  //     if (timerRef.current) {
-  //       clearTimeout(timerRef.current);
-  //     }
-  //   };
-  // }, []);
   return (
     <div
       className="pb-1 p-2 w-full group flex items-end gap-2 z-[9] "
@@ -354,8 +327,7 @@ export function ScrollDown({
   chatId,
   queryKey,
 }: ScrollDownProps) {
-  const { setUnreadCount, unreadMessages, final, setFinal } =
-    useGlobalContext();
+  const { setUnreadCount } = useGlobalContext();
 
   return (
     <>
