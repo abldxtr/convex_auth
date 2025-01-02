@@ -9,8 +9,6 @@ import { EmojiProvider } from "@/context/EmojiContext";
 // import { MessageProvider } from "@/hooks/use-message";
 // import { EdgeStoreProvider } from "@/lib/edgestore";
 
-import { ConvexQueryCacheProvider } from "convex-helpers/react/cache";
-
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
