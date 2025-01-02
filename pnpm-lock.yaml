@@ -50,9 +50,6 @@ dependencies:
   convex:
     specifier: ^1.17.4
     version: 1.17.4(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
-  convex-helpers:
-    specifier: ^0.1.67
-    version: 0.1.67(convex@1.17.4)(react@19.0.0-rc-f994737d14-20240522)(zod@3.24.1)
   emoji-mart:
     specifier: ^5.6.0
     version: 5.6.0
@@ -1836,27 +1833,6 @@ packages:
   /concat-map@0.0.1:
     resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
     dev: true
-
-  /convex-helpers@0.1.67(convex@1.17.4)(react@19.0.0-rc-f994737d14-20240522)(zod@3.24.1):
-    resolution: {integrity: sha512-nnb0W2FYKbqJt00UH6raZ/J0A1+CbcFdqmFJTDvvSR1P4RhwBj1TBzS3/B1G1nMYebX3gguSwOWfO0s2rcB/wg==}
-    hasBin: true
-    peerDependencies:
-      convex: ^1.13.0
-      hono: ^4.0.5
-      react: ^17.0.2 || ^18.0.0 || ^19.0.0
-      zod: ^3.22.4
-    peerDependenciesMeta:
-      hono:
-        optional: true
-      react:
-        optional: true
-      zod:
-        optional: true
-    dependencies:
-      convex: 1.17.4(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
-      react: 19.0.0-rc-f994737d14-20240522
-      zod: 3.24.1
-    dev: false
 
   /convex@1.17.4(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522):
     resolution: {integrity: sha512-D3PMFVlE1gUBerdHWIXn8zXgAPcTe0g8fzzEIoljY/ffJI0IWUECi4r4j7rIyXISqg3Wg78iGz7Pm1E/tsCnkA==}
