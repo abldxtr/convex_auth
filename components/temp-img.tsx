@@ -1,6 +1,6 @@
 import { FileState, useGlobalContext } from "@/context/globalContext";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEdgeStore } from "@/lib/edgestore";
+// import { useEdgeStore } from "@/lib/edgestore";
 import { CircleProgress } from "./circle-progress";
 import { useMemo } from "react";
 
