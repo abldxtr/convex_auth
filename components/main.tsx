@@ -10,11 +10,11 @@ import {
 export default async function Main({ param }: { param: string }) {
   const token = await convexAuthNextjsToken();
   const user = await fetchQuery(api.user.getUser, {}, { token });
-  const chatList = await fetchQuery(
-    api.chat.chatList,
-    { id: user?._id! },
-    { token }
-  );
+  // const chatList = await fetchQuery(
+  //   api.chat.chatList,
+  //   { id: user?._id! },
+  //   { token }
+  // );
   // }
 
   if (param) {
@@ -27,7 +27,7 @@ export default async function Main({ param }: { param: string }) {
       >
         <Chat_text
           param={param}
-          chatlist={chatList}
+          // chatlist={chatList}
           user={user}
           // preloadedMessages={preloadedMessages}
           // preloadedChat={preloadedChat}

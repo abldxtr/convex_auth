@@ -17,13 +17,14 @@ import { User } from "./message.list";
 import { useChatScroll } from "@/hooks/use-chat-scroll";
 import { usePaginatedQuery } from "convex/react";
 import { InView, useInView } from "react-intersection-observer";
+import { Id } from "@/convex/_generated/dataModel";
 
 export default function Messages({
   chatId,
   other,
   user,
 }: {
-  chatId: string | undefined;
+  chatId: Id<"chats"> | undefined;
   other?: string | undefined;
   user?: User;
 }) {
@@ -48,34 +49,37 @@ export default function Messages({
     setGoDown,
   });
 
-  useLayoutEffect(() => {
-    const storedScrollPosition = sessionStorage.getItem(`scrollPos-${chatId}`);
+  // useLayoutEffect(() => {
+  //   // const storedScrollPosition = sessionStorage.getItem(`scrollPos-${chatId}`);
 
-    const chatElement = chatRef.current;
-    const unReadElement = chatRef.current;
+  //   const chatElement = chatRef.current;
+  //   const unReadElement = chatRef.current;
 
-    if (storedScrollPosition && chatElement) {
-      chatElement.scrollTop = parseInt(storedScrollPosition, 10);
-    } else if (storedScrollPosition && unReadElement) {
-      bottomRef.current?.scrollIntoView({
-        behavior: "instant",
-      });
-    }
+  //   if (!storedScrollPosition) {
+  //     bottomRef.current?.scrollIntoView({
+  //       behavior: "instant",
+  //     });
+  //   }
 
-    return () => {
-      if (chatElement) {
-        sessionStorage.setItem(
-          `scrollPos-${chatId}`,
-          chatElement.scrollTop.toString()
-        );
-      }
-    };
-  }, [chatId]);
+  //   if (storedScrollPosition && chatElement) {
+  //     chatElement.scrollTop = parseInt(storedScrollPosition, 10);
+  //   } else if (storedScrollPosition && unReadElement) {
+  //   }
+
+  //   return () => {
+  //     if (chatElement) {
+  //       sessionStorage.setItem(
+  //         `scrollPos-${chatId}`,
+  //         chatElement.scrollTop.toString()
+  //       );
+  //     }
+  //   };
+  // }, [chatId]);
 
   const queryKey = useMemo(() => `chat:${paramValue}`, [paramValue]);
 
-  const chatIdd = chatId ? chatId : "";
-  const cc = chatIdd;
+  const chatIdd = chatId ?? chatId;
+  const cc = chatIdd!;
 
   // const { data: messages, isPending } = useQuery(
   //   convexQuery(api.message.messages, { chatId: cc })
@@ -101,12 +105,12 @@ export default function Messages({
 
   useEffect(() => {
     if (inView && status === "CanLoadMore") {
-      console.log("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
+      // console.log("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
       loadMore(10);
     }
   }, [InView]);
 
-  console.log({ messages, inView, status });
+  // console.log({ messages, inView, status });
 
   const groupedMessages = useMemo(() => {
     if (!messages) return {};

@@ -20,10 +20,8 @@ const schema = defineSchema({
     markAsGone: v.id("_scheduled_functions"),
   }).index("by_room_user", ["room", "user"]),
   chats: defineTable({
-    initiatorId: v.string(),
-    participantId: v.string(),
-    unreadMessagesCountInitiator: v.number(),
-    unreadMessagesCountParticipant: v.number(),
+    initiatorId: v.id("users"),
+    participantId: v.id("users"),
   })
     .index("by_initiator_and_participant", ["initiatorId", "participantId"])
     .index("by_participant_and_initiator", ["participantId", "initiatorId"])

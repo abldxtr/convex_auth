@@ -1,44 +1,32 @@
 "use client";
 
-// import { user } from "@/lib/definitions";
 import ChatHeader from "./chat-header";
 import InputChat from "./chat.input";
 import Messages from "./message";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import {
-  Preloaded,
-  usePreloadedQuery,
-  useMutation,
-  useQuery,
-} from "convex/react";
+import { useQuery } from "convex/react";
 import { User } from "./message.list";
+import { useRouter } from "next/navigation";
 
-export default function Chat_text(props: {
-  // preloadedMessages: Preloaded<typeof api.message.messages>;
-  // preloadedChat: Preloaded<typeof api.chat.getChat>;
-
-  param: string;
-  user?: User;
-  chatlist?: any;
-}) {
-  // const usr = useSession();
-  // const currentUser = usr.data?.user.id ? usr.data?.user.id : "";
-  // const messages = usePreloadedQuery(props.preloadedMessages);
-  // const chat = usePreloadedQuery(props.preloadedChat);
+export default function Chat_text(props: { param: string; user?: User }) {
+  const router = useRouter();
   const chat = useQuery(api.chat.getChat, { id: props.param as Id<"chats"> });
+
+  // if (chat === null) {
+  //   router.push("/");
+  // }
+  const other =
+    chat?.initiatorId === props.user?._id
+      ? chat?.participantId
+      : chat?.initiatorId;
+
+  const otherUser = useQuery(api.user.getUserById, {
+    id: other as Id<"users">,
+  });
 
   if (props.param) {
     console.log("props.param", props.param);
-
-    const other =
-      chat?.initiatorId === props.user?._id
-        ? chat?.participantId
-        : chat?.initiatorId;
-
-    const otherUser = useQuery(api.user.getUserById, {
-      id: other as Id<"users">,
-    });
 
     return (
       <section
@@ -59,7 +47,7 @@ export default function Chat_text(props: {
           <ChatHeader other={otherUser} />
           <Messages
             //  text={message}
-            chatId={props.param}
+            chatId={props.param as Id<"chats">}
             other={other}
             user={props.user}
           />
@@ -68,7 +56,7 @@ export default function Chat_text(props: {
             param={props.param}
             other={other! as Id<"users">}
             // message={message}
-            chatId={props.param}
+            chatId={props.param as Id<"chats">}
             user={props.user}
           />
         </div>

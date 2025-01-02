@@ -11,7 +11,11 @@ import TempImg from "./temp-img";
 import { useQueryClient } from "@tanstack/react-query";
 import { FileState, useGlobalContext } from "@/context/globalContext";
 import DragContainer from "./drag-container";
-import { useMutation } from "convex/react";
+import {
+  PaginatedQueryReference,
+  optimisticallyUpdateValueInPaginatedQuery,
+  useMutation,
+} from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 // import { useSession } from "next-auth/react";
@@ -27,7 +31,7 @@ export default function InputChat({
   user,
 }: {
   param: string;
-  chatId: string | undefined;
+  chatId: Id<"chats">;
   other?: Id<"users">;
   user?: User;
 }) {
@@ -53,50 +57,115 @@ export default function InputChat({
 
   const presentOthers = (others ?? []).filter((p) => p.present);
 
-  // console.log({ presentOthers });
-  // console.log({ data });
-  // console.log({ others });
-
   const [inputValue, setInputValue] = useState("");
   const textRef = useRef<HTMLInputElement | null>(null);
   const EmojiRef = useRef(null);
 
+  // const createMessage = useMutation(
+  //   api.message.createMessage
+  // ).withOptimisticUpdate((localStore, mutationArg) => {
+  //   // const { content, chatId, images, opupId, recieverId, senderId } = args;
+  //   optimisticallyUpdateValueInPaginatedQuery(
+  //     localStore,
+  //     api.message.messages,
+
+  //     { chatId },
+  //     (currentValue) => {
+
+  //       const aa = localStore.getAllQueries(api.message.messages);
+  //       console.log({ localStore });
+  //       return currentValue;
+  //       // return null
+  //     }
+  //   );
+
+  // });
+
   const createMessage = useMutation(
     api.message.createMessage
-  ).withOptimisticUpdate((localStore, args) => {
-    const { content, chatId, images, opupId, recieverId, senderId } = args;
-    const currentValue = localStore.getQuery(api.message.messages, {
-      chatId,
-    });
-    // console.log({ currentValue });
+  ).withOptimisticUpdate((localStore, mutationArg) => {
+    const { content, chatId, images, senderId, recieverId, opupId } =
+      mutationArg;
 
-    if (currentValue !== undefined) {
-      const now = Date.now() as number;
-      const id = crypto.randomUUID() as Id<"messages">;
-      // افزودن پیام جدید به لیست فعلی
-      localStore.setQuery(
-        api.message.messages,
-        {
-          chatId,
-        },
-        [
-          ...currentValue,
-          {
-            content,
-            chatId,
-            image: [],
-            opupId: "123",
-            receiverId: recieverId as Id<"users">,
-            senderId: senderId as Id<"users">,
-            status: "DELIVERED",
-            type: "TEXT",
-            _creationTime: now,
-            _id: id,
-          },
-          // پیام موقت
-        ]
-      );
-    }
+    // ایجاد پیام موقت
+    const optimisticMessage = {
+      _id: `optimistic-${opupId}` as Id<"messages">, // تبدیل به نوع مناسب
+      _creationTime: Date.now(),
+      type: images.length > 0 ? "IMAGE" : "TEXT",
+      content,
+      senderId: senderId as Id<"users">,
+      receiverId: recieverId as Id<"users">,
+      chatId: chatId as Id<"chats">,
+      status: "SENDING",
+      opupId,
+      image: images,
+    };
+
+    console.log({ localStore });
+    const paginationOpts = {
+      id: 1,
+      // endCursor: null,
+      // maximumRowsRead: undefined,
+      // maximumBytesRead: undefined,
+      numItems: 10,
+      cursor: null,
+    };
+
+    const res = localStore.getQuery(api.message.messages, {
+      chatId,
+      paginationOpts,
+    });
+
+    const messagesKey = JSON.stringify({
+      udfPath: "message:messages",
+      args: {
+        chatId: "k5703jg2ph7ngwys18pkdbv9p977mpnv",
+        paginationOpts: { cursor: null, id: 1, numItems: 10 },
+      },
+    });
+
+    // const messagesResult = localStore.getQuery(
+    //   api.message.messages,
+    //   messagesKey
+    // );
+
+    console.log({ res });
+
+    // if (res) {
+    //   const len = res.page.length;
+    //   const tt = res.page[len - 1];
+    //   localStore.setQuery(
+    //     api.message.messages,
+    //     { chatId, paginationOpts },
+    //     {
+    //       ...res,
+    //       page: [...res.result.page, newMessage],
+    //     }
+    //   );
+    // }
+    // به‌روزرسانی داده‌ها در query
+    // const aaa = optimisticallyUpdateValueInPaginatedQuery(
+    //   localStore,
+    //   api.message.messages,
+    //   { chatId },
+    //   (currentValue) => {
+    //     // if (!currentValue || !currentValue.page) {
+    //     //   // اگر صفحه‌ای وجود نداشت، پیام موقت را به تنهایی بازگردانید
+    //     //   return {
+    //     //     ...currentValue,
+    //     //     page: [optimisticMessage],
+    //     //     isComplete: false,
+    //     //   };
+    //     // }
+    //     return currentValue;
+
+    //     // // اضافه کردن پیام موقت به ابتدای صفحه
+    //     // return {
+    //     //   ...currentValue,
+    //     //   page: [optimisticMessage, ...currentValue.page],
+    //     // };
+    //   }
+    // );
   });
 
   const handleClickOutside = () => {
@@ -150,6 +219,7 @@ export default function InputChat({
             chatId: chatId as Id<"chats">,
             opupId: crypto.randomUUID(),
             images: [""],
+            // messageId: crypto.randomUUID() as Id<"messages">,
           };
 
           console.log("newMessage", newMessage1);

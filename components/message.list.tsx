@@ -83,7 +83,7 @@ export default function Message_list({
   const param = useParams<{ conversationId: string }>();
   const matches = useMediaQuery("(min-width: 768px)");
 
-  console.log({ matches });
+  // console.log({ matches });
 
   useEffect(() => {
     if (!!param.conversationId && matches) {
@@ -98,7 +98,7 @@ export default function Message_list({
 
   return (
     <>
-      <CreateChat id={user} />
+      <CreateChat id={user!} />
 
       <div
         className={cn(
@@ -132,7 +132,7 @@ export default function Message_list({
                     return <UserListLoading key={index} />;
                   })
                 : chatlist?.map((item) => {
-                    console.log(item.name);
+                    // console.log(item.name);
                     const otherUser =
                       chat?.initiatorId === user?._id
                         ? chat?.participantId

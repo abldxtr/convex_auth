@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
+import { getAuthUserId } from "@convex-dev/auth/server";
 
 export const chatList = query({
   args: {
@@ -12,6 +13,13 @@ export const chatList = query({
     if (!args.id) {
       return [];
     }
+
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) {
+      //   throw new Error("Client is not authenticated!");
+      return null;
+    }
+
     let query_1 = await ctx.db
       .query("chats")
       .withIndex("by_user_initiator", (q) => q.eq("initiatorId", args.id!))
@@ -84,7 +92,20 @@ export const getChat = query({
     id: v.id("chats"),
   },
   handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) {
+      //   throw new Error("Client is not authenticated!");
+      return null;
+    }
     let chatChannel = await ctx.db.get(args.id);
+
+    const Ispart =
+      chatChannel?.initiatorId === userId ||
+      chatChannel?.participantId === userId;
+
+    if (!Ispart) {
+      return null;
+    }
 
     return chatChannel;
   },
@@ -101,8 +122,6 @@ export const createChat = mutation({
     const messageId = await ctx.db.insert("chats", {
       initiatorId: first,
       participantId: second,
-      unreadMessagesCountInitiator: 0,
-      unreadMessagesCountParticipant: 0,
     });
   },
 });

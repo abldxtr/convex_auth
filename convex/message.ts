@@ -8,9 +8,10 @@ export const createMessage = mutation({
     content: v.string(),
     chatId: v.id("chats"),
     images: v.array(v.string()),
-    senderId: v.string(),
-    recieverId: v.string(),
+    senderId: v.id("users"),
+    recieverId: v.id("users"),
     opupId: v.string(),
+    // messageId: v.id("messages"),
   },
   handler: async (ctx, args) => {
     const messageId = await ctx.db.insert("messages", {
@@ -18,8 +19,8 @@ export const createMessage = mutation({
       image: args.images,
       type: args.images.length > 0 ? "IMAGE" : "TEXT",
       chatId: args.chatId,
-      senderId: args.senderId as Id<"users">,
-      receiverId: args.recieverId as Id<"users">,
+      senderId: args.senderId,
+      receiverId: args.recieverId,
       status: "SENT",
       opupId: args.opupId,
     });
@@ -36,9 +37,7 @@ export const createMessage = mutation({
 
 export const messages = query({
   args: {
-    chatId: v.string(),
-    limit: v.optional(v.number()),
-    cursor: v.optional(v.id("messages")),
+    chatId: v.id("chats"),
     paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args) => {
