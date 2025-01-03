@@ -2,20 +2,17 @@ import Chat_text from "./chat.text";
 import { api } from "@/convex/_generated/api";
 import { fetchQuery, preloadQuery } from "convex/nextjs";
 import ChatHeader from "./chat-header";
-import {
-  convexAuthNextjsToken,
-  isAuthenticatedNextjs,
-} from "@convex-dev/auth/nextjs/server";
+import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
 
 export default async function Main({ param }: { param: string }) {
   const token = await convexAuthNextjsToken();
   const user = await fetchQuery(api.user.getUser, {}, { token });
-  // const chatList = await fetchQuery(
-  //   api.chat.chatList,
-  //   { id: user?._id! },
-  //   { token }
-  // );
-  // }
+
+  const preloadedChatList = await preloadQuery(
+    api.chat.chatList,
+    { id: user?._id },
+    { token }
+  );
 
   if (param) {
     return (
@@ -27,10 +24,8 @@ export default async function Main({ param }: { param: string }) {
       >
         <Chat_text
           param={param}
-          // chatlist={chatList}
           user={user}
-          // preloadedMessages={preloadedMessages}
-          // preloadedChat={preloadedChat}
+          // preloadedChatList={preloadedChatList}
         />
       </div>
     );

@@ -320,15 +320,15 @@ interface ScrollDownProps {
   func: () => void;
   chatId: string;
   queryKey: string;
+  unreadMessagesCount: number | null | undefined;
 }
 export function ScrollDown({
   goDown,
   func,
   chatId,
   queryKey,
+  unreadMessagesCount,
 }: ScrollDownProps) {
-  const { setUnreadCount } = useGlobalContext();
-
   return (
     <>
       <div
@@ -342,10 +342,13 @@ export function ScrollDown({
         <div
           className={cn(
             " absolute -top-5 right-3 flex items-center justify-center bg-blue-400 text-white font-semibold rounded-full size-8 ",
-            "hidden"
+            !!unreadMessagesCount === false && "hidden"
           )}
         >
           {/* {unreadCount} */}
+          {!!unreadMessagesCount &&
+            unreadMessagesCount > 0 &&
+            unreadMessagesCount}
         </div>
 
         <svg

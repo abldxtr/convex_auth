@@ -125,3 +125,52 @@ export const createChat = mutation({
     });
   },
 });
+
+export const unreadCountChat = query({
+  args: {
+    chatId: v.id("chats"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) {
+      //   throw new Error("Client is not authenticated!");
+      return null;
+    }
+
+    // let chats = await ctx.db
+    //   .query("chats")
+    //   .withIndex("by_id", (q) => q.eq("_id", args.chatId!))
+    //   .collect();
+
+    // // پردازش برای هر چت
+    // const result = await Promise.all(
+    //   chats.map(async (chat) => {
+    //     // تعداد پیام‌های خوانده‌نشده
+    //     const unreadMessages = await ctx.db
+    //       .query("messages")
+    //       .withIndex("by_chatId", (q) => q.eq("chatId", chat._id))
+    //       .filter((q) =>
+    //         q.and(
+    //           q.eq(q.field("receiverId"), userId),
+    //           q.eq(q.field("status"), "SENT")
+    //         )
+    //       )
+    //       .collect();
+    //     const unreadMessagesCount = unreadMessages.length;
+    //     return unreadMessagesCount;
+    //   })
+    // );
+    const unreadMessagesCount = await ctx.db
+      .query("messages")
+      .withIndex("by_chatId", (q) => q.eq("chatId", args.chatId!))
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("receiverId"), userId),
+          q.eq(q.field("status"), "SENT")
+        )
+      )
+      .collect();
+
+    return unreadMessagesCount.length;
+  },
+});

@@ -1,11 +1,8 @@
-import CurrentUser from "@/components/current-user";
 import {
   convexAuthNextjsToken,
   isAuthenticatedNextjs,
 } from "@convex-dev/auth/nextjs/server";
-
 import Message_list from "@/components/message.list";
-import Main from "@/components/main";
 import { redirect } from "next/navigation";
 import { fetchQuery, preloadQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
@@ -17,7 +14,6 @@ export default async function ChatLayout({
 }) {
   const token = await convexAuthNextjsToken();
   const isAuth = await isAuthenticatedNextjs();
-  // console.log({ token });
   console.log({ isAuth });
 
   if (!isAuth) {
@@ -32,11 +28,8 @@ export default async function ChatLayout({
 
   const preloadedChatList = await preloadQuery(
     api.chat.chatList,
-    // { id: user?._id!, chatId: param as Id<"chats"> }
-    { id: user?._id }
-
-    // { token }
-    // پاس دادن headers به preloadQuery
+    { id: user?._id },
+    { token }
   );
   return (
     // <div className="w-full max-w-[2400px] isolate mx-auto flex h-dvh  overflow-hidden">

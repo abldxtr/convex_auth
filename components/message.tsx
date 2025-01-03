@@ -23,16 +23,20 @@ export default function Messages({
   chatId,
   other,
   user,
+  unreadMessagesCount,
 }: {
   chatId: Id<"chats"> | undefined;
   other?: string | undefined;
   user?: User;
+  unreadMessagesCount: number | null | undefined;
 }) {
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const chatRef = useRef<HTMLDivElement | null>(null);
   const unReadDiv = useRef<HTMLDivElement | null>(null);
-  const [goDown, setGoDown] = useState(false);
+  const [goDown, setGoDown] = useState(true);
   const currentUser = user?._id ? user._id : "";
+
+  console.log({ unreadMessagesCount });
 
   const paramValue = chatId ? chatId : "";
 
@@ -48,33 +52,6 @@ export default function Messages({
     chatRef,
     setGoDown,
   });
-
-  // useLayoutEffect(() => {
-  //   // const storedScrollPosition = sessionStorage.getItem(`scrollPos-${chatId}`);
-
-  //   const chatElement = chatRef.current;
-  //   const unReadElement = chatRef.current;
-
-  //   if (!storedScrollPosition) {
-  //     bottomRef.current?.scrollIntoView({
-  //       behavior: "instant",
-  //     });
-  //   }
-
-  //   if (storedScrollPosition && chatElement) {
-  //     chatElement.scrollTop = parseInt(storedScrollPosition, 10);
-  //   } else if (storedScrollPosition && unReadElement) {
-  //   }
-
-  //   return () => {
-  //     if (chatElement) {
-  //       sessionStorage.setItem(
-  //         `scrollPos-${chatId}`,
-  //         chatElement.scrollTop.toString()
-  //       );
-  //     }
-  //   };
-  // }, [chatId]);
 
   const queryKey = useMemo(() => `chat:${paramValue}`, [paramValue]);
 
@@ -99,7 +76,6 @@ export default function Messages({
   const isloadingData = status === "LoadingMore";
 
   const { ref, inView, entry } = useInView({
-    /* Optional options */
     threshold: 0,
   });
 
@@ -148,6 +124,7 @@ export default function Messages({
         func={HandleScrollDown}
         chatId={paramValue}
         queryKey={queryKey}
+        unreadMessagesCount={unreadMessagesCount}
       />
       <div
         className={cn(
@@ -155,7 +132,6 @@ export default function Messages({
         )}
         ref={chatRef}
       >
-        {/* <div ref={ref} className="h-4 bg-green-500 w-full"></div> */}
         <div
           className="h-1"
           ref={(el) => {
@@ -204,3 +180,30 @@ export default function Messages({
     </div>
   );
 }
+
+// useLayoutEffect(() => {
+//   // const storedScrollPosition = sessionStorage.getItem(`scrollPos-${chatId}`);
+
+//   const chatElement = chatRef.current;
+//   const unReadElement = chatRef.current;
+
+//   if (!storedScrollPosition) {
+//     bottomRef.current?.scrollIntoView({
+//       behavior: "instant",
+//     });
+//   }
+
+//   if (storedScrollPosition && chatElement) {
+//     chatElement.scrollTop = parseInt(storedScrollPosition, 10);
+//   } else if (storedScrollPosition && unReadElement) {
+//   }
+
+//   return () => {
+//     if (chatElement) {
+//       sessionStorage.setItem(
+//         `scrollPos-${chatId}`,
+//         chatElement.scrollTop.toString()
+//       );
+//     }
+//   };
+// }, [chatId]);
