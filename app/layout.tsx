@@ -6,7 +6,7 @@ import { ConvexClientProvider } from "./ConvexClientProvider";
 
 import { GlobalProvider } from "@/context/globalContext";
 import { EmojiProvider } from "@/context/EmojiContext";
-// import { ConvexQueryCacheProvider } from "convex-helpers/react/cache";
+import { ConvexQueryCacheProvider } from "convex-helpers/react/cache/provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -28,13 +28,13 @@ export default function RootLayout({
             {/* <MessageProvider> */}
             <GlobalProvider>
               <EmojiProvider>
-                {/* <ConvexQueryCacheProvider> */}
-                <div className="w-full max-w-[2400px] isolate mx-auto flex h-dvh  overflow-hidden">
-                  <div className=" overflow-auto  h-full scrl flex w-full  ">
-                    {children}
+                <ConvexQueryCacheProvider>
+                  <div className="w-full max-w-[2400px] isolate mx-auto flex h-dvh  overflow-hidden">
+                    <div className=" overflow-auto  h-full scrl flex w-full  ">
+                      {children}
+                    </div>
                   </div>
-                </div>
-                {/* </ConvexQueryCacheProvider> */}
+                </ConvexQueryCacheProvider>
               </EmojiProvider>
             </GlobalProvider>
             {/* </MessageProvider> */}

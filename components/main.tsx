@@ -8,11 +8,11 @@ export default async function Main({ param }: { param: string }) {
   const token = await convexAuthNextjsToken();
   const user = await fetchQuery(api.user.getUser, {}, { token });
 
-  const preloadedChatList = await preloadQuery(
-    api.chat.chatList,
-    { id: user?._id },
-    { token }
-  );
+  // const preloadedChatList = await preloadQuery(
+  //   api.chat.chatList,
+  //   { id: user?._id },
+  //   { token }
+  // );
 
   if (param) {
     return (

@@ -5,9 +5,9 @@ import InputChat from "./chat.input";
 import Messages from "./message";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { Preloaded, useQuery } from "convex/react";
 import { User } from "./message.list";
 import { useRouter } from "next/navigation";
+import { useQuery } from "convex-helpers/react/cache/hooks";
 
 export default function Chat_text(props: {
   param: string;

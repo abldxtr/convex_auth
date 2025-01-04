@@ -31,12 +31,17 @@ export const getUser = query({
 
 export const getUserById = query({
   args: {
-    id: v.id("users"),
+    id: v.optional(v.id("users")),
   },
   handler: async (ctx, args) => {
-    const user = await ctx.db.get(args.id);
+    const { id } = args;
+    if (id) {
+      const user = await ctx.db.get(id);
 
-    return user;
+      return user;
+    } else {
+      return null;
+    }
     // ...
   },
 });
