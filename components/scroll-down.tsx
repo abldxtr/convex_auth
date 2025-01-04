@@ -8,31 +8,15 @@ import React, {
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { formatPersianDate, cn } from "@/lib/utils";
-// import { CircleProgress } from './CircleProgress';
-// import { MessageData } from "@/lib/definitions";
 import { CircleProgress } from "./circle-progress";
-import { useGlobalContext } from "@/context/globalContext";
 
 import { useInView, IntersectionOptions } from "react-intersection-observer";
-import {
-  useInfiniteQuery,
-  useQueryClient,
-  // useMutation,
-  useQuery,
-} from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-// import { useSocket } from "@/provider/socket-provider";
-// import { useChatSeen } from "@/hooks/user-chat-seen";
+
 import { Loader2 } from "lucide-react";
-// import { useChatSeen } from "@/context/chatSeenContext";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-
-// interface ChatMessageProps {
-//   message: MessageData;
-//   isCurrentUser: boolean;
-// }
+import { UseMutateFunction } from "@tanstack/react-query";
 
 interface messageItem {
   _id: Id<"messages">;
@@ -142,8 +126,7 @@ const MessageFooter: React.FC<{
 }> = ({ message, imageLoaded }) => {
   const renderStatusIcon = () => {
     if (message.status === "DELIVERED") {
-      // if (false) {
-      return <Loader2 className="size-[14px] text-green-500 animate-spin " />;
+      return <Loader2 className="size-[12px] text-green-500 animate-spin " />;
     } else if (message.status === "SENT") {
       return (
         <svg
@@ -197,17 +180,13 @@ const MessRight: React.FC<{
   message: messageItem;
   children: React.ReactNode;
 }> = ({ message, children }) => (
-  <motion.div
-    className="pb-1 p-2 w-full group flex items-end gap-2 justify-end z-[9]"
-    // initial={{ y: 20, opacity: 0 }}
-    // animate={{ y: 0, opacity: 1 }}
-  >
+  <div className="pb-1 p-2 w-full group flex items-end gap-2 justify-end z-[9]">
     <div className="flex flex-col items-end max-w-[75%]">
       <div className="bg-[#dcfaf5] rounded-tl-2xl rounded-tr-sm rounded-bl-2xl p-3 text-[#091e42]">
         {children}
       </div>
     </div>
-  </motion.div>
+  </div>
 );
 
 const MessLeft: React.FC<{
@@ -246,8 +225,6 @@ const MessLeft: React.FC<{
     <div
       className="pb-1 p-2 w-full group flex items-end gap-2 z-[9] "
       ref={ref}
-      // initial={{ y: 20, opacity: 0 }}
-      // animate={{ y: 0, opacity: 1 }}
     >
       <div className="flex flex-col items-start max-w-[75%]">
         <div className="bg-[#f4f5f7] rounded-tr-2xl rounded-tl-sm rounded-br-2xl p-3 text-[#091e42]">
@@ -282,52 +259,46 @@ export function BackMenue({ func }: { func: () => void }) {
 
 export function TypingLeft({ message }: { message: string }) {
   return (
-    // <AnimatePresence>
-    <motion.div
-      // className="  pb-[5px]  p-2 flex   items-center w-full group gap-2 "
+    <div
       className={cn(
         " absolute md:bottom-2 md:left-10 bottom-2 left-8 flex items-center z-[10] shrink-0       ",
         "cursor-pointer transiton-all duration-300  "
       )}
-      // initial={{ y: 5, opacity: 0, height: 0 }}
-      // animate={{ y: 0, opacity: 1, height: "auto" }}
-      // exit={{ opacity: 0, height: 0, transition: { duration: 0.5 } }}
-      // transition={{
-      //   duration: 1.5,
-      // }}
     >
       <div className="flex flex-col w-full items-start animate-pulse ">
         <div className="flex items-center flex-row-reverse gap-2 max-w-[calc((100%_/_2)_+_(100%_/_3))]  ">
           <div className=" flex cursor-pointer flex-col text-[#0f1419] bg-gray-300 rounded-bl-sm rounded-2xl py-[12px] px-[16px] text-right leading-[20px] text-[15px] transition-all duration-300    ">
-            <span
-              className={cn(
-                "  shrink-0  "
-                // direction === "rtl" ? "rtlDir text-right " : "text-left"
-              )}
-            >
-              {message}
-            </span>
+            <span className={cn("  shrink-0  ")}>{message}</span>
           </div>
         </div>
       </div>
-    </motion.div>
-    // </AnimatePresence>
+    </div>
   );
 }
 
 interface ScrollDownProps {
   goDown: boolean;
   func: () => void;
-  chatId: string;
-  queryKey: string;
+  chatId: Id<"chats">;
+  userId: Id<"users">;
   unreadMessagesCount: number | null | undefined;
+  mutate: UseMutateFunction<
+    null,
+    Error,
+    {
+      chatId: Id<"chats">;
+      userId: Id<"users">;
+    },
+    unknown
+  >;
 }
 export function ScrollDown({
   goDown,
   func,
   chatId,
-  queryKey,
+  userId,
   unreadMessagesCount,
+  mutate,
 }: ScrollDownProps) {
   return (
     <>
@@ -337,7 +308,12 @@ export function ScrollDown({
           "cursor-pointer transiton-all duration-300  ",
           goDown ? "opacity-100" : "opacity-0 pointer-events-none "
         )}
-        onClick={func}
+        onClick={() => {
+          if (!!unreadMessagesCount && unreadMessagesCount > 0) {
+            mutate({ chatId, userId });
+          }
+          func();
+        }}
       >
         <div
           className={cn(

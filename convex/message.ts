@@ -2,12 +2,13 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 import { paginationOptsValidator } from "convex/server";
+import { getAuthUserId } from "@convex-dev/auth/server";
 
 export const createMessage = mutation({
   args: {
     content: v.string(),
     chatId: v.id("chats"),
-    images: v.array(v.string()),
+    images: v.optional(v.array(v.string())),
     senderId: v.id("users"),
     recieverId: v.id("users"),
     opupId: v.string(),
@@ -16,8 +17,8 @@ export const createMessage = mutation({
   handler: async (ctx, args) => {
     const messageId = await ctx.db.insert("messages", {
       content: args.content,
-      image: args.images,
-      type: args.images.length > 0 ? "IMAGE" : "TEXT",
+      image: args.images!,
+      type: args?.images!.length > 0 ? "IMAGE" : "TEXT",
       chatId: args.chatId,
       senderId: args.senderId,
       receiverId: args.recieverId,
@@ -38,13 +39,14 @@ export const createMessage = mutation({
 export const messages = query({
   args: {
     chatId: v.id("chats"),
-    paginationOpts: paginationOptsValidator,
+    // paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args) => {
     let res = await ctx.db
       .query("messages")
       .withIndex("by_chatId", (q) => q.eq("chatId", args.chatId))
-      .paginate(args.paginationOpts);
+      .collect();
+    // .paginate(args.paginationOpts);
 
     return res;
   },
@@ -68,5 +70,48 @@ export const seenMessage = mutation({
     if (!chat) {
       throw new Error(`Chat with id ${chatId} not found.`);
     }
+  },
+});
+
+export const seenMessageAll = mutation({
+  args: {
+    chatId: v.id("chats"),
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const { chatId, userId } = args;
+
+    const userIdAuth = await getAuthUserId(ctx);
+    if (userIdAuth === null) {
+      //   throw new Error("Client is not authenticated!");
+      return null;
+    }
+
+    const chat = await ctx.db.get(chatId);
+
+    const isPart =
+      chat?.initiatorId === userIdAuth || chat?.participantId === userIdAuth;
+
+    if (!isPart) {
+      return null;
+    }
+
+    const user = await ctx.db
+      .query("messages")
+      .withIndex("by_chatId", (q) => q.eq("chatId", chatId))
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("receiverId"), userId),
+          q.eq(q.field("status"), "SENT")
+        )
+      )
+      .collect();
+
+    Promise.all(
+      user.map((item) => {
+        const id = item._id;
+        ctx.db.patch(id, { status: "READ" });
+      })
+    );
   },
 });

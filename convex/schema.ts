@@ -34,7 +34,7 @@ const schema = defineSchema({
     senderId: v.id("users"),
     receiverId: v.id("users"),
     // chatId: v.id("chats"),
-    chatId: v.string(),
+    chatId: v.id("chats"),
 
     status: v.union(
       v.literal("SENT"),

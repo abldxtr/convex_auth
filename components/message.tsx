@@ -15,9 +15,14 @@ import { api } from "@/convex/_generated/api";
 import usePresence from "@/hooks/usePresence";
 import { User } from "./message.list";
 import { useChatScroll } from "@/hooks/use-chat-scroll";
-import { usePaginatedQuery } from "convex/react";
+import { useMutation, usePaginatedQuery } from "convex/react";
 import { InView, useInView } from "react-intersection-observer";
 import { Id } from "@/convex/_generated/dataModel";
+import {
+  useMutation as TanStackMutation,
+  useQuery,
+} from "@tanstack/react-query";
+import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
 
 export default function Messages({
   chatId,
@@ -33,45 +38,94 @@ export default function Messages({
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const chatRef = useRef<HTMLDivElement | null>(null);
   const unReadDiv = useRef<HTMLDivElement | null>(null);
-  const [goDown, setGoDown] = useState(true);
-  const currentUser = user?._id ? user._id : "";
+  const [goDown, setGoDown] = useState(false);
+  const currentUser = user?._id ?? user?._id;
 
   console.log({ unreadMessagesCount });
 
-  const paramValue = chatId ? chatId : "";
+  const paramValue = chatId ?? chatId;
 
-  const [data, others, updatePresence] = usePresence(paramValue, currentUser, {
-    text: "",
+  const [data, others, updatePresence] = usePresence(
+    paramValue!,
+    currentUser!,
+    {
+      text: "",
 
-    typing: false as boolean,
-  });
+      typing: false as boolean,
+    }
+  );
   const presentOthers = (others ?? []).filter((p) => p.present)[0];
-
-  const scrol = useChatScroll({
-    bottomRef,
-    chatRef,
-    setGoDown,
+  const { mutate, isPending: seenMessageAllLoading } = TanStackMutation({
+    mutationFn: useConvexMutation(api.message.seenMessageAll),
   });
 
-  const queryKey = useMemo(() => `chat:${paramValue}`, [paramValue]);
+  // const seenMessageall = useMutation(api.message.seenMessageAll);
+
+  // const scrol = useChatScroll({
+  //   bottomRef,
+  //   chatRef,
+  //   setGoDown,
+  // });
+
+  useEffect(() => {
+    const chatContainer = chatRef?.current;
+    const handleScroll = () => {
+      if (chatContainer) {
+        console.log("scrollll");
+        const distanceFromBottom =
+          chatContainer.scrollHeight -
+          chatContainer.scrollTop -
+          chatContainer.clientHeight;
+        const distanceFromTop = chatContainer.scrollTop;
+
+        console.log({ distanceFromBottom });
+        console.log({ distanceFromTop });
+        console.log("scrollheight", chatContainer.scrollHeight);
+        // console.log(chatContainer.clientHeight);
+        // const aa = chatContainer.scrollTo();
+
+        setGoDown(distanceFromBottom > 50);
+
+        if (distanceFromBottom < 50) {
+          // HandleScrollDown();
+          bottomRef.current?.scrollIntoView({
+            behavior: "smooth",
+          });
+        }
+
+        // if (distanceFromTop < 100 && shouldLoadMore) {
+        //   // loadMore();
+        // }
+      }
+    };
+
+    chatContainer?.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      chatContainer?.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("scroll", handleScroll);
+    };
+    // }, [shouldLoadMore, loadMore, chatRef, setGoDown]);
+  }, [chatRef, setGoDown]);
 
   const chatIdd = chatId ?? chatId;
   const cc = chatIdd!;
 
-  // const { data: messages, isPending } = useQuery(
-  //   convexQuery(api.message.messages, { chatId: cc })
-  // );
-
-  const {
-    results: messages,
-    status,
-    loadMore,
-    isLoading,
-  } = usePaginatedQuery(
-    api.message.messages,
-    { chatId: cc },
-    { initialNumItems: 10 }
+  const { data: messages, isPending } = useQuery(
+    convexQuery(api.message.messages, { chatId: cc })
   );
+
+  // const {
+  //   results: messages,
+  //   status,
+  //   loadMore,
+  //   isLoading,
+  // } = usePaginatedQuery(
+  //   api.message.messages,
+  //   { chatId: cc },
+  //   { initialNumItems: 10 }
+  // );
 
   const isloadingData = status === "LoadingMore";
 
@@ -79,12 +133,12 @@ export default function Messages({
     threshold: 0,
   });
 
-  useEffect(() => {
-    if (inView && status === "CanLoadMore") {
-      // console.log("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
-      loadMore(10);
-    }
-  }, [InView]);
+  // useEffect(() => {
+  //   if (inView && status === "CanLoadMore") {
+  //     // console.log("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
+  //     loadMore(10);
+  //   }
+  // }, [InView]);
 
   // console.log({ messages, inView, status });
 
@@ -109,7 +163,8 @@ export default function Messages({
 
   // if (status === "pending") {
   // if (!messages) {
-  if (isLoading) {
+  // if (isLoading) {
+  if (isPending) {
     return (
       <div className=" w-full h-full flex justify-center my-2 ">
         <Loader2 className="size-8 text-zinc-500 animate-spin " />
@@ -122,9 +177,10 @@ export default function Messages({
       <ScrollDown
         goDown={goDown}
         func={HandleScrollDown}
-        chatId={paramValue}
-        queryKey={queryKey}
+        chatId={paramValue!}
+        userId={currentUser!}
         unreadMessagesCount={unreadMessagesCount}
+        mutate={mutate}
       />
       <div
         className={cn(
@@ -132,7 +188,7 @@ export default function Messages({
         )}
         ref={chatRef}
       >
-        <div
+        {/* <div
           className="h-1"
           ref={(el) => {
             if (el) {
@@ -150,7 +206,7 @@ export default function Messages({
               return () => observer.disconnect();
             }
           }}
-        ></div>
+        ></div> */}
         {isloadingData && (
           <div className="flex justify-center">
             <Loader2 className="h-6 w-6 text-zinc-500 animate-spin my-4" />

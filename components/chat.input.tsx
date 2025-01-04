@@ -90,82 +90,42 @@ export default function InputChat({
     // ایجاد پیام موقت
     const optimisticMessage = {
       _id: `optimistic-${opupId}` as Id<"messages">, // تبدیل به نوع مناسب
-      _creationTime: Date.now(),
-      type: images.length > 0 ? "IMAGE" : "TEXT",
+      _creationTime: Date.now() as number,
+      type: "TEXT" as const,
       content,
       senderId: senderId as Id<"users">,
       receiverId: recieverId as Id<"users">,
       chatId: chatId as Id<"chats">,
-      status: "SENDING",
+      status: "DELIVERED" as const,
       opupId,
-      image: images,
+      image: [""],
     };
 
-    console.log({ localStore });
-    const paginationOpts = {
-      id: 1,
-      // endCursor: null,
-      // maximumRowsRead: undefined,
-      // maximumBytesRead: undefined,
-      numItems: 10,
-      cursor: null,
-    };
+    // _id: Id<"messages">;
+    // _creationTime: number;
+    // type: "TEXT" | "IMAGE" | "VIDEO" | "AUDIO" | "FILE";
+    // content: string;
+    // senderId: Id<"users">;
+    // receiverId: Id<"users">;
+    // chatId: string;
+    // status: "SENT" | "DELIVERED" | "READ";
+    // opupId: string;
+    // image: string[];
 
     const res = localStore.getQuery(api.message.messages, {
       chatId,
-      paginationOpts,
+      // paginationOpts,
     });
-
-    const messagesKey = JSON.stringify({
-      udfPath: "message:messages",
-      args: {
-        chatId: "k5703jg2ph7ngwys18pkdbv9p977mpnv",
-        paginationOpts: { cursor: null, id: 1, numItems: 10 },
-      },
-    });
-
-    // const messagesResult = localStore.getQuery(
-    //   api.message.messages,
-    //   messagesKey
-    // );
-
-    console.log({ res });
-
-    // if (res) {
-    //   const len = res.page.length;
-    //   const tt = res.page[len - 1];
-    //   localStore.setQuery(
-    //     api.message.messages,
-    //     { chatId, paginationOpts },
-    //     {
-    //       ...res,
-    //       page: [...res.result.page, newMessage],
-    //     }
-    //   );
-    // }
-    // به‌روزرسانی داده‌ها در query
-    // const aaa = optimisticallyUpdateValueInPaginatedQuery(
-    //   localStore,
-    //   api.message.messages,
-    //   { chatId },
-    //   (currentValue) => {
-    //     // if (!currentValue || !currentValue.page) {
-    //     //   // اگر صفحه‌ای وجود نداشت، پیام موقت را به تنهایی بازگردانید
-    //     //   return {
-    //     //     ...currentValue,
-    //     //     page: [optimisticMessage],
-    //     //     isComplete: false,
-    //     //   };
-    //     // }
-    //     return currentValue;
-
-    //     // // اضافه کردن پیام موقت به ابتدای صفحه
-    //     // return {
-    //     //   ...currentValue,
-    //     //   page: [optimisticMessage, ...currentValue.page],
-    //     // };
-    //   }
-    // );
+    if (res) {
+      const aaa = localStore.setQuery(api.message.messages, { chatId }, [
+        ...res,
+        optimisticMessage,
+      ]);
+      // localStore.setQuery(api.messages.list, { channel }, [
+      //   ...existingMessages,
+      //   newMessage,
+      // ]);
+    }
   });
 
   const handleClickOutside = () => {
