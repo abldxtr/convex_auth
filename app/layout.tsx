@@ -25,7 +25,6 @@ export default function RootLayout({
       <html lang="en" suppressHydrationWarning>
         <body className="">
           <ConvexClientProvider>
-            {/* <MessageProvider> */}
             <GlobalProvider>
               <EmojiProvider>
                 <ConvexQueryCacheProvider>
@@ -37,7 +36,6 @@ export default function RootLayout({
                 </ConvexQueryCacheProvider>
               </EmojiProvider>
             </GlobalProvider>
-            {/* </MessageProvider> */}
           </ConvexClientProvider>
         </body>
       </html>

@@ -14,7 +14,7 @@ export default async function ChatLayout({
 }) {
   const token = await convexAuthNextjsToken();
   const isAuth = await isAuthenticatedNextjs();
-  console.log({ isAuth });
+  // console.log({ isAuth });
 
   if (!isAuth) {
     redirect("/register");

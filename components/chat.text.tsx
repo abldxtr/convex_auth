@@ -30,7 +30,7 @@ export default function Chat_text(props: {
   });
 
   if (props.param) {
-    console.log("props.param", props.param);
+    // console.log("props.param", props.param);
 
     return (
       <section

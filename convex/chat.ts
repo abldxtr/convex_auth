@@ -72,8 +72,6 @@ export const chatList = query({
             ? await ctx.db.get(name1?.participantId as Id<"users">)
             : await ctx.db.get(name1?.initiatorId as Id<"users">);
 
-        console.log({ name });
-
         return {
           ...chat,
           unreadMessagesCount,
@@ -119,7 +117,7 @@ export const createChat = mutation({
   handler: async (ctx, args) => {
     const { first, second } = args;
 
-    const messageId = await ctx.db.insert("chats", {
+    await ctx.db.insert("chats", {
       initiatorId: first,
       participantId: second,
     });
@@ -137,29 +135,6 @@ export const unreadCountChat = query({
       return null;
     }
 
-    // let chats = await ctx.db
-    //   .query("chats")
-    //   .withIndex("by_id", (q) => q.eq("_id", args.chatId!))
-    //   .collect();
-
-    // // پردازش برای هر چت
-    // const result = await Promise.all(
-    //   chats.map(async (chat) => {
-    //     // تعداد پیام‌های خوانده‌نشده
-    //     const unreadMessages = await ctx.db
-    //       .query("messages")
-    //       .withIndex("by_chatId", (q) => q.eq("chatId", chat._id))
-    //       .filter((q) =>
-    //         q.and(
-    //           q.eq(q.field("receiverId"), userId),
-    //           q.eq(q.field("status"), "SENT")
-    //         )
-    //       )
-    //       .collect();
-    //     const unreadMessagesCount = unreadMessages.length;
-    //     return unreadMessagesCount;
-    //   })
-    // );
     const unreadMessagesCount = await ctx.db
       .query("messages")
       .withIndex("by_chatId", (q) => q.eq("chatId", args.chatId!))

@@ -40,8 +40,9 @@ export default function Messages({
   const unReadDiv = useRef<HTMLDivElement | null>(null);
   const [goDown, setGoDown] = useState(false);
   const currentUser = user?._id ?? user?._id;
+  const firstUnreadRef = useRef<string | null>(null); // ذخیره ID پیام خوانده‌نشده اول
 
-  console.log({ unreadMessagesCount });
+  // console.log({ unreadMessagesCount });
 
   const paramValue = chatId ?? chatId;
 
@@ -71,27 +72,27 @@ export default function Messages({
     const chatContainer = chatRef?.current;
     const handleScroll = () => {
       if (chatContainer) {
-        console.log("scrollll");
+        // console.log("scrollll");
         const distanceFromBottom =
           chatContainer.scrollHeight -
           chatContainer.scrollTop -
           chatContainer.clientHeight;
         const distanceFromTop = chatContainer.scrollTop;
 
-        console.log({ distanceFromBottom });
-        console.log({ distanceFromTop });
-        console.log("scrollheight", chatContainer.scrollHeight);
+        // console.log({ distanceFromBottom });
+        // console.log({ distanceFromTop });
+        // console.log("scrollheight", chatContainer.scrollHeight);
         // console.log(chatContainer.clientHeight);
         // const aa = chatContainer.scrollTo();
 
         setGoDown(distanceFromBottom > 50);
 
-        if (distanceFromBottom < 50) {
-          // HandleScrollDown();
-          bottomRef.current?.scrollIntoView({
-            behavior: "smooth",
-          });
-        }
+        // if (distanceFromBottom < 50) {
+        //   // HandleScrollDown();
+        //   bottomRef.current?.scrollIntoView({
+        //     behavior: "smooth",
+        //   });
+        // }
 
         // if (distanceFromTop < 100 && shouldLoadMore) {
         //   // loadMore();
@@ -115,32 +116,40 @@ export default function Messages({
   const { data: messages, isPending } = useQuery(
     convexQuery(api.message.messages, { chatId: cc })
   );
+  // const [hasScrolledToUnread, setHasScrolledToUnread] = useState(false);
 
-  // const {
-  //   results: messages,
-  //   status,
-  //   loadMore,
-  //   isLoading,
-  // } = usePaginatedQuery(
-  //   api.message.messages,
-  //   { chatId: cc },
-  //   { initialNumItems: 10 }
-  // );
+  useLayoutEffect(() => {
+    if (!firstUnreadRef.current && messages) {
+      const firstUnreadMessage = messages.find(
+        (message) =>
+          message.status !== "READ" && message.senderId !== currentUser
+      );
+
+      if (firstUnreadMessage) {
+        firstUnreadRef.current = firstUnreadMessage._id; // ذخیره ID پیام
+      }
+    }
+
+    if (firstUnreadRef.current) {
+      const unreadElement = document.getElementById(
+        `message-${firstUnreadRef.current}`
+      );
+
+      if (unreadElement) {
+        unreadElement.scrollIntoView({
+          behavior: "instant",
+          block: "end",
+        });
+        // scrolledToUnread.current = true; // جلوگیری از اسکرول مجدد
+      }
+    }
+  }, []);
 
   const isloadingData = status === "LoadingMore";
 
   const { ref, inView, entry } = useInView({
     threshold: 0,
   });
-
-  // useEffect(() => {
-  //   if (inView && status === "CanLoadMore") {
-  //     // console.log("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
-  //     loadMore(10);
-  //   }
-  // }, [InView]);
-
-  // console.log({ messages, inView, status });
 
   const groupedMessages = useMemo(() => {
     if (!messages) return {};
@@ -171,6 +180,7 @@ export default function Messages({
       </div>
     );
   }
+  let firstUnreadFound = false;
 
   return (
     <div className=" flex-1 overflow-hidden relative isolate ">
@@ -188,25 +198,6 @@ export default function Messages({
         )}
         ref={chatRef}
       >
-        {/* <div
-          className="h-1"
-          ref={(el) => {
-            if (el) {
-              const observer = new IntersectionObserver(
-                ([entry]) => {
-                  if (entry.isIntersecting && status === "CanLoadMore") {
-                    loadMore(10);
-                  }
-                },
-                {
-                  threshold: 1.0,
-                }
-              );
-              observer.observe(el);
-              return () => observer.disconnect();
-            }
-          }}
-        ></div> */}
         {isloadingData && (
           <div className="flex justify-center">
             <Loader2 className="h-6 w-6 text-zinc-500 animate-spin my-4" />
@@ -218,13 +209,23 @@ export default function Messages({
             <div className="text-center text-sm text-gray-500 my-2 sticky top-0 rtlDir z-[200] w-full flex items-center justify-center">
               <div className="px-2 py-1 bg-gray-100 rounded-full">{date}</div>
             </div>
-            {msgs.map((message) => (
-              <ChatMessage
-                key={message._id}
-                message={message}
-                isCurrentUser={message.senderId === currentUser}
-              />
-            ))}
+            {msgs.map((message) => {
+              const isFirstUnread = message._id === firstUnreadRef.current; // فقط یک بار
+              return (
+                <div key={message._id} id={`message-${message._id}`}>
+                  {isFirstUnread && (
+                    <div className="bg-yellow-100 text-yellow-800 text-center py-2 rounded-md mb-2">
+                      پیام‌های خوانده‌نشده
+                    </div>
+                  )}
+                  <ChatMessage
+                    key={message._id}
+                    message={message}
+                    isCurrentUser={message.senderId === currentUser}
+                  />
+                </div>
+              );
+            })}
           </div>
         ))}
         <div ref={bottomRef} />
@@ -263,3 +264,45 @@ export default function Messages({
 //     }
 //   };
 // }, [chatId]);
+
+{
+  /* <div
+          className="h-1"
+          ref={(el) => {
+            if (el) {
+              const observer = new IntersectionObserver(
+                ([entry]) => {
+                  if (entry.isIntersecting && status === "CanLoadMore") {
+                    loadMore(10);
+                  }
+                },
+                {
+                  threshold: 1.0,
+                }
+              );
+              observer.observe(el);
+              return () => observer.disconnect();
+            }
+          }}
+        ></div> */
+}
+
+// useEffect(() => {
+//   if (inView && status === "CanLoadMore") {
+//     // console.log("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
+//     loadMore(10);
+//   }
+// }, [InView]);
+
+// console.log({ messages, inView, status });
+
+// const {
+//   results: messages,
+//   status,
+//   loadMore,
+//   isLoading,
+// } = usePaginatedQuery(
+//   api.message.messages,
+//   { chatId: cc },
+//   { initialNumItems: 10 }
+// );
