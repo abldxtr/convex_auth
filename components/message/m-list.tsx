@@ -96,10 +96,6 @@ export default function UserList({ user }: { user: userList }) {
     return null;
   };
 
-  // const currentUser = useSession();
-
-  // const me = currentUser.status;
-
   return (
     <Link
       className="min-h-[40px] w-full  "

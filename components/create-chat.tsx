@@ -42,6 +42,9 @@ export function CreateChat({ id }: { id: User }) {
         first: id?._id!,
         second: userId as Id<"users">,
       }).catch(() => console.log("error to create Chat!!!"));
+
+      setOpenChatCreate(false);
+
       // }
       // if (success) {
       //   queryClient.invalidateQueries({ queryKey: ["userList"] });
@@ -88,7 +91,7 @@ export function CreateChatIcon() {
   const { openChatCreate, setOpenChatCreate } = useGlobalContext();
   return (
     <div
-      className=" absolute bottom-4 z-[100] right-4 size-[56px] rounded-full bg-blue-400  flex items-center justify-center cursor-pointer "
+      className=" absolute bottom-4 z-[100] right-4 size-[56px] rounded-full bg-green-500 hover:bg-green-400 transition-colors   flex items-center justify-center cursor-pointer "
       onClick={() => {
         setOpenChatCreate(true);
       }}

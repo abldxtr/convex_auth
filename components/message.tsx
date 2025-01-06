@@ -40,11 +40,14 @@ export default function Messages({
   const unReadDiv = useRef<HTMLDivElement | null>(null);
   const [goDown, setGoDown] = useState(false);
   const currentUser = user?._id ?? user?._id;
-  const firstUnreadRef = useRef<string | null>(null); // ذخیره ID پیام خوانده‌نشده اول
+  const firstUnreadRef = useRef<string | null>(null);
+  const firstRender = useRef<number | null>(null);
 
   // console.log({ unreadMessagesCount });
 
   const paramValue = chatId ?? chatId;
+  const chatIdd = chatId ?? chatId;
+  const cc = chatIdd!;
 
   const [data, others, updatePresence] = usePresence(
     paramValue!,
@@ -59,11 +62,18 @@ export default function Messages({
   const { mutate, isPending: seenMessageAllLoading } = TanStackMutation({
     mutationFn: useConvexMutation(api.message.seenMessageAll),
   });
+  const { data: messages, isPending } = useQuery(
+    convexQuery(api.message.messages, { chatId: cc })
+  );
 
   useEffect(() => {
+    console.log("useEffect scroll");
+    console.log({ goDown });
+
     const chatContainer = chatRef?.current;
     const handleScroll = () => {
       if (chatContainer) {
+        console.log("ture chatContainer");
         // console.log("scrollll");
         const distanceFromBottom =
           chatContainer.scrollHeight -
@@ -74,6 +84,15 @@ export default function Messages({
         setGoDown(distanceFromBottom > 50);
       }
     };
+    if (chatContainer && !goDown) {
+      const distanceFromBottom =
+        chatContainer.scrollHeight -
+        chatContainer.scrollTop -
+        chatContainer.clientHeight;
+      const distanceFromTop = chatContainer.scrollTop;
+
+      setGoDown(distanceFromBottom > 50);
+    }
 
     chatContainer?.addEventListener("scroll", handleScroll);
     window.addEventListener("scroll", handleScroll);
@@ -81,56 +100,6 @@ export default function Messages({
     return () => {
       chatContainer?.removeEventListener("scroll", handleScroll);
       window.removeEventListener("scroll", handleScroll);
-    };
-    // }, [shouldLoadMore, loadMore, chatRef, setGoDown]);
-  }, [chatRef, setGoDown]);
-
-  const chatIdd = chatId ?? chatId;
-  const cc = chatIdd!;
-
-  const { data: messages, isPending } = useQuery(
-    convexQuery(api.message.messages, { chatId: cc })
-  );
-  // const [hasScrolledToUnread, setHasScrolledToUnread] = useState(false);
-  // const chatRef = chatRef.current;
-
-  useLayoutEffect(() => {
-    const storedScrollPosition = sessionStorage.getItem(`scrollPos-${chatId}`);
-
-    if (!firstUnreadRef.current && messages) {
-      const firstUnreadMessage = messages.find(
-        (message) =>
-          message.status !== "READ" && message.senderId !== currentUser
-      );
-
-      if (firstUnreadMessage) {
-        firstUnreadRef.current = firstUnreadMessage._id; // ذخیره ID پیام
-      }
-    }
-
-    if (firstUnreadRef.current) {
-      const unreadElement = document.getElementById(
-        `message-${firstUnreadRef.current}`
-      );
-
-      if (unreadElement) {
-        unreadElement.scrollIntoView({
-          behavior: "instant",
-          block: "end",
-        });
-        // scrolledToUnread.current = true; // جلوگیری از اسکرول مجدد
-      }
-    } else if (storedScrollPosition && chatRef.current) {
-      chatRef.current.scrollTop = parseInt(storedScrollPosition, 10);
-    } else {
-      bottomRef.current?.scrollIntoView({
-        behavior: "instant",
-      });
-    }
-
-    // ذخیره مقدار اولیه chatRef.current
-
-    return () => {
       if (chatRef.current) {
         sessionStorage.setItem(
           `scrollPos-${chatId}`,
@@ -138,7 +107,74 @@ export default function Messages({
         );
       }
     };
-  }, []);
+    // }, [shouldLoadMore, loadMore, chatRef, setGoDown]);
+  }, [setGoDown, chatId, chatRef.current]);
+
+  useLayoutEffect(() => {
+    const storedScrollPosition = sessionStorage.getItem(`scrollPos-${chatId}`);
+    console.log("useLayoutEffect");
+    console.log(bottomRef.current);
+
+    if (!firstUnreadRef.current && messages) {
+      console.log("firstUnreadMessage && message");
+
+      const firstUnreadMessage = messages.find(
+        (message) =>
+          message.status !== "READ" && message.senderId !== currentUser
+      );
+
+      if (firstUnreadMessage) {
+        firstUnreadRef.current = firstUnreadMessage._id; // ذخیره ID پیام
+        const unreadElement = document.getElementById(
+          `message-${firstUnreadRef.current}`
+        );
+        console.log("firstUnreadMessage");
+
+        if (unreadElement) {
+          unreadElement.scrollIntoView({
+            behavior: "instant",
+            block: "end",
+          });
+        }
+
+        // if (storedScrollPosition && chatRef.current) {
+        //   chatRef.current.scrollTop = parseInt(storedScrollPosition, 10);
+        //   console.log("storedScrollPosition");
+        // }
+      } else if (bottomRef.current && firstRender.current === null) {
+        console.log("bottomRef.current");
+        bottomRef.current.scrollIntoView({
+          behavior: "instant",
+          block: "center",
+        });
+        console.log("bottomref");
+      } else if (
+        storedScrollPosition &&
+        chatRef.current &&
+        firstRender.current === 1
+      ) {
+        console.log("storedScrollPosition");
+
+        chatRef.current.scrollTop = parseInt(storedScrollPosition, 10);
+      }
+    }
+
+    return () => {
+      if (chatRef.current && firstRender.current === null) {
+        sessionStorage.setItem(
+          `scrollPos-${chatId}`,
+          chatRef.current.scrollTop.toString()
+        );
+        firstRender.current = 1;
+      }
+    };
+  }, [
+    chatId,
+    firstUnreadRef.current,
+    bottomRef.current,
+    chatRef.current,
+    firstRender.current,
+  ]);
 
   const isloadingData = status === "LoadingMore";
 
@@ -228,3 +264,27 @@ export default function Messages({
     </div>
   );
 }
+
+// }
+
+// if (firstUnreadRef.current) {
+//   const unreadElement = document.getElementById(
+//     `message-${firstUnreadRef.current}`
+//   );
+
+//   if (unreadElement) {
+//     unreadElement.scrollIntoView({
+//       behavior: "instant",
+//       block: "end",
+//     });
+//   }
+//   console.log("firstUnreadMessage");
+// } else if (storedScrollPosition && chatRef.current) {
+//   chatRef.current.scrollTop = parseInt(storedScrollPosition, 10);
+//   console.log("storedScrollPosition");
+// } else if (bottomRef.current) {
+//   bottomRef.current.scrollIntoView({
+//     behavior: "instant",
+//   });
+//   console.log("bottomref");
+// }

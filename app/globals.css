@@ -80,3 +80,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .rtlDir {
+    direction: rtl;
+  }
+}
