@@ -3,6 +3,7 @@ import { forwardRef } from "react";
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 import { cn } from "@/lib/utils";
+import { useMediaQuery } from "usehooks-ts";
 
 export const EmojiPicker = forwardRef<
   HTMLInputElement,
@@ -14,6 +15,7 @@ export const EmojiPicker = forwardRef<
   }
 >(({ value, onChange, onSubmit, handleEmoji }, ref) => {
   const { openEmoji, setOpenEmoji, open, setOpen } = useEmojiState();
+  const matches = useMediaQuery("(min-width: 768px)");
 
   return (
     <div className=" relative " onClick={() => setOpenEmoji(true)}>
@@ -31,7 +33,7 @@ export const EmojiPicker = forwardRef<
       {openEmoji && (
         <div
           className={cn(
-            " absolute  bottom-full isolate  right-[-16rem] z-[100]   "
+            " absolute  bottom-full isolate  md:right-[-16rem] right-[-150px] z-[100]   "
             // openEmoji ? " flex " : "opacity-0 pointer-events-none hidden",
           )}
           ref={ref}
@@ -43,7 +45,7 @@ export const EmojiPicker = forwardRef<
             searchPosition="none"
             onClickOutside={() => setOpenEmoji(false)}
             maxFrequentRows={0}
-            perLine={8}
+            perLine={matches ? 8 : 6}
             showPreview={false}
           />
         </div>

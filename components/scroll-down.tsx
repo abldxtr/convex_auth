@@ -180,7 +180,7 @@ const MessRight: React.FC<{
   message: messageItem;
   children: React.ReactNode;
 }> = ({ message, children }) => (
-  <div className="pb-1 p-2 w-full group flex items-end gap-2 justify-end z-[9]">
+  <div className="pb-1 md:p-2 p-1 w-full group flex items-end gap-2 justify-end z-[9]">
     <div className="flex flex-col items-end max-w-[75%]">
       <div className="bg-[#dcfaf5] rounded-tl-2xl rounded-tr-sm rounded-bl-2xl p-3 text-[#091e42]">
         {children}
@@ -223,7 +223,7 @@ const MessLeft: React.FC<{
 
   return (
     <div
-      className="pb-1 p-2 w-full group flex items-end gap-2 z-[9] "
+      className="pb-1 md:p-2 p-1 w-full group flex items-end gap-2 z-[9] "
       ref={ref}
     >
       <div className="flex flex-col items-start max-w-[75%]">

@@ -42,6 +42,7 @@ export default function Messages({
   const currentUser = user?._id ?? user?._id;
   const firstUnreadRef = useRef<string | null>(null);
   const firstRender = useRef<number | null>(null);
+  const [isScroll, setInScroll] = useState(false);
 
   // console.log({ unreadMessagesCount });
 
@@ -83,6 +84,7 @@ export default function Messages({
 
         setGoDown(distanceFromBottom > 50);
       }
+      setInScroll(true);
     };
     if (chatContainer && !goDown) {
       const distanceFromBottom =
@@ -100,12 +102,12 @@ export default function Messages({
     return () => {
       chatContainer?.removeEventListener("scroll", handleScroll);
       window.removeEventListener("scroll", handleScroll);
-      if (chatRef.current) {
-        sessionStorage.setItem(
-          `scrollPos-${chatId}`,
-          chatRef.current.scrollTop.toString()
-        );
-      }
+      // if (chatRef.current) {
+      //   sessionStorage.setItem(
+      //     `scrollPos-${chatId}`,
+      //     chatRef.current.scrollTop.toString()
+      //   );
+      // }
     };
     // }, [shouldLoadMore, loadMore, chatRef, setGoDown]);
   }, [setGoDown, chatId, chatRef.current]);
@@ -133,7 +135,7 @@ export default function Messages({
         if (unreadElement) {
           unreadElement.scrollIntoView({
             behavior: "instant",
-            block: "end",
+            block: "center",
           });
         }
 
@@ -141,31 +143,26 @@ export default function Messages({
         //   chatRef.current.scrollTop = parseInt(storedScrollPosition, 10);
         //   console.log("storedScrollPosition");
         // }
-      } else if (bottomRef.current && firstRender.current === null) {
+      } else if (storedScrollPosition && chatRef.current) {
+        console.log("storedScrollPosition");
+
+        chatRef.current.scrollTop = parseInt(storedScrollPosition, 10);
+      } else if (bottomRef.current) {
         console.log("bottomRef.current");
         bottomRef.current.scrollIntoView({
           behavior: "instant",
           block: "center",
         });
         console.log("bottomref");
-      } else if (
-        storedScrollPosition &&
-        chatRef.current &&
-        firstRender.current === 1
-      ) {
-        console.log("storedScrollPosition");
-
-        chatRef.current.scrollTop = parseInt(storedScrollPosition, 10);
       }
     }
 
     return () => {
-      if (chatRef.current && firstRender.current === null) {
+      if (chatRef.current && isScroll) {
         sessionStorage.setItem(
           `scrollPos-${chatId}`,
           chatRef.current.scrollTop.toString()
         );
-        firstRender.current = 1;
       }
     };
   }, [
@@ -173,7 +170,7 @@ export default function Messages({
     firstUnreadRef.current,
     bottomRef.current,
     chatRef.current,
-    firstRender.current,
+    isScroll,
   ]);
 
   const isloadingData = status === "LoadingMore";
@@ -221,7 +218,7 @@ export default function Messages({
       />
       <div
         className={cn(
-          "w-full  p-2  overflow-y-auto flex  flex-col h-full  [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-md"
+          "w-full  md:p-2  overflow-y-auto flex  flex-col h-full  [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-md"
         )}
         ref={chatRef}
       >
@@ -241,7 +238,7 @@ export default function Messages({
               return (
                 <div key={message._id} id={`message-${message._id}`}>
                   {isFirstUnread && (
-                    <div className="bg-yellow-100 text-yellow-800 text-center py-2 rounded-md mb-2">
+                    <div className="bg-yellow-100 text-yellow-800 text-center py-1 rounded-md ">
                       پیام‌های خوانده‌نشده
                     </div>
                   )}

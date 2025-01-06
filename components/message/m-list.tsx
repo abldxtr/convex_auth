@@ -163,7 +163,7 @@ export default function UserList({ user }: { user: userList }) {
                 <span className=" animate-pulse ">typing...</span>
               ) : user.lastMessage ? (
                 user.lastMessage?.content.length > 20 ? (
-                  user.lastMessage.content.substring(0, 20) + "..."
+                  user.lastMessage.content.substring(0, 40) + "..."
                 ) : (
                   user.lastMessage?.content
                 )
