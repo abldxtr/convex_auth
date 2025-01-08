@@ -7,6 +7,7 @@ import { ConvexClientProvider } from "./ConvexClientProvider";
 import { GlobalProvider } from "@/context/globalContext";
 import { EmojiProvider } from "@/context/EmojiContext";
 import { ConvexQueryCacheProvider } from "convex-helpers/react/cache/provider";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -32,6 +33,7 @@ export default function RootLayout({
                     <div className=" overflow-auto  h-full scrl flex w-full  ">
                       {children}
                     </div>
+                    <Toaster />
                   </div>
                 </ConvexQueryCacheProvider>
               </EmojiProvider>

@@ -1,7 +1,8 @@
-import { useGlobalContext } from "@/context/globalContext";
+import { FileState, useGlobalContext } from "@/context/globalContext";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { DragEvent, useState } from "react";
+import { toast } from "sonner";
 
 type Props = {
   className?: string;
@@ -12,47 +13,80 @@ export default function DragContainer({ className, children }: Props) {
   const [isDragging, setIsDragging] = useState(false);
   const { imgTemp, setImgTemp, setIsShowImgTemp } = useGlobalContext();
 
+  const isFileDuplicate = (file: File) => {
+    return imgTemp.some((existingFile) => {
+      if (typeof existingFile.file === "string") return false;
+
+      return (
+        existingFile.file.name === file.name &&
+        existingFile.file.size === file.size &&
+        existingFile.file.lastModified === file.lastModified
+      );
+    });
+  };
+
+  const handleFiles = (files: File[]) => {
+    // فیلتر کردن فایل‌های تکراری
+    const duplicates: string[] = [];
+    const newFiles = files.filter((file) => {
+      if (!file.type.startsWith("image/")) {
+        return false;
+      }
+      const isDuplicate = isFileDuplicate(file);
+      if (isDuplicate) {
+        duplicates.push(file.name);
+      }
+      return !isDuplicate;
+    });
+
+    // نمایش پیام برای فایل‌های تکراری
+    if (duplicates.length > 0) {
+      toast.error(`فایل‌های تکراری: ${duplicates.join(", ")}`);
+    }
+
+    // اضافه کردن فایل‌های جدید
+    if (newFiles.length > 0) {
+      const addedFiles = newFiles.map<FileState>((file) => ({
+        file,
+        key: crypto.randomUUID(),
+        progress: "PENDING",
+      }));
+
+      setImgTemp((prev) => [...prev, ...addedFiles]);
+      setIsShowImgTemp(true);
+    }
+  };
+
   const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
+    event.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragEnter = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
     setIsDragging(true);
   };
 
   const handleDragLeave = (event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
+    event.stopPropagation();
+
+    // فقط زمانی که موس از روی کانتینر اصلی خارج می‌شود
+    if (event.currentTarget.contains(event.relatedTarget as Node)) {
+      return;
+    }
+
     setIsDragging(false);
-    setIsShowImgTemp(true);
   };
 
   const handleDrop = (event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
+    event.stopPropagation();
+
     const droppedFiles = Array.from(event.dataTransfer.files);
-    const existingFiles = Array.from(imgTemp || []);
-
-    // فیلتر کردن فایل‌های تکراری
-    const newFiles = droppedFiles.filter(
-      (file) =>
-        !existingFiles.some((existingFile) => {
-          if (typeof existingFile.file === "string") {
-            return false;
-          }
-          existingFile.file.name === file.name &&
-            existingFile.file.size === file.size &&
-            existingFile.file.lastModified === file.lastModified;
-        })
-    );
-
-    if (newFiles.length > 0) {
-      const updatedFiles = [
-        ...existingFiles,
-        ...newFiles.map((file) => ({
-          file,
-          key: crypto.randomUUID(),
-          progress: "PENDING" as const,
-        })),
-      ];
-      setImgTemp(updatedFiles);
-    }
-
+    handleFiles(droppedFiles);
     setIsDragging(false);
   };
 

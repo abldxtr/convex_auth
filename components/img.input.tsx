@@ -4,6 +4,8 @@ import { FileState, useGlobalContext } from "@/context/globalContext";
 import { ChangeEvent, useMemo, useRef, useState } from "react";
 import { useDropzone, type DropzoneOptions } from "react-dropzone";
 import { twMerge } from "tailwind-merge";
+import { toast } from "sonner";
+import { useUploadImages } from "@/hooks/useUploadImages";
 
 type InputProps = {
   className?: string;
@@ -12,7 +14,7 @@ type InputProps = {
   onFilesAdded?: (addedFiles: FileState[]) => void | Promise<void>;
   disabled?: boolean;
   dropzoneOptions?: Omit<DropzoneOptions, "disabled">;
-  ref?: React.RefObject<HTMLInputElement>;
+  // ref?: React.RefObject<HTMLInputElement>;
 };
 export default function ImgInput({
   dropzoneOptions,
@@ -21,97 +23,140 @@ export default function ImgInput({
   disabled,
   onChange,
   onFilesAdded,
-  ref,
+  // ref,
 }: InputProps) {
   const imagesRef = useRef<HTMLInputElement | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
   const { imgTemp, setImgTemp } = useGlobalContext();
+  const { uploadImage } = useUploadImages();
 
-  // dropzone configuration
-  const {
-    getRootProps,
-    getInputProps,
-    fileRejections,
-    isFocused,
-    isDragAccept,
-    isDragReject,
-  } = useDropzone({
-    accept: { "image/*": [] },
-    disabled,
-    onDrop: (acceptedFiles) => {
-      const files = acceptedFiles;
-      // setCustomError(undefined);
-      if (
-        dropzoneOptions?.maxFiles &&
-        (imgTemp?.length ?? 0) + files.length > dropzoneOptions.maxFiles
-      ) {
-        // setCustomError(ERROR_MESSAGES.tooManyFiles(dropzoneOptions.maxFiles));
-        return;
+  // Setup dropzone
+  const isFileDuplicate = (file: File) => {
+    return imgTemp.some((existingFile) => {
+      if (typeof existingFile.file === "string") return false;
+
+      return (
+        existingFile.file.name === file.name &&
+        existingFile.file.size === file.size &&
+        existingFile.file.lastModified === file.lastModified
+      );
+    });
+  };
+
+  const handleFiles = async (files: File[]) => {
+    // فیلتر کردن فایل‌های تکراری
+    const duplicates: string[] = [];
+    const newFiles = files.filter((file) => {
+      const isDuplicate = isFileDuplicate(file);
+      if (isDuplicate) {
+        duplicates.push(file.name);
       }
-      if (files) {
-        const addedFiles = files.map<FileState>((file) => ({
-          file,
-          key: Math.random().toString(36).slice(2),
-          progress: "PENDING",
-        }));
-        void onFilesAdded?.(addedFiles);
-        void onChange?.([...(value ?? []), ...addedFiles]);
-      }
-    },
-    ...dropzoneOptions,
-  });
+      return !isDuplicate;
+    });
 
-  const handleImages = (e: ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    // const existingFiles = Array.from(imgTemp || []);
+    // نمایش پیام برای فایل‌های تکراری
+    if (duplicates.length > 0) {
+      toast.error(`فایل‌های تکراری: ${duplicates.join(", ")}`);
+    }
 
-    const newFiles = files.filter(
-      (file) =>
-        !imgTemp.some((existingFile) => {
-          if (typeof existingFile.file === "string") {
-            return false;
-          }
-
-          existingFile.file.name === file.name &&
-            existingFile.file.size === file.size &&
-            existingFile.file.lastModified === file.lastModified;
-        })
-    );
-
-    if (newFiles.length === 0) {
-      setErrorMsg("فایل‌های انتخاب شده تکراری هستند.");
+    // بررسی محدودیت تعداد فایل‌ها
+    if (
+      dropzoneOptions?.maxFiles &&
+      (imgTemp?.length ?? 0) + newFiles.length > dropzoneOptions.maxFiles
+    ) {
+      toast.error(`حداکثر تعداد فایل مجاز ${dropzoneOptions.maxFiles} است.`);
       return;
     }
 
-    const newFileStates = newFiles.map((file) => ({
-      file,
-      key: crypto.randomUUID(), // تولید یک کلید یکتا برای هر فایل
-      progress: "PENDING" as const,
-    }));
+    // اضافه کردن فایل‌های جدید
+    if (newFiles.length > 0) {
+      const addedFiles = newFiles.map<FileState>((file) => ({
+        file,
+        key: crypto.randomUUID(),
+        progress: "PENDING",
+      }));
+      // اضافه کردن فایل‌های جدید به state با وضعیت اولیه
+      const newFileStates = newFiles.map<FileState>((file) => ({
+        file,
+        key: crypto.randomUUID(),
+        progress: 0,
+      }));
+      console.log({ newFileStates });
+      // آپلود هر فایل به صورت جداگانه
+      const uploadPromises = newFileStates.map(async (fileState) => {
+        // try {
+        //   const storageId = await uploadImage(
+        //     fileState.file as File,
+        //     (progress) => {
+        //       // بروزرسانی درصد پیشرفت برای این فایل
+        //       setImgTemp((prev) =>
+        //         prev.map((item) =>
+        //           item.key === fileState.key ? { ...item, progress } : item
+        //         )
+        //       );
+        //     }
+        //   );
+        //   // بروزرسانی وضعیت فایل پس از آپلود موفق
+        //   setImgTemp((prev) =>
+        //     prev.map((item) =>
+        //       item.key === fileState.key
+        //         ? { ...item, storageId, progress: "COMPLETE" }
+        //         : item
+        //     )
+        //   );
+        //   return { ...fileState, storageId, progress: "COMPLETE" };
+        // } catch (error) {
+        //   console.error(`Error uploading file ${fileState.file.name}:`, error);
+        //   // بروزرسانی وضعیت خطا برای این فایل
+        //   setImgTemp((prev) =>
+        //     prev.map((item) =>
+        //       item.key === fileState.key
+        //         ? { ...item, progress: "ERROR", error: "خطا در آپلود فایل" }
+        //         : item
+        //     )
+        //   );
+        //   return {
+        //     ...fileState,
+        //     progress: "ERROR",
+        //     error: "خطا در آپلود فایل",
+        //   };
+        // }
+      });
 
-    setImgTemp((prev) => [...prev, ...newFileStates]);
+      try {
+        // const results = await Promise.all(uploadPromises);
+        // console.log({ results });
+        // void onFilesAdded?.(results);
+        // void onChange?.([...(value ?? []), ...results]);
+      } catch (error) {
+        console.error("Error handling files:", error);
+        toast.error("خطا در آپلود فایل‌ها");
+      }
 
-    setErrorMsg(""); // پاک کردن پیام خطا (در صورت وجود)
+      setImgTemp((prev) => [...prev, ...addedFiles]);
+      void onFilesAdded?.(addedFiles);
+      void onChange?.([...(value ?? []), ...addedFiles]);
+    }
   };
 
+  const { getRootProps, getInputProps } = useDropzone({
+    accept: { "image/*": [] },
+    disabled,
+    onDrop: handleFiles,
+    // onDragEnter: () => setIsDragging(true),
+    // onDragLeave: () => setIsDragging(false),
+    ...dropzoneOptions,
+  });
+
   return (
-    <div>
-      <input
-        type="file"
-        accept="image/jpeg,image/png,image/webp,image/gif"
-        ref={imagesRef}
-        // ref={ref}
-        // {...getInputProps()}
-        multiple
-        hidden
-        // onChange={(e) => handleImages(e)}
-      />
+    <div {...getRootProps()} className="cursor-pointer">
+      <input {...getInputProps()} />
 
       {/* {errorMsg && <p className="text-red-500">{errorMsg}</p>} */}
 
       <button
         className="size-[34px] hover:bg-[#1d9bf01a] flex items-center justify-center transition-all duration-300 rounded-full"
-        onClick={() => imagesRef.current?.click()}
+        // onClick={() => imagesRef.current?.click()}
       >
         <svg
           viewBox="0 0 24 24"

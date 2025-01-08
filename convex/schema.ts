@@ -49,7 +49,8 @@ const schema = defineSchema({
       v.literal("FILE")
     ),
     opupId: v.string(),
-    image: v.array(v.string()),
+    image: v.optional(v.array(v.string())),
+    img: v.optional(v.bytes()),
   })
     .index("by_sender_user", ["senderId"])
     .index("by_receiver_user", ["receiverId"])

@@ -14,6 +14,7 @@ import DragContainer from "./drag-container";
 import {
   PaginatedQueryReference,
   optimisticallyUpdateValueInPaginatedQuery,
+  useAction,
   useMutation,
 } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -23,6 +24,40 @@ import usePresence from "@/hooks/usePresence";
 import useTypingIndicator from "@/hooks/useTypingIndicator";
 import useSingleFlight from "@/hooks/useSingleFlight";
 import { User } from "./message.list";
+import { toast } from "sonner";
+
+interface imageOptions {
+  contentType?: string;
+  width?: number;
+  height?: number;
+}
+
+export const blobToBase64 = (blob: any) => {
+  const reader = new FileReader();
+  reader.readAsDataURL(blob);
+  return new Promise((resolve) => {
+    reader.onloadend = () => {
+      resolve(reader.result);
+    };
+  });
+};
+
+export function base64ToArrayBuffer(base64: string, opts?: imageOptions) {
+  const base64Data = base64.replace(/^data:.+;base64,/, "");
+  const paddedBase64Data = base64Data.padEnd(
+    base64Data.length + ((4 - (base64Data.length % 4)) % 4),
+    "="
+  );
+
+  const binaryString = atob(paddedBase64Data);
+  const byteArray = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    byteArray[i] = binaryString.charCodeAt(i);
+  }
+  const blobProps = {};
+  // if (opts?.contentType) blobProps["type"] = opts.contentType;
+  return new Blob([byteArray], blobProps);
+}
 
 export default function InputChat({
   param,
@@ -36,14 +71,27 @@ export default function InputChat({
   user?: User;
 }) {
   const { setOpenEmoji } = useEmojiState();
-  const { imgTemp, setImgTemp, isShowImgTemp, setIsShowImgTemp } =
-    useGlobalContext();
-  // const usr = useSession();
+  const {
+    imgTemp,
+    setImgTemp,
+    isShowImgTemp,
+    setIsShowImgTemp,
+    convexFile,
+    setConvexFile,
+  } = useGlobalContext();
   const currentUser = user?._id ?? user?._id;
-  // const [userId] = useState(() => Math.floor(Math.random() * 10000));
   const updatePresenceForStop = useSingleFlight(
     useMutation(api.presence.update)
   );
+  console.log({ imgTemp });
+  if (imgTemp.length > 0) {
+    blobToBase64(imgTemp[0].file).then((res) => {
+      // do what you wanna do
+      console.log({ res }); // res is base64 now
+      const ddd = base64ToArrayBuffer(res as string);
+      console.log(typeof ddd);
+    });
+  }
 
   const [data, others, updatePresence] = usePresence(param, currentUser!, {
     text: "",
@@ -61,72 +109,43 @@ export default function InputChat({
   const textRef = useRef<HTMLInputElement | null>(null);
   const EmojiRef = useRef(null);
 
-  // const createMessage = useMutation(
-  //   api.message.createMessage
-  // ).withOptimisticUpdate((localStore, mutationArg) => {
-  //   // const { content, chatId, images, opupId, recieverId, senderId } = args;
-  //   optimisticallyUpdateValueInPaginatedQuery(
-  //     localStore,
-  //     api.message.messages,
-
-  //     { chatId },
-  //     (currentValue) => {
-
-  //       const aa = localStore.getAllQueries(api.message.messages);
-  //       console.log({ localStore });
-  //       return currentValue;
-  //       // return null
-  //     }
-  //   );
-
-  // });
-
   const createMessage = useMutation(
     api.message.createMessage
   ).withOptimisticUpdate((localStore, mutationArg) => {
-    const { content, chatId, images, senderId, recieverId, opupId } =
+    const { content, chatId, images, senderId, recieverId, opupId, img } =
       mutationArg;
 
     // ایجاد پیام موقت
+    // const typeImg = !!images?.length && "IMAGE";
+    // const imgSrc = new Blob([img!]);
     const optimisticMessage = {
       _id: `optimistic-${opupId}` as Id<"messages">, // تبدیل به نوع مناسب
       _creationTime: Date.now() as number,
-      type: "TEXT" as const,
+      // type: "TEXT" as const,
+      type: "IMAGE" as const,
+
       content,
       senderId: senderId as Id<"users">,
       receiverId: recieverId as Id<"users">,
       chatId: chatId as Id<"chats">,
       status: "DELIVERED" as const,
       opupId,
-      image: [""],
+      image: images,
+      img: img,
     };
-
-    // _id: Id<"messages">;
-    // _creationTime: number;
-    // type: "TEXT" | "IMAGE" | "VIDEO" | "AUDIO" | "FILE";
-    // content: string;
-    // senderId: Id<"users">;
-    // receiverId: Id<"users">;
-    // chatId: string;
-    // status: "SENT" | "DELIVERED" | "READ";
-    // opupId: string;
-    // image: string[];
 
     const res = localStore.getQuery(api.message.messages, {
       chatId,
-      // paginationOpts,
     });
     if (res) {
-      const aaa = localStore.setQuery(api.message.messages, { chatId }, [
+      localStore.setQuery(api.message.messages, { chatId }, [
         ...res,
         optimisticMessage,
       ]);
-      // localStore.setQuery(api.messages.list, { channel }, [
-      //   ...existingMessages,
-      //   newMessage,
-      // ]);
     }
   });
+
+  // const creatUploadMessage = useAction(api.message.MessageWithImg);
 
   const handleClickOutside = () => {
     setOpenEmoji(false);
@@ -134,71 +153,150 @@ export default function InputChat({
 
   useOnClickOutside([EmojiRef, textRef], handleClickOutside);
 
+  // const handleSubmit = async (e: FormEvent) => {
+  //   e.preventDefault();
+  //   // console.log("handleSubmit");
+  //   if (imgTemp.length > 0) {
+  //     if (currentUser && other && chatId) {
+  //       const newMessage = {
+  //         content: inputValue.trim(),
+  //         senderId: currentUser,
+  //         receiverId: other,
+  //         id: chatId,
+  //         createdAt: new Date().toISOString() as unknown as Date,
+  //         updatedAt: new Date().toISOString() as unknown as Date,
+  //         chatId,
+  //         type: "IMAGE" as const,
+  //         status: "SENT" as const,
+  //         opupId: crypto.randomUUID(),
+  //         images: imgTemp,
+  //       };
+  //       const newMessage1 = {
+  //         content: inputValue.trim(),
+  //         senderId: currentUser,
+  //         recieverId: other,
+  //         chatId: chatId as Id<"chats">,
+  //         opupId: crypto.randomUUID(),
+  //         images: imgTemp.map((item) => item.file as unknown as string),
+  //       };
+  //       createMessage(newMessage1);
+
+  //       // }
+  //     }
+  //   } else {
+  //     if (inputValue.trim()) {
+  //       if (currentUser && other && chatId) {
+  //         const newMessage = {
+  //           content: inputValue.trim(),
+  //           senderId: currentUser,
+  //           receiverId: other,
+  //           id: chatId,
+  //           createdAt: new Date().toISOString() as unknown as Date,
+  //           updatedAt: new Date().toISOString() as unknown as Date,
+  //           chatId,
+
+  //           type: "TEXT" as const,
+  //           status: "SENT" as const,
+  //           opupId: crypto.randomUUID(),
+  //         };
+
+  //         const newMessage1 = {
+  //           content: inputValue.trim(),
+  //           senderId: currentUser,
+  //           recieverId: other,
+  //           chatId: chatId as Id<"chats">,
+  //           opupId: crypto.randomUUID(),
+  //           images: [""],
+  //           // messageId: crypto.randomUUID() as Id<"messages">,
+  //         };
+
+  //         // console.log("newMessage", newMessage1);
+  //         // sendMessage(newMessage);
+  //         const a = {
+  //           typing: false,
+  //           present: false,
+  //           latestJoin: Date.now(),
+  //         };
+  //         // updatePresenceForStop({ user: currentUser, room: chatId, data: a });
+
+  //         // createMessage(newMessage1);
+  //         // sendMessage(newMessage);
+  //       }
+  //     }
+  //   }
+
+  //   setInputValue("");
+  //   setIsShowImgTemp(false);
+  // };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    // console.log("handleSubmit");
+
+    if (!currentUser || !other || !chatId) return;
+
+    const messageContent = inputValue.trim();
+    const messageId = crypto.randomUUID();
+
     if (imgTemp.length > 0) {
-      if (currentUser && other && chatId) {
-        const newMessage = {
-          content: inputValue.trim(),
-          senderId: currentUser,
-          receiverId: other,
-          id: chatId,
-          createdAt: new Date().toISOString() as unknown as Date,
-          updatedAt: new Date().toISOString() as unknown as Date,
-          chatId,
-          type: "IMAGE" as const,
-          status: "SENT" as const,
-          opupId: crypto.randomUUID(),
-          images: imgTemp,
-        };
+      // بررسی اینکه آیا همه عکس‌ها آپلود شده‌اند
+      // const allUploaded = imgTemp.every(
+      //   (img) => img.progress === "COMPLETE" && img.storageId
+      // );
 
-        // }
-      }
-    } else {
-      if (inputValue.trim()) {
-        if (currentUser && other && chatId) {
-          const newMessage = {
-            content: inputValue.trim(),
-            senderId: currentUser,
-            receiverId: other,
-            id: chatId,
-            createdAt: new Date().toISOString() as unknown as Date,
-            updatedAt: new Date().toISOString() as unknown as Date,
-            chatId,
+      // if (!allUploaded) {
+      //   toast.error("لطفاً منتظر اتمام آپلود عکس‌ها بمانید");
+      //   return;
+      // }
+      const dddd = await blobToBase64(imgTemp[0].file).then((res) => {
+        // do what you wanna do
+        console.log({ res }); // res is base64 now
+        const ddd = base64ToArrayBuffer(res as string);
+        const arrayBuffer = new Response(ddd).arrayBuffer();
+        return arrayBuffer;
+      });
 
-            type: "TEXT" as const,
-            status: "SENT" as const,
-            opupId: crypto.randomUUID(),
-          };
+      // ایجاد پیام با عکس‌ها
+      const newMessage = {
+        content: messageContent,
+        senderId: currentUser,
+        recieverId: other,
+        chatId: chatId as Id<"chats">,
+        opupId: messageId,
+        images: imgTemp
+          .filter((img) => img.storageId)
+          .map((img) => img.storageId as Id<"_storage">),
+        img: dddd,
+      };
 
-          const newMessage1 = {
-            content: inputValue.trim(),
-            senderId: currentUser,
-            recieverId: other,
-            chatId: chatId as Id<"chats">,
-            opupId: crypto.randomUUID(),
-            images: [""],
-            // messageId: crypto.randomUUID() as Id<"messages">,
-          };
+      createMessage(newMessage);
+      setImgTemp([]);
+      setIsShowImgTemp(false);
+    } else if (messageContent) {
+      // ایجاد پیام متنی
+      const newMessage = {
+        content: messageContent,
+        senderId: currentUser,
+        recieverId: other,
+        chatId: chatId as Id<"chats">,
+        opupId: messageId,
+        // images: [""],
+      };
 
-          console.log("newMessage", newMessage1);
-          // sendMessage(newMessage);
-          const a = {
-            typing: false,
-            present: false,
-            latestJoin: Date.now(),
-          };
-          updatePresenceForStop({ user: currentUser, room: chatId, data: a });
+      const presenceUpdate = {
+        typing: false,
+        present: false,
+        latestJoin: Date.now(),
+      };
 
-          createMessage(newMessage1);
-          // sendMessage(newMessage);
-        }
-      }
+      updatePresenceForStop({
+        user: currentUser,
+        room: chatId,
+        data: presenceUpdate,
+      });
+      createMessage(newMessage);
     }
 
     setInputValue("");
-    setIsShowImgTemp(false);
   };
 
   const handleEmoji = (emoji: any) => {

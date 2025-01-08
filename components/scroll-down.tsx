@@ -15,13 +15,17 @@ import { useInView, IntersectionOptions } from "react-intersection-observer";
 import { Loader2 } from "lucide-react";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
+import { useMutation as useReactQueryMutation } from "@tanstack/react-query";
 import { api } from "@/convex/_generated/api";
 import { UseMutateFunction } from "@tanstack/react-query";
+import { useGenerateUploadUrl } from "@/hooks/useGenerateUploadUrl";
+import { useUploadImage } from "@/hooks/useUploadImage";
 
 interface messageItem {
   _id: Id<"messages">;
   _creationTime: number;
-  image: string[];
+  // image?: Id<"_storage">[] | undefined;
+  image?: string[] | undefined;
   chatId: string;
   content: string;
   status: "SENT" | "DELIVERED" | "READ";
@@ -29,6 +33,7 @@ interface messageItem {
   senderId: string;
   receiverId: string;
   opupId: string;
+  img?: ArrayBuffer | undefined;
 }
 
 export const ChatMessage = ({
@@ -42,18 +47,36 @@ export const ChatMessage = ({
   // const {ref, inView}= useInView(inViewOptions);
 
   const MessageWrapper = isCurrentUser ? MessRight : MessLeft;
+  const ii = message.img
+    ? btoa(String.fromCharCode(...new Uint8Array(message.img)))
+    : null;
+
+  // console.log({ message });
 
   return (
     <MessageWrapper message={message}>
       {/* {message.type === "IMAGE" &&
-        message.images &&
-        message.images.length > 0 && (
+        message.image &&
+        message.image.length > 0 && (
           <ImageContent
-            images={message.images}
+            images={message.image}
             setImageLoaded={setImageLoaded}
-            uploading={message.statusOU === "SENDING" ? true : false}
+            uploading={message.status === "DELIVERED" ? true : false}
+            iii=[ii]
           />
         )} */}
+      {ii !== null && (
+        <img
+          src={`data:image/jpeg;base64,${ii}`}
+          alt={`uploaded-img`}
+          width={600}
+          height={600}
+          className={cn(
+            "h-auto max-h-[calc(55dvh)] bg-[#0f141981] shrink-0 object-cover",
+            message.status === "DELIVERED" ? "blur-md" : "blur-0"
+          )}
+        />
+      )}
       {message.content && <span className="break-all">{message.content}</span>}
       <MessageFooter message={message} imageLoaded={imageLoaded} />
     </MessageWrapper>
@@ -61,15 +84,19 @@ export const ChatMessage = ({
 };
 
 const ImageContent: React.FC<{
-  images: any[];
+  images: string[];
   setImageLoaded: (loaded: boolean) => void;
   uploading: boolean;
+  iii?: Blob | null;
 }> = ({ images, setImageLoaded, uploading }) => {
+  // const mut = useMutation(api.upload.generateUploadUrl);
+
   return (
     <div
       className={cn(
         "grid gap-1 h-auto max-h-[calc(55dvh)] w-full shrink-0 overflow-hidden relative",
         images.length > 1 ? "grid-cols-2" : "grid-cols-1"
+        // images.length > 2 && "grid-cold-2"
       )}
     >
       {images.map((image, index) => (
@@ -91,11 +118,25 @@ const ImageItem: React.FC<{
 }> = ({ image, setImageLoaded, uploading }) => {
   const [loading, setLoading] = useState(true);
 
+  // const url = useGenerateUploadUrl();
+  // const { mutate, mutateAsync } = useUploadImage();
+  // const uploadImage = useUploadImage();
+
+  // const upload = async () => {
+  //   try {
+  //     const storageId = await uploadImage.mutateAsync(image);
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // };
+
   return (
     <div className="relative flex items-center justify-center">
       <Image
-        src={image.url || URL.createObjectURL(image.file)}
-        alt={`uploaded-img-${image.id || image.key}`}
+        // src={image.url || URL.createObjectURL(image.file)}
+        src={image}
+        // alt={`uploaded-img-${image.id || image.key}`}
+        alt={`uploaded-img`}
         width={600}
         height={600}
         className={cn(
@@ -113,9 +154,9 @@ const ImageItem: React.FC<{
         </div>
       )}
 
-      {typeof image.progress === "number" && image.progress < 100 && (
+      {/* {typeof image.progress === "number" && image.progress < 100 && (
         <CircleProgress progress={image.progress} />
-      )}
+      )} */}
     </div>
   );
 };

@@ -18,6 +18,7 @@ import type * as chat from "../chat.js";
 import type * as http from "../http.js";
 import type * as message from "../message.js";
 import type * as presence from "../presence.js";
+import type * as upload from "../upload.js";
 import type * as user from "../user.js";
 
 /**
@@ -34,6 +35,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   message: typeof message;
   presence: typeof presence;
+  upload: typeof upload;
   user: typeof user;
 }>;
 export declare const api: FilterApi<

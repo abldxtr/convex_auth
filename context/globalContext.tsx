@@ -3,13 +3,17 @@
 import { userList } from "@/components/message/m-list";
 // import { MessageData } from "@/lib/definitions";
 import React, { createContext, useContext, useEffect, useState } from "react";
-// export type final = {
-//   [key: string]: MessageData[];
-// }[];
+
 export type FileState = {
-  file: File | string;
+  file: File;
   key: string; // used to identify the file in the progress callback
-  progress: "PENDING" | "COMPLETE" | "ERROR" | number;
+  progress: "PENDING" | "COMPLETE" | "ERROR" | number | string;
+  storageId?: string;
+};
+
+export type convexFile = {
+  file: FileList;
+  key: string;
 };
 
 interface CounterContextType {
@@ -52,11 +56,15 @@ interface CounterContextType {
   setOpenChatCreate: React.Dispatch<React.SetStateAction<boolean>>;
   conversationId: string;
   setConversationId: React.Dispatch<React.SetStateAction<string>>;
+  convexFile: convexFile | null;
+  setConvexFile: React.Dispatch<React.SetStateAction<convexFile | null>>;
 }
 
 const GlobalContext = createContext<CounterContextType | undefined>(undefined);
 
 export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
+  const [convexFile, setConvexFile] = useState<convexFile | null>(null);
+
   const [imgTemp, setImgTemp] = useState<FileState[]>([]);
   const [currentView, setCurrentView] = useState<string>("all-chats");
   const [showFriendProfile, setShowFriendProfile] = useState<boolean>(false);
@@ -108,6 +116,8 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
         setOpenChatCreate,
         conversationId,
         setConversationId,
+        convexFile,
+        setConvexFile,
       }}
     >
       {children}
