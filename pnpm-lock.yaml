@@ -41,6 +41,9 @@ dependencies:
   '@types/moment-jalaali':
     specifier: ^0.7.9
     version: 0.7.9
+  babel-plugin-react-compiler:
+    specifier: 19.0.0-beta-63e3235-20250105
+    version: 19.0.0-beta-63e3235-20250105
   class-variance-authority:
     specifier: ^0.7.1
     version: 0.7.1
@@ -67,7 +70,7 @@ dependencies:
     version: 0.10.4
   next:
     specifier: 15.1.4
-    version: 15.1.4(@babel/core@7.26.0)(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
+    version: 15.1.4(@babel/core@7.26.0)(babel-plugin-react-compiler@19.0.0-beta-63e3235-20250105)(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
   next-themes:
     specifier: ^0.4.4
     version: 0.4.4(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
@@ -2131,6 +2134,12 @@ packages:
     engines: {node: '>= 0.4'}
     dev: true
 
+  /babel-plugin-react-compiler@19.0.0-beta-63e3235-20250105:
+    resolution: {integrity: sha512-38qEX4e1nNOZ9K7rVAF4VVijcjTHBbRHd+ftYpfim2Oabitd1NGjvrL0bnwFymDTBB4MqswqIHTYjYfuy1OeTQ==}
+    dependencies:
+      '@babel/types': 7.26.3
+    dev: false
+
   /balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
 
@@ -3734,7 +3743,7 @@ packages:
       react-dom: 19.0.0-rc-f994737d14-20240522(react@19.0.0-rc-f994737d14-20240522)
     dev: false
 
-  /next@15.1.4(@babel/core@7.26.0)(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522):
+  /next@15.1.4(@babel/core@7.26.0)(babel-plugin-react-compiler@19.0.0-beta-63e3235-20250105)(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522):
     resolution: {integrity: sha512-mTaq9dwaSuwwOrcu3ebjDYObekkxRnXpuVL21zotM8qE2W0HBOdVIdg2Li9QjMEZrj73LN96LcWcz62V19FjAg==}
     engines: {node: ^18.18.0 || ^19.8.0 || >= 20.0.0}
     hasBin: true
@@ -3758,6 +3767,7 @@ packages:
       '@next/env': 15.1.4
       '@swc/counter': 0.1.3
       '@swc/helpers': 0.5.15
+      babel-plugin-react-compiler: 19.0.0-beta-63e3235-20250105
       busboy: 1.6.0
       caniuse-lite: 1.0.30001684
       postcss: 8.4.31
@@ -4167,7 +4177,7 @@ packages:
       estree-walker: 3.0.3
       kleur: 4.1.5
       mri: 1.2.0
-      next: 15.1.4(@babel/core@7.26.0)(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
+      next: 15.1.4(@babel/core@7.26.0)(babel-plugin-react-compiler@19.0.0-beta-63e3235-20250105)(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
       playwright: 1.49.1
       preact: 10.25.4
       react: 19.0.0-rc-f994737d14-20240522

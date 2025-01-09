@@ -21,6 +21,7 @@
     "@radix-ui/react-slot": "^1.1.1",
     "@tanstack/react-query": "^5.62.11",
     "@types/moment-jalaali": "^0.7.9",
+    "babel-plugin-react-compiler": "19.0.0-beta-63e3235-20250105",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "convex": "^1.17.4",

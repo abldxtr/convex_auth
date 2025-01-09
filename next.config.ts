@@ -40,6 +40,9 @@ const nextConfig = {
           }
         : false,
   },
+  experimental: {
+    reactCompiler: true,
+  },
   // reactStrictMode: false,
 };
 
