@@ -8,6 +8,7 @@ import { GlobalProvider } from "@/context/globalContext";
 import { EmojiProvider } from "@/context/EmojiContext";
 import { ConvexQueryCacheProvider } from "convex-helpers/react/cache/provider";
 import { Toaster } from "@/components/ui/sonner";
+import { Monitoring } from "react-scan/monitoring/next"; // Import this first before React
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -34,6 +35,10 @@ export default function RootLayout({
                       {children}
                     </div>
                     <Toaster />
+                    <Monitoring
+                      apiKey="qwwfA_jdPmQd7HK3zKwRwegHybbcbyfa" // Safe to expose publically
+                      url="https://monitoring.react-scan.com/api/v1/ingest"
+                    />
                   </div>
                 </ConvexQueryCacheProvider>
               </EmojiProvider>

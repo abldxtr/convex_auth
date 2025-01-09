@@ -25,14 +25,15 @@ export type userList = {
   lastMessage: {
     _id: Id<"messages">;
     _creationTime: number;
+    image?: string[] | undefined;
+    img?: ArrayBuffer | undefined;
     type: "TEXT" | "IMAGE" | "VIDEO" | "AUDIO" | "FILE";
     content: string;
     senderId: Id<"users">;
     receiverId: Id<"users">;
-    chatId: string;
+    chatId: Id<"chats">;
     status: "SENT" | "DELIVERED" | "READ";
     opupId: string;
-    image: string[];
   } | null;
   date: number | undefined;
   unReadMess: number;
