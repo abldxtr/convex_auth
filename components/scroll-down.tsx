@@ -77,7 +77,11 @@ export const ChatMessage = ({
           )}
         />
       )}
-      {message.content && <span className="break-all">{message.content}</span>}
+      {message.content && (
+        <span className={cn("break-all  ", ii !== null && "pt-1")}>
+          {message.content}
+        </span>
+      )}
       <MessageFooter message={message} imageLoaded={imageLoaded} />
     </MessageWrapper>
   );
@@ -212,7 +216,7 @@ const MessageFooter: React.FC<{
   return (
     <div className="text-[#6a7485] text-xs leading-4 mt-1 flex items-center  ">
       {formatPersianDate(new Date(message._creationTime))}
-      <span className="ml-2 pb-1">{renderStatusIcon()}</span>
+      <span className="ml-2 ">{renderStatusIcon()}</span>
     </div>
   );
 };

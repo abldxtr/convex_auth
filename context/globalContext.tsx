@@ -58,6 +58,10 @@ interface CounterContextType {
   setConversationId: React.Dispatch<React.SetStateAction<string>>;
   convexFile: convexFile | null;
   setConvexFile: React.Dispatch<React.SetStateAction<convexFile | null>>;
+  scrollPos: number;
+  setScrollPos: React.Dispatch<React.SetStateAction<number>>;
+  toScroll: boolean;
+  setToScroll: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const GlobalContext = createContext<CounterContextType | undefined>(undefined);
@@ -76,6 +80,8 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
   const [isShowImgTemp, setIsShowImgTemp] = useState<boolean>(true);
   const [openChatCreate, setOpenChatCreate] = useState<boolean>(false);
   const [conversationId, setConversationId] = useState<string>("");
+  const [scrollPos, setScrollPos] = useState<number>(0);
+  const [toScroll, setToScroll] = useState<boolean>(false);
 
   const [unreadCountMenue, setUnreadCountMenue] = useState<
     { id: string; count: number }[]
@@ -118,6 +124,10 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
         setConversationId,
         convexFile,
         setConvexFile,
+        scrollPos,
+        setScrollPos,
+        toScroll,
+        setToScroll,
       }}
     >
       {children}

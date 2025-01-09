@@ -8,23 +8,15 @@ import { EmojiPicker } from "./EmojiPicker";
 import { InputWithRef } from "./InputWithRef";
 import GifInput from "./Gif-input";
 import TempImg from "./temp-img";
-import { useQueryClient } from "@tanstack/react-query";
 import { FileState, useGlobalContext } from "@/context/globalContext";
 import DragContainer from "./drag-container";
-import {
-  PaginatedQueryReference,
-  optimisticallyUpdateValueInPaginatedQuery,
-  useAction,
-  useMutation,
-} from "convex/react";
+import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-// import { useSession } from "next-auth/react";
 import usePresence from "@/hooks/usePresence";
 import useTypingIndicator from "@/hooks/useTypingIndicator";
 import useSingleFlight from "@/hooks/useSingleFlight";
 import { User } from "./message.list";
-import { toast } from "sonner";
 
 interface imageOptions {
   contentType?: string;
@@ -78,18 +70,25 @@ export default function InputChat({
     setIsShowImgTemp,
     convexFile,
     setConvexFile,
+    scrollPos,
+    setScrollPos,
+    toScroll,
+    setToScroll,
   } = useGlobalContext();
+
+  console.log({ scrollPos });
+
   const currentUser = user?._id ?? user?._id;
   const updatePresenceForStop = useSingleFlight(
     useMutation(api.presence.update)
   );
-  console.log({ imgTemp });
+  // console.log({ imgTemp });
   if (imgTemp.length > 0) {
     blobToBase64(imgTemp[0].file).then((res) => {
       // do what you wanna do
-      console.log({ res }); // res is base64 now
+      // console.log({ res }); // res is base64 now
       const ddd = base64ToArrayBuffer(res as string);
-      console.log(typeof ddd);
+      // console.log(typeof ddd);
     });
   }
 
@@ -267,6 +266,9 @@ export default function InputChat({
           .map((img) => img.storageId as Id<"_storage">),
         img: dddd,
       };
+      if (scrollPos > 30 && scrollPos < 600) {
+        setToScroll(true);
+      }
 
       createMessage(newMessage);
       setImgTemp([]);
@@ -293,6 +295,9 @@ export default function InputChat({
         room: chatId,
         data: presenceUpdate,
       });
+      if (scrollPos > 30 && scrollPos < 600) {
+        setToScroll(true);
+      }
       createMessage(newMessage);
     }
 

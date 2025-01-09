@@ -14,8 +14,6 @@ import ChatMessage, { ScrollDown, TypingLeft } from "./scroll-down";
 import { api } from "@/convex/_generated/api";
 import usePresence from "@/hooks/usePresence";
 import { User } from "./message.list";
-import { useChatScroll } from "@/hooks/use-chat-scroll";
-import { useMutation, usePaginatedQuery } from "convex/react";
 import { InView, useInView } from "react-intersection-observer";
 import { Id } from "@/convex/_generated/dataModel";
 import {
@@ -23,6 +21,7 @@ import {
   useQuery,
 } from "@tanstack/react-query";
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
+import { useGlobalContext } from "@/context/globalContext";
 
 export default function Messages({
   chatId,
@@ -37,14 +36,10 @@ export default function Messages({
 }) {
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const chatRef = useRef<HTMLDivElement | null>(null);
-  const unReadDiv = useRef<HTMLDivElement | null>(null);
   const [goDown, setGoDown] = useState(false);
   const currentUser = user?._id ?? user?._id;
   const firstUnreadRef = useRef<string | null>(null);
-  const firstRender = useRef<number | null>(null);
   const [isScroll, setInScroll] = useState(false);
-
-  // console.log({ unreadMessagesCount });
 
   const paramValue = chatId ?? chatId;
   const chatIdd = chatId ?? chatId;
@@ -63,19 +58,15 @@ export default function Messages({
   const { mutate, isPending: seenMessageAllLoading } = TanStackMutation({
     mutationFn: useConvexMutation(api.message.seenMessageAll),
   });
+  const { scrollPos, setScrollPos, toScroll, setToScroll } = useGlobalContext();
   const { data: messages, isPending } = useQuery(
     convexQuery(api.message.messages, { chatId: cc })
   );
 
   useEffect(() => {
-    console.log("useEffect scroll");
-    console.log({ goDown });
-
     const chatContainer = chatRef?.current;
     const handleScroll = () => {
       if (chatContainer) {
-        console.log("ture chatContainer");
-        // console.log("scrollll");
         const distanceFromBottom =
           chatContainer.scrollHeight -
           chatContainer.scrollTop -
@@ -83,6 +74,7 @@ export default function Messages({
         const distanceFromTop = chatContainer.scrollTop;
 
         setGoDown(distanceFromBottom > 50);
+        setScrollPos(distanceFromBottom);
       }
       setInScroll(true);
     };
@@ -91,17 +83,17 @@ export default function Messages({
         chatContainer.scrollHeight -
         chatContainer.scrollTop -
         chatContainer.clientHeight;
-      const distanceFromTop = chatContainer.scrollTop;
+      // const distanceFromTop = chatContainer.scrollTop;
 
       setGoDown(distanceFromBottom > 50);
     }
 
     chatContainer?.addEventListener("scroll", handleScroll);
-    window.addEventListener("scroll", handleScroll);
+    // window.addEventListener("scroll", handleScroll);
 
     return () => {
       chatContainer?.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("scroll", handleScroll);
+      // window.removeEventListener("scroll", handleScroll);
       // if (chatRef.current) {
       //   sessionStorage.setItem(
       //     `scrollPos-${chatId}`,
@@ -111,6 +103,17 @@ export default function Messages({
     };
     // }, [shouldLoadMore, loadMore, chatRef, setGoDown]);
   }, [setGoDown, chatId, chatRef.current]);
+
+  useEffect(() => {
+    if (toScroll && bottomRef.current) {
+      bottomRef.current.scrollIntoView({
+        behavior: "smooth",
+        // block: "center",
+      });
+
+      setToScroll(false);
+    }
+  }, [toScroll, setToScroll, bottomRef.current]);
 
   useLayoutEffect(() => {
     const storedScrollPosition = sessionStorage.getItem(`scrollPos-${chatId}`);
@@ -231,7 +234,9 @@ export default function Messages({
         {Object.entries(groupedMessages).map(([date, msgs]) => (
           <div key={date} className="mb-4 isolate">
             <div className="text-center text-sm text-gray-500 my-2 sticky top-0 rtlDir z-[200] w-full flex items-center justify-center">
-              <div className="px-2 py-1 bg-gray-100 rounded-full">{date}</div>
+              <div className="px-2 py-1 bg-gray-100 rounded-full mt-2 md:mt-0 ">
+                {date}
+              </div>
             </div>
             {msgs.map((message) => {
               const isFirstUnread = message._id === firstUnreadRef.current; // فقط یک بار
