@@ -295,7 +295,7 @@ export default function InputChat({
         room: chatId,
         data: presenceUpdate,
       });
-      if (scrollPos > 30 && scrollPos < 600) {
+      if (scrollPos > 30 && scrollPos * 0.25 < 600) {
         setToScroll(true);
       }
       createMessage(newMessage);

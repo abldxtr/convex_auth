@@ -283,18 +283,21 @@ export function Account({ user }: { user?: User }) {
             {/* <span>{user.lastMessage.substring(0, 30)}</span> */}
           </div>
         </div>
-        <div
-          className={cn(
-            "   transition-[opacity] duration-300 mr-4 ",
-            isCopied
-              ? "text-green-400 group-hover:text-green-400 "
-              : "text-gray-900/50 group-hover:text-gray-900"
-          )}
-        >
-          <AnimatePresence>
+        <AnimatePresence>
+          <div
+            className={cn(
+              "   transition-[opacity] duration-300 mr-4 ",
+              isCopied
+                ? "text-[#1d9bf0] group-hover:text-[#1d9bf0] "
+                : "text-gray-900/50 group-hover:text-gray-900"
+            )}
+          >
             {isCopied ? (
               <motion.div
-                // className="absolute -left-[24px] top-0.3"
+                className={cn(
+                  isCopied && "opacity-100 scale-100  ",
+                  "transition-all"
+                )}
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: isCopied ? 1 : 0, scale: isCopied ? 1 : 0 }}
                 exit={{ scale: 0, opacity: 0 }}
@@ -303,7 +306,10 @@ export function Account({ user }: { user?: User }) {
               </motion.div>
             ) : (
               <motion.div
-                // className="absolute -left-4 top-0.3"
+                className={cn(
+                  isCopied && "opacity-0 scale-0 pointer-events-none ",
+                  "transition-all"
+                )}
                 initial={{ opacity: 1, scale: 1 }}
                 animate={{ opacity: isCopied ? 0 : 1, scale: isCopied ? 0 : 1 }}
                 exit={{ scale: 0, opacity: 0 }}
@@ -311,8 +317,8 @@ export function Account({ user }: { user?: User }) {
                 <Copy />
               </motion.div>
             )}
-          </AnimatePresence>
-        </div>
+          </div>
+        </AnimatePresence>
       </div>
     </div>
   );
