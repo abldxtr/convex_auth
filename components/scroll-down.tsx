@@ -1,30 +1,16 @@
-import React, {
-  useState,
-  useEffect,
-  startTransition,
-  useRef,
-  useCallback,
-} from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
 import { formatPersianDate, cn } from "@/lib/utils";
-import { CircleProgress } from "./circle-progress";
-
 import { useInView, IntersectionOptions } from "react-intersection-observer";
-
 import { Loader2 } from "lucide-react";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
-import { useMutation as useReactQueryMutation } from "@tanstack/react-query";
 import { api } from "@/convex/_generated/api";
 import { UseMutateFunction } from "@tanstack/react-query";
-import { useGenerateUploadUrl } from "@/hooks/useGenerateUploadUrl";
-import { useUploadImage } from "@/hooks/useUploadImage";
 
 interface messageItem {
   _id: Id<"messages">;
   _creationTime: number;
-  // image?: Id<"_storage">[] | undefined;
   image?: string[] | undefined;
   chatId: string;
   content: string;
@@ -362,7 +348,7 @@ export function ScrollDown({
       >
         <div
           className={cn(
-            " absolute -top-5 right-3 flex items-center justify-center bg-blue-400 text-white font-semibold rounded-full size-8 ",
+            " absolute -top-5 right-3 flex items-center justify-center bg-green-300 text-white font-semibold rounded-full size-8 ",
             !!unreadMessagesCount === false && "hidden"
           )}
         >
@@ -375,7 +361,7 @@ export function ScrollDown({
         <svg
           viewBox="0 0 24 24"
           aria-hidden="true"
-          className=" fill-[rgb(29,155,240)] shrink-0 size-[24px] "
+          className=" fill-green-400 shrink-0 size-[24px] "
         >
           <g>
             <path d="M13 3v13.59l5.043-5.05 1.414 1.42L12 20.41l-7.457-7.45 1.414-1.42L11 16.59V3h2z"></path>
