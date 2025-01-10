@@ -1,7 +1,5 @@
 "use client";
 
-import { userList } from "@/components/message/m-list";
-// import { MessageData } from "@/lib/definitions";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 export type FileState = {
@@ -14,6 +12,11 @@ export type FileState = {
 export type convexFile = {
   file: FileList;
   key: string;
+};
+
+export type IconChange = {
+  type: "voice" | "text";
+  state: boolean;
 };
 
 interface CounterContextType {
@@ -62,6 +65,8 @@ interface CounterContextType {
   setScrollPos: React.Dispatch<React.SetStateAction<number>>;
   toScroll: boolean;
   setToScroll: React.Dispatch<React.SetStateAction<boolean>>;
+  changeIcon: IconChange
+  setChangeIcon: React.Dispatch<React.SetStateAction<IconChange>>
 }
 
 const GlobalContext = createContext<CounterContextType | undefined>(undefined);
@@ -82,6 +87,7 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
   const [conversationId, setConversationId] = useState<string>("");
   const [scrollPos, setScrollPos] = useState<number>(0);
   const [toScroll, setToScroll] = useState<boolean>(false);
+  const [changeIcon, setChangeIcon] = useState<IconChange>({state:false,type:"voice"});
 
   const [unreadCountMenue, setUnreadCountMenue] = useState<
     { id: string; count: number }[]
@@ -128,6 +134,8 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
         setScrollPos,
         toScroll,
         setToScroll,
+        changeIcon,
+        setChangeIcon,
       }}
     >
       {children}

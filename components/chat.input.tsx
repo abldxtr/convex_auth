@@ -74,6 +74,8 @@ export default function InputChat({
     setScrollPos,
     toScroll,
     setToScroll,
+    changeIcon,
+    setChangeIcon,
   } = useGlobalContext();
 
   console.log({ scrollPos });
@@ -273,6 +275,7 @@ export default function InputChat({
       createMessage(newMessage);
       setImgTemp([]);
       setIsShowImgTemp(false);
+      setChangeIcon({ type: "voice", state: false });
     } else if (messageContent) {
       // ایجاد پیام متنی
       const newMessage = {
@@ -299,9 +302,12 @@ export default function InputChat({
         setToScroll(true);
       }
       createMessage(newMessage);
+      console.log("ddddddddddddddddddddddddd");
+      setInputValue("");
+      setImgTemp([]);
+      setIsShowImgTemp(false);
+      setChangeIcon({ type: "voice", state: false });
     }
-
-    setInputValue("");
   };
 
   const handleEmoji = (emoji: any) => {
@@ -309,12 +315,8 @@ export default function InputChat({
   };
 
   return (
-    <DragContainer className=" bg-[#fcfdfd] border-t border-[#eff3f4] px-[12px]    py-1 isolate ">
-      {/* <div
-        className={classNames(
-          " bg-[#fcfdfd] border-t border-[#eff3f4] px-[12px]    py-1 isolate "
-        )}
-      > */}
+    // <DragContainer className=" bg-[#fcfdfd] border-t border-[#eff3f4] px-[12px]    py-1 isolate ">
+    <DragContainer className=" bg-transparent px-[12px]    py-1 isolate ">
       <div className="  flex flex-col w-full h-full bg-[#eff3f4] rounded-[16px] ">
         {isShowImgTemp && <TempImg />}
         <div className=" my-[4px] mx-[12px] p-[4px] flex items-center justify-between bg-[#eff3f4] rounded-[16px] gap-1    ">
@@ -338,13 +340,17 @@ export default function InputChat({
             onChange={(e) => {
               setInputValue(e.target.value);
               updatePresence({ text: e.target.value });
+              if (e.target.value.trim().length > 0) {
+                setChangeIcon({ type: "text", state: true });
+              } else {
+                setChangeIcon({ type: "voice", state: false });
+              }
             }}
             onSubmit={handleSubmit}
             ref={textRef}
           />
         </div>
       </div>
-      {/* </div> */}
     </DragContainer>
   );
 }

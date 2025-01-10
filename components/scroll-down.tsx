@@ -335,7 +335,7 @@ export function ScrollDown({
     <>
       <div
         className={cn(
-          " absolute bottom-6 right-8 flex items-center z-[10] justify-center size-[32px] rounded-full bg-white border-transparent  px-[16px] [box-shadow:rgb(101_119_134_/_20%)_0px_0px_8px,_rgb(101_119_134_/_25%)_0px_1px_3px_1px]   ",
+          " absolute bottom-6 right-8 flex items-center z-[10] justify-center size-[54px] rounded-full bg-white border-transparent  px-[16px] [box-shadow:rgb(101_119_134_/_20%)_0px_0px_8px,_rgb(101_119_134_/_25%)_0px_1px_3px_1px]   ",
           "cursor-pointer transiton-all duration-300  ",
           goDown ? "opacity-100" : "opacity-0 pointer-events-none "
         )}
@@ -352,7 +352,6 @@ export function ScrollDown({
             !!unreadMessagesCount === false && "hidden"
           )}
         >
-          {/* {unreadCount} */}
           {!!unreadMessagesCount &&
             unreadMessagesCount > 0 &&
             unreadMessagesCount}
@@ -361,7 +360,7 @@ export function ScrollDown({
         <svg
           viewBox="0 0 24 24"
           aria-hidden="true"
-          className=" fill-[#1d9bf0] shrink-0 size-[24px] "
+          className=" fill-[#707579] shrink-0 size-[24px] "
         >
           <g>
             <path d="M13 3v13.59l5.043-5.05 1.414 1.42L12 20.41l-7.457-7.45 1.414-1.42L11 16.59V3h2z"></path>
