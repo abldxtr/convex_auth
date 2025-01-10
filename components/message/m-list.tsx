@@ -73,7 +73,7 @@ export default function UserList({ user }: { user: userList }) {
           </g>
           <defs>
             <clipPath id="clip0">
-              <rect width="12" height="7" fill="#04CC83"></rect>
+              <rect width="12" height="7" fill="#1d9bf0"></rect>
             </clipPath>
           </defs>
         </svg>
@@ -89,7 +89,7 @@ export default function UserList({ user }: { user: userList }) {
         >
           <path
             d="M8.71917 1.09935C8.91838 0.897802 8.91834 0.573492 8.71908 0.371997C8.51658 0.167235 8.18585 0.167266 7.9834 0.372067L5.43861 2.94637C5.23928 3.14801 5.23936 3.47253 5.4388 3.67407C5.64138 3.87878 5.97212 3.87868 6.17458 3.67384L8.71917 1.09935ZM11.6381 0.371138C11.4351 0.166704 11.1043 0.16702 10.9017 0.371841L5.84858 5.48024C5.8253 5.50377 5.7873 5.50379 5.76399 5.48028L4.01681 3.71737C3.81414 3.51288 3.48358 3.513 3.28106 3.71765C3.08148 3.91933 3.08141 4.24408 3.28091 4.44585L5.31604 6.50414C5.58564 6.7768 6.026 6.77681 6.29561 6.50417L11.6388 1.10086C11.8388 0.89861 11.8385 0.572974 11.6381 0.371138ZM0.363426 3.71718C0.162252 3.91923 0.161685 4.24572 0.362155 4.44847L2.51702 6.62785C2.71959 6.83272 3.05044 6.83279 3.2531 6.62801C3.45252 6.42649 3.45275 6.10204 3.2536 5.90025L1.10082 3.71881C0.898174 3.51347 0.566978 3.51274 0.363426 3.71718Z"
-            fill="#04CC83"
+            fill="#1d9bf0"
           ></path>
         </svg>
       );
@@ -117,12 +117,12 @@ export default function UserList({ user }: { user: userList }) {
             : "hover:bg-[#f4f5f7]",
           // user.active ? "bg-[rgba(0,184,147,0.15)]" : "hover:bg-[#f4f5f7]"
           // chatIdActive?.active ? "bg-[#f7f9f9] border-r-2 border-blue-300 " : ""
-          chatIdActive === user.id && "border-r-2 border-green-300"
+          chatIdActive === user.id && "border-r-2 border-[#1d9bf0]"
         )}
       >
         <div
           className={cn(
-            " absolute bottom-2 flex items-center justify-center right-4 size-6 rounded-full bg-green-400 text-white font-semibold  ",
+            " absolute bottom-2 flex items-center justify-center right-4 size-6 rounded-full bg-[#1d9bf0] text-white font-semibold  ",
             user.unReadMess === 0 && "hidden "
           )}
         >

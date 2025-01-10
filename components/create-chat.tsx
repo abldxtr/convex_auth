@@ -72,7 +72,7 @@ export function CreateChat({ id }: { id: User }) {
             disabled={pending}
           />
           <div className="flex w-full items-center justify-center ">
-            <Button className="w-full bg-green-500 hover:bg-green-400">
+            <Button className="w-full bg-[#1d9bf0] hover:bg-[#1d9cf0b9]">
               {pending ? <BeatLoader size={5} color="#ffffff" /> : "create"}
             </Button>
           </div>
@@ -86,7 +86,7 @@ export function CreateChatIcon() {
   const { openChatCreate, setOpenChatCreate } = useGlobalContext();
   return (
     <div
-      className=" absolute bottom-4 z-[100] right-4 size-[56px] rounded-full bg-green-500 hover:bg-green-400 transition-colors   flex items-center justify-center cursor-pointer "
+      className=" absolute bottom-4 z-[100] right-4 size-[56px] rounded-full bg-[#1d9bf0] hover:bg-[#1d9cf0b9] transition-colors   flex items-center justify-center cursor-pointer "
       onClick={() => {
         setOpenChatCreate(true);
       }}
