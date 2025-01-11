@@ -16,54 +16,33 @@ export const createMessage = mutation({
     recieverId: v.id("users"),
     opupId: v.string(),
     img: v.optional(v.bytes()),
-    // messageId: v.id("messages"),
+    audio: v.optional(v.bytes()),
+    type: v.union(
+      v.literal("TEXT"),
+      v.literal("IMAGE"),
+      v.literal("VIDEO"),
+      v.literal("AUDIO"),
+      v.literal("FILE")
+    ),
   },
   handler: async (ctx, args) => {
-    // const aa = args.images?.map(async (item) => {
-    //   return await ctx.storage.getUrl(item);
-    // });
-    // const ddd = ctx.runMutation
-    // Promise.all(aa!);
-    // const img = args.images as File;
-    // const url = await ctx.storage.generateUploadUrl();
+    if (!!args.audio) {
+      let messageId = await ctx.db.insert("messages", {
+        content: args.content,
+        // image: args.images!,
+        // image: imageUrls,
+        type: args.type,
+        chatId: args.chatId,
+        senderId: args.senderId,
+        receiverId: args.recieverId,
+        status: "SENT",
+        opupId: args.opupId,
+        img: args.img,
+        audioUrl: args.audio,
+      });
+    }
 
-    // const urlPromises = args.images?.map(async (storageId: Id<"_storage">) => {
-    //   const url = await ctx.storage.getUrl(storageId);
-    //   if (!url) {
-    //     throw new Error(`Failed to get URL for storage ID: ${storageId}`);
-    //   }
-    //   return url;
-    // });
-    // if (urlPromises !== undefined) {
-    //   const imageUrls = await Promise.all(urlPromises);
-
-    //   let messageId = await ctx.db.insert("messages", {
-    //     content: args.content,
-    //     // image: args.images!,
-    //     image: imageUrls,
-    //     type: "IMAGE",
-    //     chatId: args.chatId,
-    //     senderId: args.senderId,
-    //     receiverId: args.recieverId,
-    //     status: "SENT",
-    //     opupId: args.opupId,
-    //   });
-    // } else {
-    let messageId = await ctx.db.insert("messages", {
-      content: args.content,
-      // image: args.images!,
-      // image: imageUrls,
-      type: "TEXT",
-      chatId: args.chatId,
-      senderId: args.senderId,
-      receiverId: args.recieverId,
-      status: "SENT",
-      opupId: args.opupId,
-      img: args.img,
-    });
-    // }
-
-    // return messageId;
+    return null;
   },
 });
 
@@ -177,5 +156,25 @@ export const MessageWithImg = action({
     const { storageId } = await result.json();
 
     console.log({ storageId });
+  },
+});
+
+export const getMessageById = query({
+  args: {
+    Id: v.id("messages"),
+    // paginationOpts: paginationOptsValidator,
+  },
+  handler: async (ctx, args) => {
+    let res = await ctx.db.get(args.Id);
+    // .paginate(args.paginationOpts);
+
+    if (!res) return null;
+    if (res.audioUrl === undefined) return null;
+
+    return {
+      ...res,
+      // Convert Uint8Array to regular array for serialization
+      audioData: Array.from(new Uint8Array(res.audioUrl)),
+    };
   },
 });

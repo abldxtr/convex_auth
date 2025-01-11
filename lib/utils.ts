@@ -89,3 +89,64 @@ export const formatPersianDate = (date: Date) => {
       ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"][parseInt(digit)]
   );
 };
+
+export function formatTime(seconds: number): string {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+  return `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
+}
+// Convert array of numbers back to ArrayBuffer
+export function arrayToArrayBuffer(array: number[]): ArrayBuffer {
+  return new Uint8Array(array).buffer;
+}
+
+// Convert ArrayBuffer to Blob
+export function arrayBufferToBlob(
+  buffer: ArrayBuffer,
+  mimeType: string = "audio/wav"
+): Blob {
+  return new Blob([buffer], { type: mimeType });
+}
+
+// Convert ArrayBuffer to Audio URL
+export function arrayBufferToAudioUrl(
+  buffer: ArrayBuffer,
+  mimeType: string = "audio/wav"
+): string {
+  const blob = arrayBufferToBlob(buffer, mimeType);
+  return URL.createObjectURL(blob);
+}
+
+// Convert Base64 to ArrayBuffer
+export function base64ToArrayBuffer(base64: string): ArrayBuffer {
+  const binaryString = atob(base64);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes.buffer;
+}
+
+// Convert Base64 to Audio URL
+export function base64ToAudioUrl(base64: string): string {
+  const arrayBuffer = base64ToArrayBuffer(base64);
+  const blob = arrayBufferToBlob(arrayBuffer);
+  return URL.createObjectURL(blob);
+}
+
+export function combineChunks(chunks: number[][]): ArrayBuffer {
+  // Calculate total length
+  const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
+
+  // Create a new array to hold all data
+  const combined = new Uint8Array(totalLength);
+
+  // Copy each chunk into the combined array
+  let offset = 0;
+  for (const chunk of chunks) {
+    combined.set(new Uint8Array(chunk), offset);
+    offset += chunk.length;
+  }
+
+  return combined.buffer;
+}

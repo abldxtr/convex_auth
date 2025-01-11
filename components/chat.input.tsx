@@ -17,6 +17,7 @@ import usePresence from "@/hooks/usePresence";
 import useTypingIndicator from "@/hooks/useTypingIndicator";
 import useSingleFlight from "@/hooks/useSingleFlight";
 import { User } from "./message.list";
+import { useVoiceRecorder } from "@/context/audio-context";
 
 interface imageOptions {
   contentType?: string;
@@ -68,37 +69,29 @@ export default function InputChat({
     setImgTemp,
     isShowImgTemp,
     setIsShowImgTemp,
-    convexFile,
-    setConvexFile,
     scrollPos,
     setScrollPos,
-    toScroll,
     setToScroll,
-    changeIcon,
     setChangeIcon,
   } = useGlobalContext();
+  const { handleDelete, isRecording, audioArrayBuffer, stopRecording } =
+    useVoiceRecorder();
 
-  console.log({ scrollPos });
+  // console.log({ scrollPos });
 
   const currentUser = user?._id ?? user?._id;
   const updatePresenceForStop = useSingleFlight(
     useMutation(api.presence.update)
   );
-  // console.log({ imgTemp });
   if (imgTemp.length > 0) {
     blobToBase64(imgTemp[0].file).then((res) => {
-      // do what you wanna do
-      // console.log({ res }); // res is base64 now
       const ddd = base64ToArrayBuffer(res as string);
-      // console.log(typeof ddd);
     });
   }
 
   const [data, others, updatePresence] = usePresence(param, currentUser!, {
     text: "",
-    // // emoji: Emojis[userId % Emojis.length],
-    // x: 0,
-    // y: 0,
+
     typing: false as boolean,
   });
 
@@ -232,29 +225,58 @@ export default function InputChat({
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
+    stopRecording();
     if (!currentUser || !other || !chatId) return;
 
     const messageContent = inputValue.trim();
     const messageId = crypto.randomUUID();
+    // const AudioArrayBufferr = await blobToBase64(imgTemp[0].file).then(
+    //   (res) => {
+    //     const ddd = base64ToArrayBuffer(res as string);
+    //     const arrayBuffer = new Response(ddd).arrayBuffer();
+    //     return arrayBuffer;
+    //   }
+    // );
+
+    // if (isRecording) {
+
+    setTimeout(() => {
+      if (!audioArrayBuffer) {
+        return;
+      }
+      const newMessage = {
+        content: messageContent,
+        senderId: currentUser,
+        recieverId: other,
+        chatId: chatId as Id<"chats">,
+        opupId: messageId,
+        images: imgTemp
+          .filter((img) => img.storageId)
+          .map((img) => img.storageId as Id<"_storage">),
+        type: "AUDIO" as const,
+        audio: audioArrayBuffer!,
+      };
+      console.log({ newMessage });
+
+      createMessage(newMessage);
+      if (scrollPos > 30 && scrollPos < 600) {
+        setToScroll(true);
+      }
+      setImgTemp([]);
+      setIsShowImgTemp(false);
+      setChangeIcon({ type: "voice", state: false });
+    }, 5000);
+
+    // }
 
     if (imgTemp.length > 0) {
-      // بررسی اینکه آیا همه عکس‌ها آپلود شده‌اند
-      // const allUploaded = imgTemp.every(
-      //   (img) => img.progress === "COMPLETE" && img.storageId
-      // );
-
-      // if (!allUploaded) {
-      //   toast.error("لطفاً منتظر اتمام آپلود عکس‌ها بمانید");
-      //   return;
-      // }
-      const dddd = await blobToBase64(imgTemp[0].file).then((res) => {
-        // do what you wanna do
-        console.log({ res }); // res is base64 now
-        const ddd = base64ToArrayBuffer(res as string);
-        const arrayBuffer = new Response(ddd).arrayBuffer();
-        return arrayBuffer;
-      });
+      const ImageArrayBuffer = await blobToBase64(imgTemp[0].file).then(
+        (res) => {
+          const ddd = base64ToArrayBuffer(res as string);
+          const arrayBuffer = new Response(ddd).arrayBuffer();
+          return arrayBuffer;
+        }
+      );
 
       // ایجاد پیام با عکس‌ها
       const newMessage = {
@@ -266,25 +288,25 @@ export default function InputChat({
         images: imgTemp
           .filter((img) => img.storageId)
           .map((img) => img.storageId as Id<"_storage">),
-        img: dddd,
+        img: ImageArrayBuffer,
+        type: "IMAGE" as const,
       };
+
+      createMessage(newMessage);
       if (scrollPos > 30 && scrollPos < 600) {
         setToScroll(true);
       }
-
-      createMessage(newMessage);
       setImgTemp([]);
       setIsShowImgTemp(false);
       setChangeIcon({ type: "voice", state: false });
     } else if (messageContent) {
-      // ایجاد پیام متنی
       const newMessage = {
         content: messageContent,
         senderId: currentUser,
         recieverId: other,
         chatId: chatId as Id<"chats">,
         opupId: messageId,
-        // images: [""],
+        type: "TEXT" as const,
       };
 
       const presenceUpdate = {
@@ -302,7 +324,6 @@ export default function InputChat({
         setToScroll(true);
       }
       createMessage(newMessage);
-      console.log("ddddddddddddddddddddddddd");
       setInputValue("");
       setImgTemp([]);
       setIsShowImgTemp(false);

@@ -7,6 +7,7 @@ import { ConvexClientProvider } from "./ConvexClientProvider";
 import { GlobalProvider } from "@/context/globalContext";
 import { EmojiProvider } from "@/context/EmojiContext";
 import { ConvexQueryCacheProvider } from "convex-helpers/react/cache/provider";
+import { VoiceRecorderProvider } from "@/context/audio-context";
 import { Toaster } from "@/components/ui/sonner";
 // import { Monitoring } from "react-scan/monitoring/next"; // Import this first before React
 // import { ReactScan } from "@/components/react-scan";
@@ -30,19 +31,16 @@ export default function RootLayout({
           <ConvexClientProvider>
             <GlobalProvider>
               <EmojiProvider>
-                <ConvexQueryCacheProvider>
-                  <div className="w-full max-w-[2400px] isolate mx-auto flex h-dvh  overflow-hidden">
-                    <div className=" overflow-auto  h-full scrl flex w-full  ">
-                      {children}
+                <VoiceRecorderProvider>
+                  <ConvexQueryCacheProvider>
+                    <div className="w-full max-w-[2400px] isolate mx-auto flex h-dvh  overflow-hidden">
+                      <div className=" overflow-auto  h-full scrl flex w-full  ">
+                        {children}
+                      </div>
+                      <Toaster />
                     </div>
-                    <Toaster />
-                    {/* <Monitoring
-                      apiKey="qwwfA_jdPmQd7HK3zKwRwegHybbcbyfa" // Safe to expose publically
-                      url="https://monitoring.react-scan.com/api/v1/ingest"
-                    /> */}
-                    {/* <ReactScan /> */}
-                  </div>
-                </ConvexQueryCacheProvider>
+                  </ConvexQueryCacheProvider>
+                </VoiceRecorderProvider>
               </EmojiProvider>
             </GlobalProvider>
           </ConvexClientProvider>

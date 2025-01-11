@@ -1,12 +1,14 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
-import { formatPersianDate, cn } from "@/lib/utils";
+import { formatPersianDate, cn, formatTime } from "@/lib/utils";
 import { useInView, IntersectionOptions } from "react-intersection-observer";
-import { Loader2 } from "lucide-react";
+import { Loader2, Pause, Play } from "lucide-react";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { UseMutateFunction } from "@tanstack/react-query";
+import { useVoiceRecorder } from "@/context/audio-context";
+import { useWavesurfer } from "@wavesurfer/react";
 
 interface messageItem {
   _id: Id<"messages">;
@@ -20,6 +22,7 @@ interface messageItem {
   receiverId: string;
   opupId: string;
   img?: ArrayBuffer | undefined;
+  audio?: ArrayBuffer | undefined;
 }
 
 export const ChatMessage = ({
@@ -37,20 +40,8 @@ export const ChatMessage = ({
     ? btoa(String.fromCharCode(...new Uint8Array(message.img)))
     : null;
 
-  // console.log({ message });
-
   return (
     <MessageWrapper message={message}>
-      {/* {message.type === "IMAGE" &&
-        message.image &&
-        message.image.length > 0 && (
-          <ImageContent
-            images={message.image}
-            setImageLoaded={setImageLoaded}
-            uploading={message.status === "DELIVERED" ? true : false}
-            iii=[ii]
-          />
-        )} */}
       {ii !== null && (
         <img
           src={`data:image/jpeg;base64,${ii}`}
@@ -63,8 +54,11 @@ export const ChatMessage = ({
           )}
         />
       )}
+      {message.type === "AUDIO" && <AudioMessage message={message} />}
       {message.content && (
-        <span className={cn("break-all  ", ii !== null && "pt-1")}>
+        <span className={cn(" ", ii !== null && "pt-1")}>
+          {/* <span className={cn("break-all  ", ii !== null && "pt-1")}> */}
+
           {message.content}
         </span>
       )}
@@ -73,6 +67,99 @@ export const ChatMessage = ({
   );
 };
 
+const AudioMessage = ({ message }: { message: messageItem }) => {
+  const audioRef = useRef<HTMLDivElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  // const [audioURL, setAudioURL] = useState<string | null>(null);
+  const [audioDuration, setAudioDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  let audioURL;
+
+  const { wavesurfer, isPlaying: isWaveSurferPlaying } = useWavesurfer({
+    container: audioRef,
+    height: 100,
+    waveColor: "#3b82f680",
+    progressColor: "#3390ec",
+    cursorColor: "#fff",
+    barWidth: 2,
+    barGap: 1,
+    normalize: true,
+    dragToSeek: true,
+    url: audioURL || "",
+  });
+
+  useEffect(() => {
+    if (wavesurfer) {
+      console.log({ wavesurfer });
+      wavesurfer.on("timeupdate", (currentTime: number) => {
+        console.log({ currentTime });
+        setCurrentTime(currentTime);
+      });
+
+      wavesurfer.on("ready", () => {
+        setAudioDuration(wavesurfer.getDuration());
+      });
+    }
+  }, [wavesurfer]);
+
+  console.log(message.audio!.byteLength);
+
+  const audioBlob = new Blob([message.audio!], { type: "audio/wav" });
+  const url = URL.createObjectURL(audioBlob);
+  console.log({ url });
+
+  function playAudioBlob(blob: Blob) {
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    audio.play();
+  }
+
+  playAudioBlob(audioBlob);
+
+  // const setUrl = () => {
+  //   setAudioURL(url);
+  // };
+
+  // const setUrl = useCallback(() => {
+  //   setAudioURL(url);
+  // }, [url]);
+  // // setAudioURL(url);
+  audioURL = url;
+  // setUrl();
+
+  // const ii = message.audio
+  //   ? btoa(String.fromCharCode(...new Uint8Array(message.audio)))
+  //   : null;
+
+  const handlePlayPause = async () => {
+    if (wavesurfer) {
+      wavesurfer.playPause();
+      setIsPlaying(!isPlaying);
+    }
+  };
+  return (
+    <div className="flex items-center w-full min-w-[350px] gap-x-2  ">
+      <div
+        className="bg-blue-400 size-[65.5px] rounded-full flex items-center justify-center shrink-0 "
+        onClick={handlePlayPause}
+      >
+        {isPlaying || isWaveSurferPlaying ? (
+          <Pause className="size-8 fill-white " color="white" />
+        ) : (
+          <Play className="size-8 fill-white " color="white" />
+        )}
+      </div>
+
+      <div className="rounded-lg  p-4 bg-background w-full h-full ">
+        <div id="waveform" ref={audioRef} className="w-full h-[24px]" />
+        <div className="flex justify-between mt-2 text-xs text-muted-foreground">
+          <span>{formatTime(currentTime)}</span>
+          <span>{formatTime(audioDuration)}</span>
+        </div>
+      </div>
+    </div>
+  );
+};
 const ImageContent: React.FC<{
   images: string[];
   setImageLoaded: (loaded: boolean) => void;
@@ -107,18 +194,6 @@ const ImageItem: React.FC<{
   uploading: boolean;
 }> = ({ image, setImageLoaded, uploading }) => {
   const [loading, setLoading] = useState(true);
-
-  // const url = useGenerateUploadUrl();
-  // const { mutate, mutateAsync } = useUploadImage();
-  // const uploadImage = useUploadImage();
-
-  // const upload = async () => {
-  //   try {
-  //     const storageId = await uploadImage.mutateAsync(image);
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
 
   return (
     <div className="relative flex items-center justify-center">
@@ -335,7 +410,7 @@ export function ScrollDown({
     <>
       <div
         className={cn(
-          " absolute bottom-6 right-8 flex items-center z-[10] justify-center size-[54px] rounded-full bg-white border-transparent  px-[16px] [box-shadow:rgb(101_119_134_/_20%)_0px_0px_8px,_rgb(101_119_134_/_25%)_0px_1px_3px_1px]   ",
+          " absolute bottom-6 right-8 flex items-center z-[10] justify-center md:size-[54px] size-[32px] rounded-full bg-white border-transparent  px-[16px] [box-shadow:rgb(101_119_134_/_20%)_0px_0px_8px,_rgb(101_119_134_/_25%)_0px_1px_3px_1px]   ",
           "cursor-pointer transiton-all duration-300  ",
           goDown ? "opacity-100" : "opacity-0 pointer-events-none "
         )}
@@ -348,7 +423,7 @@ export function ScrollDown({
       >
         <div
           className={cn(
-            " absolute -top-5 right-3 flex items-center justify-center bg-[#1d9bf0] text-white font-semibold rounded-full size-8 ",
+            " absolute -top-5 md:right-3 right-0 flex items-center justify-center bg-[#1d9bf0] text-white font-semibold rounded-full size-8 ",
             !!unreadMessagesCount === false && "hidden"
           )}
         >
@@ -360,7 +435,7 @@ export function ScrollDown({
         <svg
           viewBox="0 0 24 24"
           aria-hidden="true"
-          className=" fill-[#707579] shrink-0 size-[24px] "
+          className=" fill-[#707579] shrink-0 md:size-[24px] size-[18px] "
         >
           <g>
             <path d="M13 3v13.59l5.043-5.05 1.414 1.42L12 20.41l-7.457-7.45 1.414-1.42L11 16.59V3h2z"></path>
@@ -372,3 +447,16 @@ export function ScrollDown({
 }
 
 export default ChatMessage;
+
+{
+  /* {message.type === "IMAGE" &&
+        message.image &&
+        message.image.length > 0 && (
+          <ImageContent
+            images={message.image}
+            setImageLoaded={setImageLoaded}
+            uploading={message.status === "DELIVERED" ? true : false}
+            iii=[ii]
+          />
+        )} */
+}

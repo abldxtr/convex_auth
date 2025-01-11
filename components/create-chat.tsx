@@ -67,7 +67,7 @@ export function CreateChat({ id }: { id: User }) {
             autoFocus
             placeholder="userId"
             required
-            maxLength={20}
+            maxLength={100}
             className=" focus:outline-none outline-none focus:ring-0 focus    "
             disabled={pending}
           />
