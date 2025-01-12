@@ -99,7 +99,7 @@ export default function UserList({ user }: { user: userList }) {
 
   return (
     <Link
-      className="min-h-[40px] w-full  "
+      className=" w-full  "
       href={`/${user.href}`}
       prefetch={true}
       onClick={() => {
@@ -158,7 +158,7 @@ export default function UserList({ user }: { user: userList }) {
               </div>
             </div>
           </div>
-          <div className="text-sm font-normal leading-[20px] text-[#7a869a] flex items-center justify-between">
+          <div className="text-sm font-normal leading-[20px] text-[#7a869a] flex items-center justify-between  ">
             <p>
               {presentOthers && presentOthers.data.typing ? (
                 <span className=" animate-pulse ">typing...</span>

@@ -102,7 +102,7 @@ const AudioMessage = ({ message }: { message: messageItem }) => {
     }
   }, [wavesurfer]);
 
-  console.log(message.audio!.byteLength);
+  // console.log(message.audio!.byteLength);
 
   const audioBlob = new Blob([message.audio!], { type: "audio/wav" });
   const url = URL.createObjectURL(audioBlob);

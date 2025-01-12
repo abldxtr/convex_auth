@@ -39,7 +39,7 @@ export default async function Main({ param }: { param: string }) {
       >
         <section
           className="w-full flex min-w-0 isolate h-dvh realtive
-        overflow-hidden max-w-[920px]  border-r-[1px] border-[#eff3f4] border-l-[1px] lg:border-l-0 
+        overflow-hidden  border-r-[1px] border-[#eff3f4] border-l-[1px] lg:border-l-0 
         bg-[rgb(223,_225,_230)] 
         
   

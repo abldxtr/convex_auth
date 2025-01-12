@@ -1,9 +1,15 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useGlobalContext } from "@/context/globalContext";
-import { CirclePlus } from "lucide-react";
+import {
+  CirclePlus,
+  ClipboardCheck,
+  ClipboardPen,
+  PaintbrushVerticalIcon,
+  X,
+} from "lucide-react";
 import { useOnClickOutside } from "usehooks-ts";
 import { BeatLoader } from "react-spinners";
 import { useMutation } from "convex/react";
@@ -31,6 +37,17 @@ export function CreateChat({ id }: { id: User }) {
   const [userId, setUserId] = useState("");
   const ref = useRef<HTMLDivElement | null>(null);
   const createChat = useMutation(api.chat.createChat);
+  const [copiedText, setCopiedText] = useState("");
+
+  const handlePaste = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      setCopiedText(text);
+      setUserId(text);
+    } catch (err) {
+      console.error("Failed to read clipboard contents: ", err);
+    }
+  };
 
   const handleClickOutside = () => {
     setOpenChatCreate(false);
@@ -61,16 +78,33 @@ export function CreateChat({ id }: { id: User }) {
           <DialogTitle>Create chat channel</DialogTitle>
         </DialogHeader>
         <form className="space-y-4" onSubmit={handleSubmit}>
-          <Input
-            value={userId}
-            onChange={(e) => setUserId(e.target.value)}
-            autoFocus
-            placeholder="userId"
-            required
-            maxLength={100}
-            className=" focus:outline-none outline-none focus:ring-0 focus    "
-            disabled={pending}
-          />
+          <div className=" relative ">
+            <Input
+              value={userId}
+              onChange={(e) => setUserId(e.target.value)}
+              autoFocus
+              placeholder="userId"
+              required
+              maxLength={100}
+              className=" focus:outline-none outline-none !focus:ring-0 !focus-within:outline-none !focus-within:ring-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0   "
+              disabled={pending}
+            />
+            {!userId ? (
+              <div
+                className=" absolute right-2 inset-y-0 flex items-center justify-center hover:bg-gray-200 transition-colors rounded-md px-1 cursor-pointer my-1  "
+                onClick={handlePaste}
+              >
+                <ClipboardCheck className=" size-[20px] shrink-0 opacity-70  " />
+              </div>
+            ) : (
+              <div
+                className=" absolute right-2 inset-y-0 flex items-center justify-center hover:bg-gray-200 transition-colors rounded-md px-1 cursor-pointer my-1  "
+                onClick={() => setUserId("")}
+              >
+                <X className=" size-[20px] shrink-0 opacity-70 " />
+              </div>
+            )}
+          </div>
           <div className="flex w-full items-center justify-center ">
             <Button className="w-full bg-[#1d9bf0] hover:bg-[#1d9cf0b9]">
               {pending ? <BeatLoader size={5} color="#ffffff" /> : "create"}
@@ -94,31 +128,4 @@ export function CreateChatIcon() {
       <CirclePlus className="  " color="white" />
     </div>
   );
-}
-
-{
-  /* <div className=" fixed inset-0 flex items-center justify-center z-[100] ">
-  <div
-    className=" w-[380px] max-w-[380px] rounded-sm border border-gray-100/80 bg-gray-300 p-8   "
-    ref={ref}
-  >
-    <input
-      type="text"
-      value={userId}
-      onChange={(e) => setUserId(e.target.value)}
-      className=" w-full p-2 mb-2 "
-      placeholder="userId"
-    />
-    <button
-      type="submit"
-      onClick={handleSubmit}
-      className={cn(
-        "w-full py-4 px-6 bg-green-500 hover:bg-green-400 text-white text-xl font-semibold "
-      )}
-      disabled={pending}
-    >
-      {pending ? <BeatLoader size={5} color="#ffffff" /> : "create"}
-    </button>
-  </div>
-</div> */
 }

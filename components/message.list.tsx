@@ -117,14 +117,11 @@ export default function Message_list({
           <div className="flex  w-full flex-col isolate ">
             <div className=" w-full sticky top-0 z-10 bg-[#fcfdfd] ">
               <MessageHeader />
-              {/* <Suspense fallback={null}> */}
               <Account user={user} />
-              {/* </Suspense> */}
             </div>
 
             <div
               className=" w-full h-full overflow-y-auto relative bg-[#fcfdfd] 
-            
             "
             >
               {!chatlist
@@ -132,16 +129,13 @@ export default function Message_list({
                     return <UserListLoading key={index} />;
                   })
                 : chatlist?.map((item) => {
-                    // console.log(item.name);
                     const otherUser =
                       chat?.initiatorId === user?._id
                         ? chat?.participantId
                         : chat?.initiatorId;
 
-                    // const lastMessage =
-                    //   item.lastMessage?.content ??
-                    //   "هنوز گفت و گویی رو آغاز نکرده اید.";
                     const lastMessage = item.lastMessage;
+                    // const type = item.
 
                     const date = item.lastMessage?._creationTime;
 
