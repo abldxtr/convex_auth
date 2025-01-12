@@ -225,7 +225,7 @@ export default function InputChat({
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    stopRecording();
+    // stopRecording();
     if (!currentUser || !other || !chatId) return;
 
     const messageContent = inputValue.trim();
@@ -240,32 +240,32 @@ export default function InputChat({
 
     // if (isRecording) {
 
-    setTimeout(() => {
-      if (!audioArrayBuffer) {
-        return;
-      }
-      const newMessage = {
-        content: messageContent,
-        senderId: currentUser,
-        recieverId: other,
-        chatId: chatId as Id<"chats">,
-        opupId: messageId,
-        images: imgTemp
-          .filter((img) => img.storageId)
-          .map((img) => img.storageId as Id<"_storage">),
-        type: "AUDIO" as const,
-        audio: audioArrayBuffer!,
-      };
-      console.log({ newMessage });
+    // setTimeout(() => {
+    //   if (!audioArrayBuffer) {
+    //     return;
+    //   }
+    //   const newMessage = {
+    //     content: messageContent,
+    //     senderId: currentUser,
+    //     recieverId: other,
+    //     chatId: chatId as Id<"chats">,
+    //     opupId: messageId,
+    //     images: imgTemp
+    //       .filter((img) => img.storageId)
+    //       .map((img) => img.storageId as Id<"_storage">),
+    //     type: "AUDIO" as const,
+    //     audio: audioArrayBuffer!,
+    //   };
+    //   console.log({ newMessage });
 
-      createMessage(newMessage);
-      if (scrollPos > 30 && scrollPos < 600) {
-        setToScroll(true);
-      }
-      setImgTemp([]);
-      setIsShowImgTemp(false);
-      setChangeIcon({ type: "voice", state: false });
-    }, 5000);
+    //   createMessage(newMessage);
+    //   if (scrollPos > 30 && scrollPos < 600) {
+    //     setToScroll(true);
+    //   }
+    //   setImgTemp([]);
+    //   setIsShowImgTemp(false);
+    //   setChangeIcon({ type: "voice", state: false });
+    // }, 5000);
 
     // }
 
@@ -293,7 +293,7 @@ export default function InputChat({
       };
 
       createMessage(newMessage);
-      if (scrollPos > 30 && scrollPos < 600) {
+      if (scrollPos < 600) {
         setToScroll(true);
       }
       setImgTemp([]);
@@ -320,7 +320,7 @@ export default function InputChat({
         room: chatId,
         data: presenceUpdate,
       });
-      if (scrollPos > 30 && scrollPos * 0.25 < 600) {
+      if (scrollPos < 600) {
         setToScroll(true);
       }
       createMessage(newMessage);
@@ -361,11 +361,11 @@ export default function InputChat({
             onChange={(e) => {
               setInputValue(e.target.value);
               updatePresence({ text: e.target.value });
-              if (e.target.value.trim().length > 0) {
-                setChangeIcon({ type: "text", state: true });
-              } else {
-                setChangeIcon({ type: "voice", state: false });
-              }
+              // if (e.target.value.trim().length > 0) {
+              //   setChangeIcon({ type: "text", state: true });
+              // } else {
+              //   setChangeIcon({ type: "voice", state: false });
+              // }
             }}
             onSubmit={handleSubmit}
             ref={textRef}

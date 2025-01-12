@@ -42,7 +42,21 @@ export const createMessage = mutation({
       });
     }
 
-    return null;
+    let messageId = await ctx.db.insert("messages", {
+      content: args.content,
+      // image: args.images!,
+      // image: imageUrls,
+      type: args.type,
+      chatId: args.chatId,
+      senderId: args.senderId,
+      receiverId: args.recieverId,
+      status: "SENT",
+      opupId: args.opupId,
+      img: args.img,
+      audioUrl: args.audio,
+    });
+
+    return messageId;
   },
 });
 
