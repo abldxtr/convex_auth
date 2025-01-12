@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 export function CreateChat({ id }: { id: User }) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -74,18 +75,27 @@ export function CreateChat({ id }: { id: User }) {
       await createChat({
         first: id?._id!,
         second: userId as Id<"users">,
-      }).catch(() => console.log("error to create Chat!!!"));
+      }).catch(() => {
+        toast.error("error to create Chat!");
+        console.log("error to create Chat!!!");
+      });
 
       setOpenChatCreate(false);
     });
   }
+  const handleOpenChange = (open: boolean) => {
+    if (!open && userId) {
+      setUserId("");
+    }
+    setOpenChatCreate(open);
+  };
   if (!openChatCreate) {
     return null;
   }
 
   if (isDesktop) {
     return (
-      <Dialog open={openChatCreate} onOpenChange={setOpenChatCreate}>
+      <Dialog open={openChatCreate} onOpenChange={handleOpenChange}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Create chat channel</DialogTitle>
@@ -129,7 +139,7 @@ export function CreateChat({ id }: { id: User }) {
     );
   } else {
     return (
-      <Drawer open={openChatCreate} onOpenChange={setOpenChatCreate}>
+      <Drawer open={openChatCreate} onOpenChange={handleOpenChange}>
         <DrawerTrigger asChild>
           <Button variant="outline">Edit Profile</Button>
         </DrawerTrigger>

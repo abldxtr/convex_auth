@@ -286,7 +286,7 @@ const MessRight: React.FC<{
   message: messageItem;
   children: React.ReactNode;
 }> = ({ message, children }) => (
-  <div className="pb-1 md:p-2 p-1 w-full group flex items-end gap-2 justify-end z-[9]">
+  <div className="pb-1 md:p-2 p-1 !pr-0 w-full group flex items-end gap-2 justify-end z-[9]">
     <div className="flex flex-col items-end max-w-[75%]">
       <div className="bg-[#dcfaf5] rounded-tl-2xl rounded-tr-sm rounded-bl-2xl p-3 text-[#091e42]">
         {children}
