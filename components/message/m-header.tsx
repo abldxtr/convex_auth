@@ -36,7 +36,7 @@ export default function MessageHeader() {
               className="flex size-[36px] cursor-pointer items-center hover:fill-red-500 justify-center rounded-full
                transition-all duration-300 hover:bg-[#0f14191a]"
               // onClick={() => signOut({ redirectTo: "/login" })}
-              onClick={() => signOut()}
+              onClick={() => void signOut()}
             >
               <svg
                 viewBox="0 0 24 24"
