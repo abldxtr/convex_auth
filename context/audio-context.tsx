@@ -1,6 +1,14 @@
 "use client";
 
-import { createContext, useContext, useState, useRef, useEffect } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useRef,
+  useEffect,
+  Dispatch,
+  SetStateAction,
+} from "react";
 import { useWavesurfer } from "@wavesurfer/react";
 import { base64ToArrayBuffer, blobToBase64 } from "@/components/chat.input";
 
@@ -21,6 +29,8 @@ interface VoiceRecorderContextType {
   handleDownload: () => void;
   handleDelete: () => void;
   getArrayBuffer: () => Promise<ArrayBuffer | null>;
+  audioBlob: Blob | null;
+  setAudioBlob: Dispatch<SetStateAction<Blob | null>>;
 }
 
 const VoiceRecorderContext = createContext<VoiceRecorderContextType | null>(
@@ -41,6 +51,7 @@ export function VoiceRecorderProvider({
   const [audioArrayBuffer, setAudioArrayBuffer] = useState<ArrayBuffer | null>(
     null
   );
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -104,6 +115,7 @@ export function VoiceRecorderProvider({
 
       mediaRecorder.onstop = async () => {
         const audioBlob = new Blob(chunksRef.current, { type: "audio/wav" });
+        setAudioBlob(audioBlob);
 
         const url = URL.createObjectURL(audioBlob);
         setAudioURL(url);
@@ -141,9 +153,8 @@ export function VoiceRecorderProvider({
     // console.log(wavesurfer?.playPause(), isPlaying);
 
     if (wavesurfer) {
-      await wavesurfer.playPause().then(() => {
-        setIsPlaying(!isPlaying);
-      });
+      await wavesurfer.playPause();
+      setIsPlaying(!isPlaying);
     }
   };
 
@@ -200,6 +211,8 @@ export function VoiceRecorderProvider({
     handleDelete,
     audioArrayBuffer,
     getArrayBuffer,
+    audioBlob,
+    setAudioBlob,
   };
 
   return (

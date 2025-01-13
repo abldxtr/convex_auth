@@ -11,6 +11,7 @@ export const createMessage = mutation({
     chatId: v.id("chats"),
     // images: v.optional(v.array(v.id("_storage"))),
     images: v.optional(v.any()),
+    audioStorageId: v.optional(v.id("_storage")),
 
     senderId: v.id("users"),
     recieverId: v.id("users"),
@@ -26,11 +27,9 @@ export const createMessage = mutation({
     ),
   },
   handler: async (ctx, args) => {
-    if (!!args.audio) {
+    if (args.type === "AUDIO") {
       let messageId = await ctx.db.insert("messages", {
         content: args.content,
-        // image: args.images!,
-        // image: imageUrls,
         type: args.type,
         chatId: args.chatId,
         senderId: args.senderId,
@@ -38,7 +37,8 @@ export const createMessage = mutation({
         status: "SENT",
         opupId: args.opupId,
         img: args.img,
-        audioUrl: args.audio,
+        // audioUrl: args.audio,
+        audioStorageId: args.audioStorageId,
       });
     }
 
@@ -72,9 +72,37 @@ export const messages = query({
       .collect();
     // .paginate(args.paginationOpts);
 
-    return res;
+    const ress = await Promise.all(
+      res.map(async (message) => ({
+        ...message,
+        // If the message is an "image" its `body` is an `Id<"_storage">`
+        ...(message.type === "AUDIO" && message.audioStorageId
+          ? { url: await ctx.storage.getUrl(message.audioStorageId) }
+          : {}),
+      }))
+    );
+
+    console.log({ ress });
+
+    return ress;
   },
 });
+
+// export const list = query({
+//   args: {},
+//   handler: async (ctx) => {
+//     const messages = await ctx.db.query("messages").collect();
+//     return Promise.all(
+//       messages.map(async (message) => ({
+//         ...message,
+//         // If the message is an "image" its `body` is an `Id<"_storage">`
+//         ...(message.format === "image"
+//           ? { url: await ctx.storage.getUrl(message.body) }
+//           : {}),
+//       })),
+//     );
+//   },
+// });
 export const seenMessage = mutation({
   args: {
     id: v.id("messages"),

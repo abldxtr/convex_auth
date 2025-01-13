@@ -29,8 +29,10 @@ export const InputWithRef = forwardRef<
   // console.log({ changeIcon });
   const isButtonDisabled = useMemo(() => {
     // return !value.trim() && !imgTemp.length;
-    return !value.trim() || !imgTemp || !audioURL;
-  }, [value, imgTemp]);
+    // || isRecording
+    // console.log(!!value.trim(), !imgTemp, !audioURL, isRecording);
+    return !!value.trim() || !imgTemp || !audioURL || isRecording;
+  }, [value, imgTemp, audioURL, isRecording]);
 
   return (
     <div className="grow shrink w-full h-full">
@@ -91,7 +93,7 @@ export const InputWithRef = forwardRef<
             >
               {isRecording ? (
                 <Pause className="size-[18px] shrink-0" />
-              ) : isPlaying || isWaveSurferPlaying ? (
+              ) : isPlaying ? (
                 <Pause className="size-4  " />
               ) : (
                 <Play className="size-4  " />
@@ -104,7 +106,8 @@ export const InputWithRef = forwardRef<
             disabled={!!audioURL || audioURL !== null || isRecording}
             className={cn(
               "shrink-0 size-[34px] hover:bg-[#1d9bf01a] flex items-center fill-[#1d9bf0] justify-center transition-all duration-300 rounded-full",
-              "disabled:opacity-70 disabled:cursor-not-allowed disabled:pointer-events-none  "
+              "disabled:opacity-70 disabled:cursor-not-allowed disabled:pointer-events-none  ",
+              isRecording && "bg-[#1d9bf01a]"
             )}
             onClick={() => {
               if (changeIcon.type === "voice") {
@@ -123,7 +126,7 @@ export const InputWithRef = forwardRef<
           </button>
           <button
             type="submit"
-            disabled={isButtonDisabled || isRecording}
+            disabled={isButtonDisabled}
             className={cn(
               "shrink-0 size-[34px] hover:bg-[#1d9bf01a] flex items-center fill-[#1d9bf0] justify-center transition-all duration-300 rounded-full",
               "disabled:opacity-70 disabled:cursor-not-allowed disabled:pointer-events-none"

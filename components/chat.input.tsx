@@ -20,6 +20,7 @@ import { User } from "./message.list";
 import { useVoiceRecorder } from "@/context/audio-context";
 import { formatTime } from "@/lib/utils";
 import { Pause, Play } from "lucide-react";
+import { useUploadImage } from "@/hooks/useUploadImage";
 
 interface imageOptions {
   contentType?: string;
@@ -77,8 +78,15 @@ export default function InputChat({
     setChangeIcon,
     scrollBound,
   } = useGlobalContext();
-  const { handleDelete, isRecording, audioArrayBuffer, stopRecording } =
-    useVoiceRecorder();
+  const {
+    handleDelete,
+    isRecording,
+    audioArrayBuffer,
+    stopRecording,
+    audioURL,
+    audioBlob,
+  } = useVoiceRecorder();
+  const uploadImg = useUploadImage();
 
   // console.log({ scrollPos });
 
@@ -109,18 +117,19 @@ export default function InputChat({
   const createMessage = useMutation(
     api.message.createMessage
   ).withOptimisticUpdate((localStore, mutationArg) => {
-    const { content, chatId, images, senderId, recieverId, opupId, img } =
+    const { content, chatId, images, senderId, recieverId, opupId, img, type } =
       mutationArg;
 
     // ایجاد پیام موقت
     // const typeImg = !!images?.length && "IMAGE";
     // const imgSrc = new Blob([img!]);
+    if (type === "AUDIO") {
+      return;
+    }
     const optimisticMessage = {
       _id: `optimistic-${opupId}` as Id<"messages">, // تبدیل به نوع مناسب
       _creationTime: Date.now() as number,
-      // type: "TEXT" as const,
-      type: "IMAGE" as const,
-
+      type,
       content,
       senderId: senderId as Id<"users">,
       receiverId: recieverId as Id<"users">,
@@ -228,49 +237,42 @@ export default function InputChat({
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    // stopRecording();
     if (!currentUser || !other || !chatId) return;
 
     const messageContent = inputValue.trim();
     const messageId = crypto.randomUUID();
-    // const AudioArrayBufferr = await blobToBase64(imgTemp[0].file).then(
-    //   (res) => {
-    //     const ddd = base64ToArrayBuffer(res as string);
-    //     const arrayBuffer = new Response(ddd).arrayBuffer();
-    //     return arrayBuffer;
-    //   }
-    // );
 
-    // if (isRecording) {
+    // آپلود فایل صوتی
+    if (audioURL && audioBlob !== null) {
+      // const response = await fetch(audioURL);
+      // const audioBlob = await response.blob();
+      // await uploadAudio(audioBlob, currentUser, chatId);
+      // handleDelete(); // حذف فایل صوتی پس از آپلود
+      console.log("audioBlob", audioBlob);
+      const res = await uploadImg(audioBlob);
+      const idStorage = res;
+      if (!!!idStorage) {
+        return;
+      }
 
-    // setTimeout(() => {
-    //   if (!audioArrayBuffer) {
-    //     return;
-    //   }
-    //   const newMessage = {
-    //     content: messageContent,
-    //     senderId: currentUser,
-    //     recieverId: other,
-    //     chatId: chatId as Id<"chats">,
-    //     opupId: messageId,
-    //     images: imgTemp
-    //       .filter((img) => img.storageId)
-    //       .map((img) => img.storageId as Id<"_storage">),
-    //     type: "AUDIO" as const,
-    //     audio: audioArrayBuffer!,
-    //   };
-    //   console.log({ newMessage });
+      const newMessage = {
+        content: messageContent,
+        senderId: currentUser,
+        recieverId: other,
+        chatId: chatId as Id<"chats">,
+        opupId: messageId,
+        images: imgTemp
+          .filter((img) => img.storageId)
+          .map((img) => img.storageId as Id<"_storage">),
+        type: "AUDIO" as const,
+        audioStorageId: idStorage,
+      };
 
-    //   createMessage(newMessage);
-    //   if (scrollPos > 30 && scrollPos < 600) {
-    //     setToScroll(true);
-    //   }
-    //   setImgTemp([]);
-    //   setIsShowImgTemp(false);
-    //   setChangeIcon({ type: "voice", state: false });
-    // }, 5000);
+      await createMessage(newMessage);
 
-    // }
+      handleDelete();
+      setChangeIcon({ type: "voice", state: false });
+    }
 
     if (imgTemp.length > 0) {
       const ImageArrayBuffer = await blobToBase64(imgTemp[0].file).then(
@@ -296,14 +298,14 @@ export default function InputChat({
       };
 
       createMessage(newMessage);
-      if (scrollPos < scrollBound) {
-        setToScroll(true);
-      }
-      setInputValue("");
-      setImgTemp([]);
-      setIsShowImgTemp(false);
-      setChangeIcon({ type: "voice", state: false });
-    } else if (messageContent) {
+      // if (scrollPos < scrollBound) {
+      //   setToScroll(true);
+      // }
+      // setInputValue("");
+      // setImgTemp([]);
+      // setIsShowImgTemp(false);
+      // setChangeIcon({ type: "voice", state: false });
+    } else if (!!messageContent) {
       const newMessage = {
         content: messageContent,
         senderId: currentUser,
@@ -324,15 +326,20 @@ export default function InputChat({
         room: chatId,
         data: presenceUpdate,
       });
-      if (scrollPos < scrollBound) {
-        setToScroll(true);
-      }
+
       createMessage(newMessage);
-      setInputValue("");
-      setImgTemp([]);
-      setIsShowImgTemp(false);
-      setChangeIcon({ type: "voice", state: false });
+      // setInputValue("");
+      // setImgTemp([]);
+      // setIsShowImgTemp(false);
+      // setChangeIcon({ type: "voice", state: false });
     }
+    if (scrollPos < scrollBound) {
+      setToScroll(true);
+    }
+    setInputValue("");
+    setImgTemp([]);
+    setIsShowImgTemp(false);
+    setChangeIcon({ type: "voice", state: false });
   };
 
   const handleEmoji = (emoji: any) => {
@@ -396,19 +403,17 @@ export const AudioContainer = () => {
     return null;
   }
   return (
-    // <div className="rounded-lg  p-4 bg-[#eff3f4] w-full h-full max-w-[250px] absolute inset-y-0 left-0   ">
-    //   <div id="waveform" ref={reff} className="w-full h-[24px]" />
-    //   <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-    //     <span>{formatTime(currentTime)}</span>
-    //     <span>{formatTime(audioDuration)}</span>
-    //   </div>
-    // </div>
     <div className="flex items-center rounded-lg !w-2/3  p-4 bg-[#eff3f4]  h-full  absolute inset-y-0 left-0 ">
       <div
         className="bg-blue-400 size-[32px] rounded-full flex items-center justify-center shrink-0 "
         onClick={handlePlayPause}
       >
-        {isPlaying || isWaveSurferPlaying ? (
+        {/* {isPlaying || isWaveSurferPlaying ? (
+          <Pause className="size-4 fill-white " color="white" />
+        ) : (
+          <Play className="size-4 fill-white " color="white" />
+        )} */}
+        {isWaveSurferPlaying ? (
           <Pause className="size-4 fill-white " color="white" />
         ) : (
           <Play className="size-4 fill-white " color="white" />

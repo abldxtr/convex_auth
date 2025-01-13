@@ -23,6 +23,7 @@ interface messageItem {
   opupId: string;
   img?: ArrayBuffer | undefined;
   audio?: ArrayBuffer | undefined;
+  url?: string | null | undefined;
 }
 
 export const ChatMessage = ({
@@ -73,19 +74,19 @@ const AudioMessage = ({ message }: { message: messageItem }) => {
   // const [audioURL, setAudioURL] = useState<string | null>(null);
   const [audioDuration, setAudioDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
-  let audioURL;
+  // let audioURL;
 
   const { wavesurfer, isPlaying: isWaveSurferPlaying } = useWavesurfer({
     container: audioRef,
-    height: 100,
-    waveColor: "#3b82f680",
+    height: "auto",
+    waveColor: "#8dcefa",
     progressColor: "#3390ec",
     cursorColor: "#fff",
     barWidth: 2,
     barGap: 1,
     normalize: true,
     dragToSeek: true,
-    url: audioURL || "",
+    url: message.url || "",
   });
 
   useEffect(() => {
@@ -104,17 +105,17 @@ const AudioMessage = ({ message }: { message: messageItem }) => {
 
   // console.log(message.audio!.byteLength);
 
-  const audioBlob = new Blob([message.audio!], { type: "audio/wav" });
-  const url = URL.createObjectURL(audioBlob);
-  console.log({ url });
+  // const audioBlob = new Blob([message.audio!], { type: "audio/wav" });
+  // const url = URL.createObjectURL(audioBlob);
+  // console.log({ url });
 
-  function playAudioBlob(blob: Blob) {
-    const url = URL.createObjectURL(blob);
-    const audio = new Audio(url);
-    audio.play();
-  }
+  // function playAudioBlob(blob: Blob) {
+  //   const url = URL.createObjectURL(blob);
+  //   const audio = new Audio(url);
+  //   audio.play();
+  // }
 
-  playAudioBlob(audioBlob);
+  // playAudioBlob(audioBlob);
 
   // const setUrl = () => {
   //   setAudioURL(url);
@@ -124,7 +125,7 @@ const AudioMessage = ({ message }: { message: messageItem }) => {
   //   setAudioURL(url);
   // }, [url]);
   // // setAudioURL(url);
-  audioURL = url;
+  // audioURL = url;
   // setUrl();
 
   // const ii = message.audio
@@ -143,7 +144,7 @@ const AudioMessage = ({ message }: { message: messageItem }) => {
         className="bg-blue-400 size-[65.5px] rounded-full flex items-center justify-center shrink-0 "
         onClick={handlePlayPause}
       >
-        {isPlaying || isWaveSurferPlaying ? (
+        {isWaveSurferPlaying ? (
           <Pause className="size-8 fill-white " color="white" />
         ) : (
           <Play className="size-8 fill-white " color="white" />

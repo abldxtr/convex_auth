@@ -1,13 +1,14 @@
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useMutation as useReactQueryMutation } from "@tanstack/react-query";
+import { Id } from "@/convex/_generated/dataModel";
 
 export const useUploadImage = () => {
   // دریافت تابع برای گرفتن URL آپلود از Convex
   const generateUploadUrl = useMutation(api.upload.generateUploadUrl);
 
   // تابع اصلی برای آپلود تصویر
-  const uploadImage = async (file: File) => {
+  const uploadImage = async (file: Blob) => {
     try {
       // 1. دریافت URL آپلود از Convex
       const uploadUrl = await generateUploadUrl();
@@ -20,7 +21,7 @@ export const useUploadImage = () => {
       const result = await fetch(uploadUrl, {
         method: "POST",
         headers: {
-          "Content-Type": file.type,
+          "Content-Type": "audio/wav",
         },
         body: file,
       });
@@ -31,7 +32,7 @@ export const useUploadImage = () => {
 
       // 3. دریافت storageId از پاسخ
       const { storageId } = await result.json();
-      return storageId;
+      return storageId as Id<"_storage">;
     } catch (error) {
       console.error("Error uploading image:", error);
       throw error;
@@ -39,9 +40,11 @@ export const useUploadImage = () => {
   };
 
   // استفاده از React Query برای مدیریت mutation
-  const mutation = useReactQueryMutation({
-    mutationFn: uploadImage,
-  });
+  // const mutation = useReactQueryMutation({
+  //   mutationFn: uploadImage,
+  // });
 
-  return mutation;
+  // return mutation;
+
+  return uploadImage;
 };

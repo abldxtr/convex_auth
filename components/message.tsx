@@ -236,6 +236,10 @@ export default function Messages({
               </div>
             </div>
             {msgs.map((message) => {
+              // if (message.type === "AUDIO") {
+              //   console.log(message.url);
+              //   // return;
+              // }
               const isFirstUnread = message._id === firstUnreadRef.current; // فقط یک بار
               return (
                 <div key={message._id} id={`message-${message._id}`}>
