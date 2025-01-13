@@ -403,7 +403,7 @@ export const AudioContainer = () => {
     //     <span>{formatTime(audioDuration)}</span>
     //   </div>
     // </div>
-    <div className="flex items-center rounded-lg w-1/3  p-4 bg-[#eff3f4]  h-full  absolute inset-y-0 left-0 ">
+    <div className="flex items-center rounded-lg !w-2/3  p-4 bg-[#eff3f4]  h-full  absolute inset-y-0 left-0 ">
       <div
         className="bg-blue-400 size-[32px] rounded-full flex items-center justify-center shrink-0 "
         onClick={handlePlayPause}
@@ -415,9 +415,9 @@ export const AudioContainer = () => {
         )}
       </div>
 
-      <div className="rounded-lg  p-4 bg-[#eff3f4] w-full h-full flex items-center">
+      <div className="rounded-lg  p-4 bg-[#eff3f4] w-full h-full flex items-center gap-x-2">
         <div id="waveform" ref={reff} className="w-full h-[24px]" />
-        <div className="flex items-center gap-x-[0.5px] text-xs text-muted-foreground">
+        <div className="flex items-center gap-x-[1px] text-sm text- ">
           <span>{formatTime(currentTime)}/ </span>
           <span>{formatTime(audioDuration)}</span>
         </div>

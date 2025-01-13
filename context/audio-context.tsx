@@ -50,13 +50,14 @@ export function VoiceRecorderProvider({
   const { wavesurfer, isPlaying: isWaveSurferPlaying } = useWavesurfer({
     container: reff,
     height: "auto",
-    waveColor: "#3b82f680",
+    waveColor: "#8dcefa",
     progressColor: "#3390ec",
     cursorColor: "#fff",
     barWidth: 2,
     barGap: 1,
     normalize: true,
     url: audioURL || "",
+    dragToSeek: true,
   });
 
   useEffect(() => {
@@ -111,12 +112,12 @@ export function VoiceRecorderProvider({
         // const buffer = await audioBlob.arrayBuffer();
         // setAudioArrayBuffer(buffer);
 
-        const AudioArrayBufferr = await blobToBase64(audioBlob).then((res) => {
-          const ddd = base64ToArrayBuffer(res as string);
-          const arrayBuffer = new Response(ddd).arrayBuffer();
-          return arrayBuffer;
-        });
-        setAudioArrayBuffer(AudioArrayBufferr);
+        // const AudioArrayBufferr = await blobToBase64(audioBlob).then((res) => {
+        //   const ddd = base64ToArrayBuffer(res as string);
+        //   const arrayBuffer = new Response(ddd).arrayBuffer();
+        //   return arrayBuffer;
+        // });
+        // setAudioArrayBuffer(AudioArrayBufferr);
       };
 
       mediaRecorder.start();
@@ -136,10 +137,13 @@ export function VoiceRecorderProvider({
     }
   };
 
-  const handlePlayPause = () => {
+  const handlePlayPause = async () => {
+    // console.log(wavesurfer?.playPause(), isPlaying);
+
     if (wavesurfer) {
-      wavesurfer.playPause();
-      setIsPlaying(!isPlaying);
+      await wavesurfer.playPause().then(() => {
+        setIsPlaying(!isPlaying);
+      });
     }
   };
 
@@ -153,6 +157,7 @@ export function VoiceRecorderProvider({
   };
 
   const handleDelete = () => {
+    stopRecording();
     setAudioURL(null);
     setIsPlaying(false);
     setAudioDuration(0);
@@ -160,7 +165,7 @@ export function VoiceRecorderProvider({
     if (wavesurfer) {
       wavesurfer.empty();
     }
-    setIsRecording(false);
+    // setIsRecording(false);
   };
 
   const getArrayBuffer = async (): Promise<ArrayBuffer | null> => {

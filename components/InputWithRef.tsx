@@ -24,11 +24,12 @@ export const InputWithRef = forwardRef<
     handlePlayPause,
     isPlaying,
     isWaveSurferPlaying,
+    audioURL,
   } = useVoiceRecorder();
   // console.log({ changeIcon });
   const isButtonDisabled = useMemo(() => {
     // return !value.trim() && !imgTemp.length;
-    return !value.trim() || !imgTemp;
+    return !value.trim() || !imgTemp || !audioURL;
   }, [value, imgTemp]);
 
   return (
@@ -44,22 +45,23 @@ export const InputWithRef = forwardRef<
             placeholder="پیام خود را وارد کنید"
             className="bg-transparent focus:ring-0 w-full h-full ring-0 focus-within:outline-none focus:border-0 text-[#0F1419] text-[15px] placeholder-[#536471] disabled:placeholder-[#53647173] "
           />
-          {/* {changeIcon.type === "voice" && changeIcon.state && (
+          {changeIcon.type === "voice" && changeIcon.state && isRecording && (
             <div className="flex items-center gap-x-1 mr-2">
-              {isRecording ? (
+              {/* {isRecording ? (
                 <span>{formatTime(recordingDuration)}</span>
               ) : (
                 <span>{formatTime(audioDuration)}</span>
-              )}
+              )} */}
+              <span>{formatTime(recordingDuration)}</span>
               <div className=" size-2 bg-red-500 animate-pulse rounded-full  " />
             </div>
-          )} */}
-          {changeIcon.type === "voice" && changeIcon.state && isRecording && (
+          )}
+          {changeIcon.type === "voice" && changeIcon.state && (
             <button
-              // disabled={isButtonDisabled}
+              disabled={isRecording}
               type="button"
               className={cn(
-                "shrink-0 size-[34px] hover:bg-[#1d9bf01a] flex items-center  justify-center transition-all duration-300 rounded-full",
+                "shrink-0 size-[34px] hover:bg-[#f01d1d1a] flex items-center  justify-center transition-all duration-300 rounded-full",
                 "disabled:opacity-70 disabled:cursor-not-allowed disabled:pointer-events-none"
               )}
               onClick={() => {
@@ -99,10 +101,10 @@ export const InputWithRef = forwardRef<
 
           <button
             type="button"
-            // disabled={isButtonDisabled}
+            disabled={!!audioURL || audioURL !== null || isRecording}
             className={cn(
               "shrink-0 size-[34px] hover:bg-[#1d9bf01a] flex items-center fill-[#1d9bf0] justify-center transition-all duration-300 rounded-full",
-              "disabled:opacity-70 disabled:cursor-not-allowed disabled:pointer-events-none"
+              "disabled:opacity-70 disabled:cursor-not-allowed disabled:pointer-events-none  "
             )}
             onClick={() => {
               if (changeIcon.type === "voice") {
