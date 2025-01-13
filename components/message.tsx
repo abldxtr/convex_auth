@@ -58,7 +58,8 @@ export default function Messages({
   const { mutate, isPending: seenMessageAllLoading } = TanStackMutation({
     mutationFn: useConvexMutation(api.message.seenMessageAll),
   });
-  const { scrollPos, setScrollPos, toScroll, setToScroll } = useGlobalContext();
+  const { scrollPos, setScrollPos, toScroll, setToScroll, setScrollBound } =
+    useGlobalContext();
   const { data: messages, isPending } = useQuery(
     convexQuery(api.message.messages, { chatId: cc })
   );
@@ -73,8 +74,11 @@ export default function Messages({
           chatContainer.clientHeight;
         const distanceFromTop = chatContainer.scrollTop;
 
+        const scrollBound = chatContainer.scrollHeight / 3;
+
         setGoDown(distanceFromBottom > 50);
         setScrollPos(distanceFromBottom);
+        setScrollBound(scrollBound);
       }
       setInScroll(true);
     };
@@ -93,13 +97,6 @@ export default function Messages({
 
     return () => {
       chatContainer?.removeEventListener("scroll", handleScroll);
-      // window.removeEventListener("scroll", handleScroll);
-      // if (chatRef.current) {
-      //   sessionStorage.setItem(
-      //     `scrollPos-${chatId}`,
-      //     chatRef.current.scrollTop.toString()
-      //   );
-      // }
     };
     // }, [shouldLoadMore, loadMore, chatRef, setGoDown]);
   }, [setGoDown, chatId, chatRef.current]);
@@ -176,11 +173,11 @@ export default function Messages({
     isScroll,
   ]);
 
-  const isloadingData = status === "LoadingMore";
+  // const isloadingData = status === "LoadingMore";
 
-  const { ref, inView, entry } = useInView({
-    threshold: 0,
-  });
+  // const { ref, inView, entry } = useInView({
+  //   threshold: 0,
+  // });
 
   const groupedMessages = useMemo(() => {
     if (!messages) return {};
@@ -225,11 +222,11 @@ export default function Messages({
         )}
         ref={chatRef}
       >
-        {isloadingData && (
+        {/* {isloadingData && (
           <div className="flex justify-center">
             <Loader2 className="h-6 w-6 text-zinc-500 animate-spin my-4" />
           </div>
-        )}
+        )} */}
 
         {Object.entries(groupedMessages).map(([date, msgs]) => (
           <div key={date} className="mb-4 isolate">

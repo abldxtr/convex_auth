@@ -65,8 +65,10 @@ interface CounterContextType {
   setScrollPos: React.Dispatch<React.SetStateAction<number>>;
   toScroll: boolean;
   setToScroll: React.Dispatch<React.SetStateAction<boolean>>;
-  changeIcon: IconChange
-  setChangeIcon: React.Dispatch<React.SetStateAction<IconChange>>
+  changeIcon: IconChange;
+  setChangeIcon: React.Dispatch<React.SetStateAction<IconChange>>;
+  scrollBound: number;
+  setScrollBound: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const GlobalContext = createContext<CounterContextType | undefined>(undefined);
@@ -86,12 +88,23 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
   const [openChatCreate, setOpenChatCreate] = useState<boolean>(false);
   const [conversationId, setConversationId] = useState<string>("");
   const [scrollPos, setScrollPos] = useState<number>(0);
+  const [scrollBound, setScrollBound] = useState<number>(0);
+
   const [toScroll, setToScroll] = useState<boolean>(false);
-  const [changeIcon, setChangeIcon] = useState<IconChange>({state:false,type:"voice"});
+  const [changeIcon, setChangeIcon] = useState<IconChange>({
+    state: false,
+    type: "voice",
+  });
 
   const [unreadCountMenue, setUnreadCountMenue] = useState<
     { id: string; count: number }[]
   >([]);
+
+  // useEffect(()=>{
+
+  //   if
+
+  // },[scrollPos])
 
   // const [unreadMessages, setUnreadMessages] = useState<MessageData[]>([]);
 
@@ -136,6 +149,8 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
         setToScroll,
         changeIcon,
         setChangeIcon,
+        scrollBound,
+        setScrollBound,
       }}
     >
       {children}

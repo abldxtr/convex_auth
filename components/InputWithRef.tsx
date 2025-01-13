@@ -1,7 +1,7 @@
 import { useVoiceRecorder } from "@/context/audio-context";
 import { useGlobalContext } from "@/context/globalContext";
 import { cn, formatTime } from "@/lib/utils";
-import { Mic, Play, Trash2 } from "lucide-react";
+import { Mic, Pause, Play, Trash2 } from "lucide-react";
 import { forwardRef, useMemo } from "react";
 
 export const InputWithRef = forwardRef<
@@ -21,11 +21,14 @@ export const InputWithRef = forwardRef<
     startRecording,
     stopRecording,
     audioDuration,
+    handlePlayPause,
+    isPlaying,
+    isWaveSurferPlaying,
   } = useVoiceRecorder();
   // console.log({ changeIcon });
   const isButtonDisabled = useMemo(() => {
     // return !value.trim() && !imgTemp.length;
-    return !value.trim() && !imgTemp;
+    return !value.trim() || !imgTemp;
   }, [value, imgTemp]);
 
   return (
@@ -51,46 +54,74 @@ export const InputWithRef = forwardRef<
               <div className=" size-2 bg-red-500 animate-pulse rounded-full  " />
             </div>
           )} */}
-          {/* {changeIcon.type === "voice" && changeIcon.state && (
+          {changeIcon.type === "voice" && changeIcon.state && isRecording && (
             <button
-              // type="submit"
               // disabled={isButtonDisabled}
+              type="button"
               className={cn(
                 "shrink-0 size-[34px] hover:bg-[#1d9bf01a] flex items-center  justify-center transition-all duration-300 rounded-full",
                 "disabled:opacity-70 disabled:cursor-not-allowed disabled:pointer-events-none"
               )}
               onClick={() => {
-                setChangeIcon({ type: "voice", state: false });
                 handleDelete();
+                setChangeIcon({ type: "voice", state: false });
               }}
             >
               <Trash2 className="size-[18px] shrink-0" color="red" />
             </button>
-          )} */}
+          )}
 
-          {/* {changeIcon.type === "voice" && changeIcon.state && (
+          {changeIcon.type === "voice" && changeIcon.state && (
             <button
               className={cn(
                 "shrink-0 size-[34px] hover:bg-[#1d9bf01a] flex items-center  justify-center transition-all duration-300 rounded-full",
                 "disabled:opacity-70 disabled:cursor-not-allowed disabled:pointer-events-none"
               )}
               onClick={() => {
-                setChangeIcon({ type: "voice", state: true });
+                // setChangeIcon({ type: "voice", state: true });
                 // handleDelete();
-                stopRecording();
+                if (isRecording) {
+                  stopRecording();
+                } else {
+                  handlePlayPause();
+                }
               }}
             >
-              <Trash2 className="size-[18px] shrink-0" color="green" />
+              {isRecording ? (
+                <Pause className="size-[18px] shrink-0" />
+              ) : isPlaying || isWaveSurferPlaying ? (
+                <Pause className="size-4  " />
+              ) : (
+                <Play className="size-4  " />
+              )}
             </button>
-          )} */}
+          )}
+
           <button
-            // type={
-            //   changeIcon.type === "voice" && changeIcon.state
-            //     ? "button"
-            //     : "submit"
-            // }
+            type="button"
+            // disabled={isButtonDisabled}
+            className={cn(
+              "shrink-0 size-[34px] hover:bg-[#1d9bf01a] flex items-center fill-[#1d9bf0] justify-center transition-all duration-300 rounded-full",
+              "disabled:opacity-70 disabled:cursor-not-allowed disabled:pointer-events-none"
+            )}
+            onClick={() => {
+              if (changeIcon.type === "voice") {
+                // think
+                if (changeIcon.type === "voice" && changeIcon.state) {
+                  return;
+                }
+                setChangeIcon({ type: "voice", state: true });
+                startRecording();
+              } else if (changeIcon.type === "text") {
+                setChangeIcon({ type: "voice", state: false });
+              }
+            }}
+          >
+            <Mic className="size-[20px] shrink-0" color="#1d9bf0" />
+          </button>
+          <button
             type="submit"
-            disabled={isButtonDisabled}
+            disabled={isButtonDisabled || isRecording}
             className={cn(
               "shrink-0 size-[34px] hover:bg-[#1d9bf01a] flex items-center fill-[#1d9bf0] justify-center transition-all duration-300 rounded-full",
               "disabled:opacity-70 disabled:cursor-not-allowed disabled:pointer-events-none"
@@ -105,30 +136,6 @@ export const InputWithRef = forwardRef<
             //   }
             // }}
           >
-            {/* {changeIcon.type === "text" ? (
-              <svg
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-                className="size-[20px] shrink-0"
-              >
-                <g>
-                  <path d="M2.504 21.866l.526-2.108C3.04 19.719 4 15.823 4 12s-.96-7.719-.97-7.757l-.527-2.109L22.236 12 2.504 21.866zM5.981 13c-.072 1.962-.34 3.833-.583 5.183L17.764 12 5.398 5.818c.242 1.349.51 3.221.583 5.183H10v2H5.981z"></path>
-                </g>
-              </svg>
-            ) : changeIcon.type === "voice" && changeIcon.state ? (
-              <svg
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-                className="size-[20px] shrink-0"
-              >
-                <g>
-                  <path d="M2.504 21.866l.526-2.108C3.04 19.719 4 15.823 4 12s-.96-7.719-.97-7.757l-.527-2.109L22.236 12 2.504 21.866zM5.981 13c-.072 1.962-.34 3.833-.583 5.183L17.764 12 5.398 5.818c.242 1.349.51 3.221.583 5.183H10v2H5.981z"></path>
-                </g>
-              </svg>
-            ) : (
-              <Mic className="size-[20px] shrink-0" color="#1d9bf0" />
-            )} */}
-
             <svg
               viewBox="0 0 24 24"
               aria-hidden="true"

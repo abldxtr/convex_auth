@@ -18,6 +18,8 @@ import useTypingIndicator from "@/hooks/useTypingIndicator";
 import useSingleFlight from "@/hooks/useSingleFlight";
 import { User } from "./message.list";
 import { useVoiceRecorder } from "@/context/audio-context";
+import { formatTime } from "@/lib/utils";
+import { Pause, Play } from "lucide-react";
 
 interface imageOptions {
   contentType?: string;
@@ -73,6 +75,7 @@ export default function InputChat({
     setScrollPos,
     setToScroll,
     setChangeIcon,
+    scrollBound,
   } = useGlobalContext();
   const { handleDelete, isRecording, audioArrayBuffer, stopRecording } =
     useVoiceRecorder();
@@ -293,9 +296,10 @@ export default function InputChat({
       };
 
       createMessage(newMessage);
-      if (scrollPos < 600) {
+      if (scrollPos < scrollBound) {
         setToScroll(true);
       }
+      setInputValue("");
       setImgTemp([]);
       setIsShowImgTemp(false);
       setChangeIcon({ type: "voice", state: false });
@@ -320,7 +324,7 @@ export default function InputChat({
         room: chatId,
         data: presenceUpdate,
       });
-      if (scrollPos < 600) {
+      if (scrollPos < scrollBound) {
         setToScroll(true);
       }
       createMessage(newMessage);
@@ -340,7 +344,7 @@ export default function InputChat({
     <DragContainer className=" bg-transparent px-[12px]    py-1 isolate ">
       <div className="  flex flex-col w-full h-full bg-[#eff3f4] rounded-[16px] ">
         {isShowImgTemp && <TempImg />}
-        <div className=" my-[4px] mx-[12px] p-[4px] flex items-center justify-between bg-[#eff3f4] rounded-[16px] gap-1    ">
+        <div className=" my-[4px] mx-[12px] p-[4px] flex items-center justify-between bg-[#eff3f4] rounded-[16px] gap-1 relative    ">
           <div className=" flex items-center  ">
             <ImgInput
               value={imgTemp}
@@ -356,6 +360,7 @@ export default function InputChat({
             <GifInput />
             <EmojiPicker ref={EmojiRef} handleEmoji={handleEmoji} />
           </div>
+          <AudioContainer />
           <InputWithRef
             value={inputValue}
             onChange={(e) => {
@@ -375,3 +380,48 @@ export default function InputChat({
     </DragContainer>
   );
 }
+
+export const AudioContainer = () => {
+  const {
+    currentTime,
+    reff,
+    audioDuration,
+    audioURL,
+    handlePlayPause,
+    isPlaying,
+    isWaveSurferPlaying,
+  } = useVoiceRecorder();
+
+  if (!!!audioURL || audioURL === null) {
+    return null;
+  }
+  return (
+    // <div className="rounded-lg  p-4 bg-[#eff3f4] w-full h-full max-w-[250px] absolute inset-y-0 left-0   ">
+    //   <div id="waveform" ref={reff} className="w-full h-[24px]" />
+    //   <div className="flex justify-between mt-2 text-xs text-muted-foreground">
+    //     <span>{formatTime(currentTime)}</span>
+    //     <span>{formatTime(audioDuration)}</span>
+    //   </div>
+    // </div>
+    <div className="flex items-center rounded-lg w-1/3  p-4 bg-[#eff3f4]  h-full  absolute inset-y-0 left-0 ">
+      <div
+        className="bg-blue-400 size-[32px] rounded-full flex items-center justify-center shrink-0 "
+        onClick={handlePlayPause}
+      >
+        {isPlaying || isWaveSurferPlaying ? (
+          <Pause className="size-4 fill-white " color="white" />
+        ) : (
+          <Play className="size-4 fill-white " color="white" />
+        )}
+      </div>
+
+      <div className="rounded-lg  p-4 bg-[#eff3f4] w-full h-full flex items-center">
+        <div id="waveform" ref={reff} className="w-full h-[24px]" />
+        <div className="flex items-center gap-x-[0.5px] text-xs text-muted-foreground">
+          <span>{formatTime(currentTime)}/ </span>
+          <span>{formatTime(audioDuration)}</span>
+        </div>
+      </div>
+    </div>
+  );
+};

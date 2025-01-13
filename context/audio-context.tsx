@@ -49,7 +49,7 @@ export function VoiceRecorderProvider({
 
   const { wavesurfer, isPlaying: isWaveSurferPlaying } = useWavesurfer({
     container: reff,
-    height: 100,
+    height: "auto",
     waveColor: "#3b82f680",
     progressColor: "#3390ec",
     cursorColor: "#fff",
