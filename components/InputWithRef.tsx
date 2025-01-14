@@ -13,6 +13,7 @@ export const InputWithRef = forwardRef<
   }
 >(({ value, onChange, onSubmit }, ref) => {
   const { imgTemp, changeIcon, setChangeIcon } = useGlobalContext();
+  console.log({ changeIcon });
   const {
     handleDelete,
     recordingDuration,
@@ -27,12 +28,29 @@ export const InputWithRef = forwardRef<
     audioURL,
   } = useVoiceRecorder();
   // console.log({ changeIcon });
+  // const isButtonDisabled = useMemo(() => {
+  //   // return !value.trim() && !imgTemp.length;
+  //   // || isRecording
+  //   const hasUrl = audioURL === null ? true : !!audioURL ? true : false;
+  //   const hasImg = imgTemp.length > 0;
+  //   const hasText = value.trim().length > 0 ? true : hasImg ? true : false;
+  //   console.log({ hasText });
+  //   console.log(!hasText, !hasImg, !hasUrl, isRecording);
+  //   // console.log({ audioURL });
+  //   return !hasText || !hasImg || hasUrl || isRecording;
+  // }, [value, imgTemp, audioURL, isRecording]);
+
   const isButtonDisabled = useMemo(() => {
-    // return !value.trim() && !imgTemp.length;
-    // || isRecording
-    // console.log(!!value.trim(), !imgTemp, !audioURL, isRecording);
-    return !!value.trim() || !imgTemp || !audioURL || isRecording;
+    const hasText = value.trim().length > 0;
+    const hasImage = imgTemp.length > 0;
+    const hasAudio = audioURL !== null;
+
+    // دکمه غیرفعال است اگر:
+    // - در حال ضبط باشیم یا
+    // - هیچ محتوایی (متن یا تصویر یا صدا) نداشته باشیم
+    return isRecording || (!hasText && !hasImage && !hasAudio);
   }, [value, imgTemp, audioURL, isRecording]);
+  console.log({ isButtonDisabled });
 
   return (
     <div className="grow shrink w-full h-full">
@@ -89,11 +107,12 @@ export const InputWithRef = forwardRef<
                 } else {
                   handlePlayPause();
                 }
+                setChangeIcon({ type: "voice", state: true });
               }}
             >
               {isRecording ? (
                 <Pause className="size-[18px] shrink-0" />
-              ) : isPlaying ? (
+              ) : isWaveSurferPlaying ? (
                 <Pause className="size-4  " />
               ) : (
                 <Play className="size-4  " />
@@ -115,8 +134,8 @@ export const InputWithRef = forwardRef<
                 if (changeIcon.type === "voice" && changeIcon.state) {
                   return;
                 }
-                setChangeIcon({ type: "voice", state: true });
                 startRecording();
+                setChangeIcon({ type: "voice", state: true });
               } else if (changeIcon.type === "text") {
                 setChangeIcon({ type: "voice", state: false });
               }
@@ -131,15 +150,6 @@ export const InputWithRef = forwardRef<
               "shrink-0 size-[34px] hover:bg-[#1d9bf01a] flex items-center fill-[#1d9bf0] justify-center transition-all duration-300 rounded-full",
               "disabled:opacity-70 disabled:cursor-not-allowed disabled:pointer-events-none"
             )}
-            // onClick={() => {
-            //   if (changeIcon.type === "voice") {
-            //     // think
-            //     setChangeIcon({ type: "voice", state: true });
-            //     startRecording();
-            //   } else if (changeIcon.type === "text") {
-            //     setChangeIcon({ type: "voice", state: false });
-            //   }
-            // }}
           >
             <svg
               viewBox="0 0 24 24"

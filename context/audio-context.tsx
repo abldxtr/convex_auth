@@ -149,12 +149,12 @@ export function VoiceRecorderProvider({
     }
   };
 
-  const handlePlayPause = async () => {
+  const handlePlayPause = () => {
     // console.log(wavesurfer?.playPause(), isPlaying);
 
     if (wavesurfer) {
-      await wavesurfer.playPause();
-      setIsPlaying(!isPlaying);
+      wavesurfer.playPause();
+      // setIsPlaying(!isPlaying);
     }
   };
 

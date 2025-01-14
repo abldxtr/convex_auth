@@ -103,35 +103,6 @@ const AudioMessage = ({ message }: { message: messageItem }) => {
     }
   }, [wavesurfer]);
 
-  // console.log(message.audio!.byteLength);
-
-  // const audioBlob = new Blob([message.audio!], { type: "audio/wav" });
-  // const url = URL.createObjectURL(audioBlob);
-  // console.log({ url });
-
-  // function playAudioBlob(blob: Blob) {
-  //   const url = URL.createObjectURL(blob);
-  //   const audio = new Audio(url);
-  //   audio.play();
-  // }
-
-  // playAudioBlob(audioBlob);
-
-  // const setUrl = () => {
-  //   setAudioURL(url);
-  // };
-
-  // const setUrl = useCallback(() => {
-  //   setAudioURL(url);
-  // }, [url]);
-  // // setAudioURL(url);
-  // audioURL = url;
-  // setUrl();
-
-  // const ii = message.audio
-  //   ? btoa(String.fromCharCode(...new Uint8Array(message.audio)))
-  //   : null;
-
   const handlePlayPause = async () => {
     if (wavesurfer) {
       wavesurfer.playPause();
@@ -141,17 +112,17 @@ const AudioMessage = ({ message }: { message: messageItem }) => {
   return (
     <div className="flex items-center w-full min-w-[350px] gap-x-2  ">
       <div
-        className="bg-blue-400 size-[65.5px] rounded-full flex items-center justify-center shrink-0 "
+        className="bg-blue-400 size-[40px] rounded-full flex items-center justify-center shrink-0 "
         onClick={handlePlayPause}
       >
         {isWaveSurferPlaying ? (
-          <Pause className="size-8 fill-white " color="white" />
+          <Pause className="size-4 fill-white " color="white" />
         ) : (
-          <Play className="size-8 fill-white " color="white" />
+          <Play className="size-4 fill-white " color="white" />
         )}
       </div>
 
-      <div className="rounded-lg  p-4 bg-background w-full h-full ">
+      <div className="rounded-lg   w-full h-full ">
         <div id="waveform" ref={audioRef} className="w-full h-[24px]" />
         <div className="flex justify-between mt-2 text-xs text-muted-foreground">
           <span>{formatTime(currentTime)}</span>
@@ -461,3 +432,32 @@ export default ChatMessage;
           />
         )} */
 }
+
+// console.log(message.audio!.byteLength);
+
+// const audioBlob = new Blob([message.audio!], { type: "audio/wav" });
+// const url = URL.createObjectURL(audioBlob);
+// console.log({ url });
+
+// function playAudioBlob(blob: Blob) {
+//   const url = URL.createObjectURL(blob);
+//   const audio = new Audio(url);
+//   audio.play();
+// }
+
+// playAudioBlob(audioBlob);
+
+// const setUrl = () => {
+//   setAudioURL(url);
+// };
+
+// const setUrl = useCallback(() => {
+//   setAudioURL(url);
+// }, [url]);
+// // setAudioURL(url);
+// audioURL = url;
+// setUrl();
+
+// const ii = message.audio
+//   ? btoa(String.fromCharCode(...new Uint8Array(message.audio)))
+//   : null;

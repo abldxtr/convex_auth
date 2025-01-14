@@ -40,6 +40,8 @@ export const createMessage = mutation({
         // audioUrl: args.audio,
         audioStorageId: args.audioStorageId,
       });
+
+      return messageId;
     }
 
     let messageId = await ctx.db.insert("messages", {
