@@ -63,15 +63,11 @@ export default function Messages({
     mutationFn: useConvexMutation(api.message.seenMessageAll),
   });
   const {
-    scrollPos,
     setScrollPos,
     toScroll,
     setToScroll,
     setScrollBound,
     setReplyMessageId,
-    replyMessageId,
-    replyMessageIdScroll,
-    setReplyMessageIdScroll,
   } = useGlobalContext();
   const { data: messages, isPending } = useQuery(
     convexQuery(api.message.messages, { chatId: cc })
@@ -151,11 +147,6 @@ export default function Messages({
             block: "center",
           });
         }
-
-        // if (storedScrollPosition && chatRef.current) {
-        //   chatRef.current.scrollTop = parseInt(storedScrollPosition, 10);
-        //   console.log("storedScrollPosition");
-        // }
       } else if (storedScrollPosition && chatRef.current) {
         console.log("storedScrollPosition");
 
@@ -186,21 +177,6 @@ export default function Messages({
     isScroll,
   ]);
 
-  // scroll to meesageId
-  // useEffect(() => {
-  //   const messageId = document.getElementById(`message-${replyMessageId?._id}`);
-
-  //   if (messageId && replyMessageIdScroll) {
-  //     messageId.scrollIntoView({
-  //       behavior: "instant",
-  //       block: "center",
-  //     });
-  //     setTimeout(() => {
-  //       setReplyMessageIdScroll(false);
-  //     }, 1000);
-  //   }
-  // }, [replyMessageId, replyMessageIdScroll, setReplyMessageIdScroll]);
-
   useMessageScroll({
     resetDelay: 1000,
     scrollOptions: {
@@ -208,12 +184,6 @@ export default function Messages({
       block: "center",
     },
   });
-
-  // const isloadingData = status === "LoadingMore";
-
-  // const { ref, inView, entry } = useInView({
-  //   threshold: 0,
-  // });
 
   const groupedMessages = useMemo(() => {
     if (!messages) return {};
@@ -277,7 +247,7 @@ export default function Messages({
                 <div
                   key={message._id}
                   id={`message-${message._id}`}
-                  onClick={() => setReplyMessageId(message)}
+                  className=" hover:bg-[rgba(66,82,110,0.03)] transition-all group   "
                 >
                   {isFirstUnread && (
                     <div className="bg-yellow-100 text-yellow-800 text-center py-1 rounded-md ">
@@ -288,6 +258,8 @@ export default function Messages({
                     key={message._id}
                     message={message}
                     isCurrentUser={message.senderId === currentUser}
+                    current_user={user}
+                    other_user={otherUser}
                   />
                 </div>
               );
