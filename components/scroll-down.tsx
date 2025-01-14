@@ -9,6 +9,7 @@ import { api } from "@/convex/_generated/api";
 import { UseMutateFunction } from "@tanstack/react-query";
 import { useVoiceRecorder } from "@/context/audio-context";
 import { useWavesurfer } from "@wavesurfer/react";
+import { useGlobalContext } from "@/context/globalContext";
 
 interface messageItem {
   _id: Id<"messages">;
@@ -258,33 +259,37 @@ const MessageFooter: React.FC<{
 const MessRight: React.FC<{
   message: messageItem;
   children: React.ReactNode;
-}> = ({ message, children }) => (
-  <div className="pb-1 md:p-2 p-1 !pr-0 w-full group flex items-end gap-2 justify-end z-[9]">
-    <div className="flex flex-col items-end max-w-[75%]">
-      <div className="bg-[#dcfaf5] rounded-tl-2xl rounded-tr-sm rounded-bl-2xl p-3 text-[#091e42]">
-        {children}
-      </div>
-    </div>
-  </div>
-);
-
-const MessLeft: React.FC<{
-  message: messageItem;
-  children: React.ReactNode;
 }> = ({ message, children }) => {
+  const { replyMessageId, replyMessageIdScroll } = useGlobalContext();
+  const [backGroundColor, setBackGroundColor] = useState(false);
   const other = message.senderId;
   const seenMess = useMutation(api.message.seenMessage);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const highlightTimeoutRef = useRef<NodeJS.Timeout>();
 
-  const { ref, inView } = useInView({
+  // Create a separate ref for the DOM element
+  const messageRef = useRef<HTMLDivElement | null>(null);
+
+  // Use inView with a callback ref
+  const { ref: inViewRef, inView } = useInView({
     threshold: 0.5,
     triggerOnce: true,
   });
 
+  // Combine refs using callback ref pattern
+  const setRefs = (node: HTMLDivElement | null) => {
+    // Set the messageRef
+    if (messageRef.current !== node) {
+      messageRef.current = node ?? null;
+    }
+    // Set the inView ref
+    inViewRef(node);
+  };
+
   useEffect(() => {
     if (message.status === "SENT" && inView) {
-      console.log("wwwwwwwwwwwwwwwwwwwwwww");
+      // console.log("wwwwwwwwwwwwwwwwwwwwwww");
 
       seenMess({
         id: message._id,
@@ -300,10 +305,176 @@ const MessLeft: React.FC<{
     };
   }, [message.status, inView, message._id, message.chatId]);
 
+  // useEffect(() => {
+  //   const Is = replyMessageId?._id === message._id;
+  //   if (inView && replyMessageIdScroll && Is) {
+  //     setTimeout(() => {
+  //       setBackGroundColor(true);
+  //     }, 500);
+  //   }
+  //   setTimeout(() => {
+  //     setBackGroundColor(false);
+  //   }, 1000);
+  // }, [inView, replyMessageIdScroll, replyMessageId]);
+
+  // Handle reply message highlighting
+  useEffect(() => {
+    const isReplyMessage = replyMessageId?._id === message._id;
+
+    if (
+      inView &&
+      replyMessageIdScroll &&
+      isReplyMessage &&
+      messageRef.current
+    ) {
+      // Clear any existing timeout
+      if (highlightTimeoutRef.current) {
+        clearTimeout(highlightTimeoutRef.current);
+      }
+
+      // Add highlight class after a short delay
+      highlightTimeoutRef.current = setTimeout(() => {
+        if (messageRef.current) {
+          messageRef.current.classList.add("bg-[rgba(66,82,110,0.3)]");
+
+          // Remove highlight after animation
+          setTimeout(() => {
+            if (messageRef.current) {
+              messageRef.current.classList.remove("bg-[rgba(66,82,110,0.3)]");
+            }
+          }, 500);
+        }
+      }, 600);
+    }
+
+    return () => {
+      if (highlightTimeoutRef.current) {
+        clearTimeout(highlightTimeoutRef.current);
+      }
+    };
+  }, [inView, replyMessageIdScroll, replyMessageId, message._id]);
   return (
     <div
-      className="pb-1 md:p-2 p-1 w-full group flex items-end gap-2 z-[9] "
-      ref={ref}
+      className="pb-1 md:p-2 p-1  w-full group flex items-end gap-2 justify-end z-[9] rounded-md  "
+      // className="md:p-2 "
+
+      ref={setRefs}
+    >
+      <div className="flex flex-col items-end max-w-[75%]">
+        <div className="bg-[#dcfaf5] rounded-tl-2xl rounded-tr-sm rounded-bl-2xl p-3 text-[#091e42]">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const MessLeft: React.FC<{
+  message: messageItem;
+  children: React.ReactNode;
+}> = ({ message, children }) => {
+  const { replyMessageId, replyMessageIdScroll } = useGlobalContext();
+  const [backGroundColor, setBackGroundColor] = useState(false);
+  const other = message.senderId;
+  const seenMess = useMutation(api.message.seenMessage);
+
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const highlightTimeoutRef = useRef<NodeJS.Timeout>();
+
+  // Create a separate ref for the DOM element
+  const messageRef = useRef<HTMLDivElement | null>(null);
+
+  // Use inView with a callback ref
+  const { ref: inViewRef, inView } = useInView({
+    threshold: 0.5,
+    triggerOnce: true,
+  });
+
+  // Combine refs using callback ref pattern
+  const setRefs = (node: HTMLDivElement | null) => {
+    // Set the messageRef
+    if (messageRef.current !== node) {
+      messageRef.current = node ?? null;
+    }
+    // Set the inView ref
+    inViewRef(node);
+  };
+
+  useEffect(() => {
+    if (message.status === "SENT" && inView) {
+      // console.log("wwwwwwwwwwwwwwwwwwwwwww");
+
+      seenMess({
+        id: message._id,
+        chatId: message.chatId as Id<"chats">,
+        userId: message.receiverId,
+      });
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, [message.status, inView, message._id, message.chatId]);
+
+  // useEffect(() => {
+  //   const Is = replyMessageId?._id === message._id;
+  //   if (inView && replyMessageIdScroll && Is) {
+  //     setTimeout(() => {
+  //       setBackGroundColor(true);
+  //     }, 500);
+  //   }
+  //   setTimeout(() => {
+  //     setBackGroundColor(false);
+  //   }, 1000);
+  // }, [inView, replyMessageIdScroll, replyMessageId]);
+
+  // Handle reply message highlighting
+  useEffect(() => {
+    const isReplyMessage = replyMessageId?._id === message._id;
+
+    if (
+      inView &&
+      replyMessageIdScroll &&
+      isReplyMessage &&
+      messageRef.current
+    ) {
+      // Clear any existing timeout
+      if (highlightTimeoutRef.current) {
+        clearTimeout(highlightTimeoutRef.current);
+      }
+
+      // Add highlight class after a short delay
+      highlightTimeoutRef.current = setTimeout(() => {
+        if (messageRef.current) {
+          messageRef.current.classList.add("bg-[rgba(66,82,110,0.3)]");
+
+          // Remove highlight after animation
+          setTimeout(() => {
+            if (messageRef.current) {
+              messageRef.current.classList.remove("bg-[rgba(66,82,110,0.3)]");
+            }
+          }, 500);
+        }
+      }, 800);
+    }
+
+    return () => {
+      if (highlightTimeoutRef.current) {
+        clearTimeout(highlightTimeoutRef.current);
+      }
+    };
+  }, [inView, replyMessageIdScroll, replyMessageId, message._id]);
+
+  return (
+    <div
+      className={cn(
+        "pb-1 md:p-2 p-1 w-full group flex items-end gap-2 z-[9] transition-all duration-200 rounded-md "
+        // backGroundColor && "bg-[rgba(66,82,110,0.3)]"
+      )}
+      // ref={ref}
+      ref={setRefs}
     >
       <div className="flex flex-col items-start max-w-[75%]">
         <div className="bg-[#f4f5f7] rounded-tr-2xl rounded-tl-sm rounded-br-2xl p-3 text-[#091e42]">

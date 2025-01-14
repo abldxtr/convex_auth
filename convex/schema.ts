@@ -30,6 +30,7 @@ const schema = defineSchema({
 
   messages: defineTable({
     content: v.string(),
+    replyMessage: v.optional(v.id("messages")),
 
     senderId: v.id("users"),
     receiverId: v.id("users"),

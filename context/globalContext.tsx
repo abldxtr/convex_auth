@@ -1,5 +1,6 @@
 "use client";
 
+import { Id } from "@/convex/_generated/dataModel";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 export type FileState = {
@@ -17,6 +18,23 @@ export type convexFile = {
 export type IconChange = {
   type: "voice" | "text";
   state: boolean;
+};
+
+export type replyMess = {
+  _id: Id<"messages">;
+  _creationTime: number;
+  replyMessage?: Id<"messages"> | undefined;
+  image?: string[] | undefined;
+  img?: ArrayBuffer | undefined;
+  audioUrl?: ArrayBuffer | undefined;
+  audioStorageId?: Id<"_storage"> | undefined;
+  type: "TEXT" | "IMAGE" | "VIDEO" | "AUDIO" | "FILE";
+  content: string;
+  senderId: Id<"users">;
+  receiverId: Id<"users">;
+  chatId: Id<"chats">;
+  status: "SENT" | "DELIVERED" | "READ";
+  opupId: string;
 };
 
 interface CounterContextType {
@@ -69,12 +87,20 @@ interface CounterContextType {
   setChangeIcon: React.Dispatch<React.SetStateAction<IconChange>>;
   scrollBound: number;
   setScrollBound: React.Dispatch<React.SetStateAction<number>>;
+  replyMessageId: replyMess | null;
+  setReplyMessageId: React.Dispatch<React.SetStateAction<replyMess | null>>;
+  replyMessageIdScroll: boolean;
+  setReplyMessageIdScroll: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const GlobalContext = createContext<CounterContextType | undefined>(undefined);
 
 export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
   const [convexFile, setConvexFile] = useState<convexFile | null>(null);
+
+  const [replyMessageId, setReplyMessageId] = useState<replyMess | null>(null);
+  const [replyMessageIdScroll, setReplyMessageIdScroll] =
+    useState<boolean>(false);
 
   const [imgTemp, setImgTemp] = useState<FileState[]>([]);
   const [currentView, setCurrentView] = useState<string>("all-chats");
@@ -151,6 +177,10 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
         setChangeIcon,
         scrollBound,
         setScrollBound,
+        replyMessageId,
+        setReplyMessageId,
+        replyMessageIdScroll,
+        setReplyMessageIdScroll,
       }}
     >
       {children}

@@ -21,12 +21,28 @@ import { useVoiceRecorder } from "@/context/audio-context";
 import { formatTime } from "@/lib/utils";
 import { Pause, Play } from "lucide-react";
 import { useUploadImage } from "@/hooks/useUploadImage";
+import ReplyMessageComp from "./reply-message";
 
 interface imageOptions {
   contentType?: string;
   width?: number;
   height?: number;
 }
+
+export type otherUser =
+  | {
+      _id: Id<"users">;
+      _creationTime: number;
+      name?: string | undefined;
+      email?: string | undefined;
+      phone?: string | undefined;
+      image?: string | undefined;
+      emailVerificationTime?: number | undefined;
+      phoneVerificationTime?: number | undefined;
+      isAnonymous?: boolean | undefined;
+    }
+  | null
+  | undefined;
 
 export const blobToBase64 = (blob: any) => {
   const reader = new FileReader();
@@ -60,11 +76,13 @@ export default function InputChat({
   chatId,
   other,
   user,
+  otherUser,
 }: {
   param: string;
   chatId: Id<"chats">;
   other?: Id<"users">;
   user?: User;
+  otherUser?: otherUser;
 }) {
   const { setOpenEmoji } = useEmojiState();
   const {
@@ -77,6 +95,8 @@ export default function InputChat({
     setToScroll,
     setChangeIcon,
     scrollBound,
+    replyMessageId,
+    setReplyMessageId,
   } = useGlobalContext();
   const {
     handleDelete,
@@ -151,89 +171,11 @@ export default function InputChat({
     }
   });
 
-  // const creatUploadMessage = useAction(api.message.MessageWithImg);
-
   const handleClickOutside = () => {
     setOpenEmoji(false);
   };
 
   useOnClickOutside([EmojiRef, textRef], handleClickOutside);
-
-  // const handleSubmit = async (e: FormEvent) => {
-  //   e.preventDefault();
-  //   // console.log("handleSubmit");
-  //   if (imgTemp.length > 0) {
-  //     if (currentUser && other && chatId) {
-  //       const newMessage = {
-  //         content: inputValue.trim(),
-  //         senderId: currentUser,
-  //         receiverId: other,
-  //         id: chatId,
-  //         createdAt: new Date().toISOString() as unknown as Date,
-  //         updatedAt: new Date().toISOString() as unknown as Date,
-  //         chatId,
-  //         type: "IMAGE" as const,
-  //         status: "SENT" as const,
-  //         opupId: crypto.randomUUID(),
-  //         images: imgTemp,
-  //       };
-  //       const newMessage1 = {
-  //         content: inputValue.trim(),
-  //         senderId: currentUser,
-  //         recieverId: other,
-  //         chatId: chatId as Id<"chats">,
-  //         opupId: crypto.randomUUID(),
-  //         images: imgTemp.map((item) => item.file as unknown as string),
-  //       };
-  //       createMessage(newMessage1);
-
-  //       // }
-  //     }
-  //   } else {
-  //     if (inputValue.trim()) {
-  //       if (currentUser && other && chatId) {
-  //         const newMessage = {
-  //           content: inputValue.trim(),
-  //           senderId: currentUser,
-  //           receiverId: other,
-  //           id: chatId,
-  //           createdAt: new Date().toISOString() as unknown as Date,
-  //           updatedAt: new Date().toISOString() as unknown as Date,
-  //           chatId,
-
-  //           type: "TEXT" as const,
-  //           status: "SENT" as const,
-  //           opupId: crypto.randomUUID(),
-  //         };
-
-  //         const newMessage1 = {
-  //           content: inputValue.trim(),
-  //           senderId: currentUser,
-  //           recieverId: other,
-  //           chatId: chatId as Id<"chats">,
-  //           opupId: crypto.randomUUID(),
-  //           images: [""],
-  //           // messageId: crypto.randomUUID() as Id<"messages">,
-  //         };
-
-  //         // console.log("newMessage", newMessage1);
-  //         // sendMessage(newMessage);
-  //         const a = {
-  //           typing: false,
-  //           present: false,
-  //           latestJoin: Date.now(),
-  //         };
-  //         // updatePresenceForStop({ user: currentUser, room: chatId, data: a });
-
-  //         // createMessage(newMessage1);
-  //         // sendMessage(newMessage);
-  //       }
-  //     }
-  //   }
-
-  //   setInputValue("");
-  //   setIsShowImgTemp(false);
-  // };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -244,10 +186,6 @@ export default function InputChat({
 
     // آپلود فایل صوتی
     if (audioURL && audioBlob !== null) {
-      // const response = await fetch(audioURL);
-      // const audioBlob = await response.blob();
-      // await uploadAudio(audioBlob, currentUser, chatId);
-      // handleDelete(); // حذف فایل صوتی پس از آپلود
       console.log("audioBlob", audioBlob);
       const res = await uploadImg(audioBlob);
       const idStorage = res;
@@ -266,12 +204,18 @@ export default function InputChat({
           .map((img) => img.storageId as Id<"_storage">),
         type: "AUDIO" as const,
         audioStorageId: idStorage,
+        replyId: replyMessageId?._id,
       };
 
       await createMessage(newMessage);
 
       handleDelete();
+
+      setInputValue("");
+      setImgTemp([]);
+      setIsShowImgTemp(false);
       setChangeIcon({ type: "voice", state: false });
+      setReplyMessageId(null);
     }
 
     if (imgTemp.length > 0) {
@@ -295,16 +239,15 @@ export default function InputChat({
           .map((img) => img.storageId as Id<"_storage">),
         img: ImageArrayBuffer,
         type: "IMAGE" as const,
+        replyId: replyMessageId?._id,
       };
 
       createMessage(newMessage);
-      // if (scrollPos < scrollBound) {
-      //   setToScroll(true);
-      // }
-      // setInputValue("");
-      // setImgTemp([]);
-      // setIsShowImgTemp(false);
-      // setChangeIcon({ type: "voice", state: false });
+      setInputValue("");
+      setImgTemp([]);
+      setIsShowImgTemp(false);
+      setChangeIcon({ type: "voice", state: false });
+      setReplyMessageId(null);
     } else if (!!messageContent) {
       const newMessage = {
         content: messageContent,
@@ -313,6 +256,7 @@ export default function InputChat({
         chatId: chatId as Id<"chats">,
         opupId: messageId,
         type: "TEXT" as const,
+        replyId: replyMessageId?._id,
       };
 
       const presenceUpdate = {
@@ -328,18 +272,15 @@ export default function InputChat({
       });
 
       createMessage(newMessage);
-      // setInputValue("");
-      // setImgTemp([]);
-      // setIsShowImgTemp(false);
-      // setChangeIcon({ type: "voice", state: false });
+      setInputValue("");
+      setImgTemp([]);
+      setIsShowImgTemp(false);
+      setChangeIcon({ type: "voice", state: false });
+      setReplyMessageId(null);
     }
     if (scrollPos < scrollBound) {
       setToScroll(true);
     }
-    setInputValue("");
-    setImgTemp([]);
-    setIsShowImgTemp(false);
-    setChangeIcon({ type: "voice", state: false });
   };
 
   const handleEmoji = (emoji: any) => {
@@ -350,6 +291,13 @@ export default function InputChat({
     // <DragContainer className=" bg-[#fcfdfd] border-t border-[#eff3f4] px-[12px]    py-1 isolate ">
     <DragContainer className=" bg-transparent px-[12px]    py-1 isolate ">
       <div className="  flex flex-col w-full h-full bg-[#eff3f4] rounded-[16px] ">
+        {replyMessageId && (
+          <ReplyMessageComp
+            message={replyMessageId}
+            chatId={chatId}
+            otherUser={otherUser}
+          />
+        )}
         {isShowImgTemp && <TempImg />}
         <div className=" my-[4px] mx-[12px] p-[4px] flex items-center justify-between bg-[#eff3f4] rounded-[16px] gap-1 relative    ">
           <div className=" flex items-center  ">

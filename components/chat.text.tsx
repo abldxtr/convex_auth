@@ -54,6 +54,7 @@ export default function Chat_text(props: {
             other={other}
             user={props.user}
             unreadMessagesCount={unreadMessagesCount}
+            otherUser={otherUser}
           />
 
           <InputChat
@@ -61,6 +62,7 @@ export default function Chat_text(props: {
             other={other! as Id<"users">}
             chatId={props.param as Id<"chats">}
             user={props.user}
+            otherUser={otherUser}
           />
         </div>
       </section>

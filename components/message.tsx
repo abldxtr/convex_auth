@@ -22,17 +22,21 @@ import {
 } from "@tanstack/react-query";
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
 import { useGlobalContext } from "@/context/globalContext";
+import { useMessageScroll } from "@/hooks/use-message-scroll";
+import { otherUser } from "./chat.input";
 
 export default function Messages({
   chatId,
   other,
   user,
   unreadMessagesCount,
+  otherUser,
 }: {
   chatId: Id<"chats"> | undefined;
   other?: string | undefined;
   user?: User;
   unreadMessagesCount: number | null | undefined;
+  otherUser?: otherUser;
 }) {
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const chatRef = useRef<HTMLDivElement | null>(null);
@@ -58,8 +62,17 @@ export default function Messages({
   const { mutate, isPending: seenMessageAllLoading } = TanStackMutation({
     mutationFn: useConvexMutation(api.message.seenMessageAll),
   });
-  const { scrollPos, setScrollPos, toScroll, setToScroll, setScrollBound } =
-    useGlobalContext();
+  const {
+    scrollPos,
+    setScrollPos,
+    toScroll,
+    setToScroll,
+    setScrollBound,
+    setReplyMessageId,
+    replyMessageId,
+    replyMessageIdScroll,
+    setReplyMessageIdScroll,
+  } = useGlobalContext();
   const { data: messages, isPending } = useQuery(
     convexQuery(api.message.messages, { chatId: cc })
   );
@@ -173,6 +186,29 @@ export default function Messages({
     isScroll,
   ]);
 
+  // scroll to meesageId
+  // useEffect(() => {
+  //   const messageId = document.getElementById(`message-${replyMessageId?._id}`);
+
+  //   if (messageId && replyMessageIdScroll) {
+  //     messageId.scrollIntoView({
+  //       behavior: "instant",
+  //       block: "center",
+  //     });
+  //     setTimeout(() => {
+  //       setReplyMessageIdScroll(false);
+  //     }, 1000);
+  //   }
+  // }, [replyMessageId, replyMessageIdScroll, setReplyMessageIdScroll]);
+
+  useMessageScroll({
+    resetDelay: 1000,
+    scrollOptions: {
+      behavior: "instant",
+      block: "center",
+    },
+  });
+
   // const isloadingData = status === "LoadingMore";
 
   // const { ref, inView, entry } = useInView({
@@ -218,7 +254,7 @@ export default function Messages({
       />
       <div
         className={cn(
-          "w-full  md:p-2 !md:pr-0  overflow-y-auto flex  flex-col h-full  [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-md"
+          "w-full    overflow-y-auto flex  flex-col h-full  [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-md"
         )}
         ref={chatRef}
       >
@@ -236,13 +272,13 @@ export default function Messages({
               </div>
             </div>
             {msgs.map((message) => {
-              // if (message.type === "AUDIO") {
-              //   console.log(message.url);
-              //   // return;
-              // }
               const isFirstUnread = message._id === firstUnreadRef.current; // فقط یک بار
               return (
-                <div key={message._id} id={`message-${message._id}`}>
+                <div
+                  key={message._id}
+                  id={`message-${message._id}`}
+                  onClick={() => setReplyMessageId(message)}
+                >
                   {isFirstUnread && (
                     <div className="bg-yellow-100 text-yellow-800 text-center py-1 rounded-md ">
                       پیام‌های خوانده‌نشده

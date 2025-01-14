@@ -77,12 +77,14 @@ export const InputWithRef = forwardRef<
             </div>
           )}
           {changeIcon.type === "voice" && changeIcon.state && (
-            <button
-              disabled={isRecording}
-              type="button"
+            <div
+              // disabled={isRecording}
               className={cn(
                 "shrink-0 size-[34px] hover:bg-[#f01d1d1a] flex items-center  justify-center transition-all duration-300 rounded-full",
-                "disabled:opacity-70 disabled:cursor-not-allowed disabled:pointer-events-none"
+                "disabled:opacity-70 disabled:cursor-not-allowed disabled:pointer-events-none",
+                isRecording
+                  ? "pointer-events-none opacity-70 cursor-not-allowed"
+                  : " cursor-pointer "
               )}
               onClick={() => {
                 handleDelete();
@@ -90,13 +92,13 @@ export const InputWithRef = forwardRef<
               }}
             >
               <Trash2 className="size-[18px] shrink-0" color="red" />
-            </button>
+            </div>
           )}
 
           {changeIcon.type === "voice" && changeIcon.state && (
-            <button
+            <div
               className={cn(
-                "shrink-0 size-[34px] hover:bg-[#1d9bf01a] flex items-center  justify-center transition-all duration-300 rounded-full",
+                "shrink-0 size-[34px] hover:bg-[#1d9bf01a] flex items-center cursor-pointer  justify-center transition-all duration-300 rounded-full",
                 "disabled:opacity-70 disabled:cursor-not-allowed disabled:pointer-events-none"
               )}
               onClick={() => {
@@ -117,7 +119,7 @@ export const InputWithRef = forwardRef<
               ) : (
                 <Play className="size-4  " />
               )}
-            </button>
+            </div>
           )}
 
           <button

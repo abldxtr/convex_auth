@@ -12,6 +12,7 @@ export const createMessage = mutation({
     // images: v.optional(v.array(v.id("_storage"))),
     images: v.optional(v.any()),
     audioStorageId: v.optional(v.id("_storage")),
+    replyId: v.optional(v.id("messages")),
 
     senderId: v.id("users"),
     recieverId: v.id("users"),
@@ -39,6 +40,7 @@ export const createMessage = mutation({
         img: args.img,
         // audioUrl: args.audio,
         audioStorageId: args.audioStorageId,
+        replyMessage: args.replyId,
       });
 
       return messageId;
@@ -56,6 +58,7 @@ export const createMessage = mutation({
       opupId: args.opupId,
       img: args.img,
       audioUrl: args.audio,
+      replyMessage: args.replyId,
     });
 
     return messageId;
@@ -81,6 +84,15 @@ export const messages = query({
         ...(message.type === "AUDIO" && message.audioStorageId
           ? { url: await ctx.storage.getUrl(message.audioStorageId) }
           : {}),
+        ...(message.replyMessage
+          ? { replyMess: await ctx.db.get(message.replyMessage) }
+          : {}),
+        // ...(message.senderId
+        //   ? { sender: await ctx.db.get(message.senderId) }
+        //   : {}),
+        // ...(message.receiverId
+        //   ? { receiver: await ctx.db.get(message.receiverId) }
+        //   : {}),
       }))
     );
 

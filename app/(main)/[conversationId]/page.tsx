@@ -17,6 +17,7 @@ const ConversationId = async (props: {
 
   const token = await convexAuthNextjsToken();
   // const user = await fetchQuery(api.user.getUser, {}, { token });
+  //
 
   const Ispart = await fetchQuery(
     api.chat.getChat,
