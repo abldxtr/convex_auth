@@ -87,6 +87,7 @@ const AudioMessage = ({ message }: { message: messageItem }) => {
     normalize: true,
     dragToSeek: true,
     url: message.url || "",
+    cursorWidth: 2,
   });
 
   useEffect(() => {
@@ -110,7 +111,7 @@ const AudioMessage = ({ message }: { message: messageItem }) => {
     }
   };
   return (
-    <div className="flex items-center w-full min-w-[350px] gap-x-2  ">
+    <div className="flex items-center md:w-[300px]  w-[220px] gap-x-2  ">
       <div
         className="bg-blue-400 size-[40px] rounded-full flex items-center justify-center shrink-0 "
         onClick={handlePlayPause}
