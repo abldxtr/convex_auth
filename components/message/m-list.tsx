@@ -13,6 +13,7 @@ import { User } from "../message.list";
 import { AnimatePresence, motion } from "framer-motion";
 import usePresence from "@/hooks/usePresence";
 import { TypingLeft } from "../scroll-down";
+import { getMessagePreview } from "../last-message";
 
 export type userList = {
   name: string | null;
@@ -160,7 +161,7 @@ export default function UserList({ user }: { user: userList }) {
           </div>
           <div className="text-sm font-normal leading-[20px] text-[#7a869a] flex items-center justify-between  ">
             <p>
-              {presentOthers && presentOthers.data.typing ? (
+              {/* {presentOthers && presentOthers.data.typing ? (
                 <span className=" animate-pulse ">typing...</span>
               ) : user.lastMessage ? (
                 user.lastMessage?.content.length > 20 ? (
@@ -170,6 +171,12 @@ export default function UserList({ user }: { user: userList }) {
                 )
               ) : (
                 "هنوز گفت و گویی شروع نکرده اید."
+              )} */}
+
+              {presentOthers && presentOthers.data.typing ? (
+                <span className=" animate-pulse ">typing...</span>
+              ) : (
+                getMessagePreview(user.lastMessage)
               )}
             </p>
             <div className={cn("", user.unReadMess > 0 ? "hidden" : "flex")}>
