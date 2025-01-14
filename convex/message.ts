@@ -13,6 +13,7 @@ export const createMessage = mutation({
     images: v.optional(v.any()),
     audioStorageId: v.optional(v.id("_storage")),
     replyId: v.optional(v.id("messages")),
+    replyMess: v.optional(v.any()),
 
     senderId: v.id("users"),
     recieverId: v.id("users"),

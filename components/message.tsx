@@ -237,7 +237,7 @@ export default function Messages({
         {Object.entries(groupedMessages).map(([date, msgs]) => (
           <div key={date} className="mb-4 isolate">
             <div className="text-center text-sm text-gray-500 my-2 sticky top-0 rtlDir z-[200] w-full flex items-center justify-center">
-              <div className="px-2 py-1 bg-gray-100 rounded-full mt-2 md:mt-0 ">
+              <div className="px-2 py-1 bg-gray-100 rounded-full mt-2  ">
                 {date}
               </div>
             </div>

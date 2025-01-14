@@ -137,8 +137,17 @@ export default function InputChat({
   const createMessage = useMutation(
     api.message.createMessage
   ).withOptimisticUpdate((localStore, mutationArg) => {
-    const { content, chatId, images, senderId, recieverId, opupId, img, type } =
-      mutationArg;
+    const {
+      content,
+      chatId,
+      images,
+      senderId,
+      recieverId,
+      opupId,
+      img,
+      type,
+      replyMess,
+    } = mutationArg;
 
     // ایجاد پیام موقت
     // const typeImg = !!images?.length && "IMAGE";
@@ -158,6 +167,7 @@ export default function InputChat({
       opupId,
       image: images,
       img: img,
+      replyMess,
     };
 
     const res = localStore.getQuery(api.message.messages, {
@@ -205,6 +215,7 @@ export default function InputChat({
         type: "AUDIO" as const,
         audioStorageId: idStorage,
         replyId: replyMessageId?._id,
+        replyMess: replyMessageId,
       };
 
       await createMessage(newMessage);
@@ -240,6 +251,7 @@ export default function InputChat({
         img: ImageArrayBuffer,
         type: "IMAGE" as const,
         replyId: replyMessageId?._id,
+        replyMess: replyMessageId,
       };
 
       createMessage(newMessage);
@@ -257,6 +269,7 @@ export default function InputChat({
         opupId: messageId,
         type: "TEXT" as const,
         replyId: replyMessageId?._id,
+        replyMess: replyMessageId,
       };
 
       const presenceUpdate = {
@@ -296,6 +309,7 @@ export default function InputChat({
             message={replyMessageId}
             chatId={chatId}
             otherUser={otherUser}
+            currentUser={user}
           />
         )}
         {isShowImgTemp && <TempImg />}

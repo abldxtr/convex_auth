@@ -18,8 +18,12 @@ export default function ReplyMessageComp({
 }: replyType) {
   const { setReplyMessageId, replyMessageIdScroll, setReplyMessageIdScroll } =
     useGlobalContext();
+  console.log({ currentUser, otherUser });
   const name =
     message.senderId === currentUser?._id ? currentUser.name : otherUser?.name;
+  console.log({ name });
+  console.log(otherUser?.name);
+
   const text =
     message.content.length > 40
       ? message.content.substring(0, 40) + "..."
@@ -52,10 +56,10 @@ export default function ReplyMessageComp({
       </div>
 
       <div
-        className="p-2 size-[42px] aspect-square cursor-pointer rounded-full bg-gray-100 hover:bg-gray-200 transition-all flex items-center justify-center  "
+        className="p-2 size-[42px] aspect-square group cursor-pointer rounded-full bg-gray-100 hover:bg-gray-200 transition-all flex items-center justify-center  "
         onClick={() => setReplyMessageId(null)}
       >
-        <X className="  " />
+        <X className=" opacity-70 group-hover:opacity-100  " />
       </div>
     </div>
   );

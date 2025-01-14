@@ -85,36 +85,42 @@ export const ChatMessage = ({
     : null;
 
   return (
-    <MessageWrapper message={message}>
-      {ii !== null && (
-        <img
-          src={`data:image/jpeg;base64,${ii}`}
-          alt={`uploaded-img`}
-          width={600}
-          height={600}
-          className={cn(
-            "h-auto max-h-[calc(55dvh)] bg-[#0f141981] shrink-0 object-cover",
-            message.status === "DELIVERED" ? "blur-md" : "blur-0"
-          )}
-        />
-      )}
-      {message.replyMess && (
-        <ReplyMessage
-          message={message.replyMess}
-          current_user={current_user}
-          other_user={other_user}
-        />
-      )}
-      {message.type === "AUDIO" && <AudioMessage message={message} />}
-      {message.content && (
-        <span className={cn(" ", ii !== null && "pt-1")}>
-          {/* <span className={cn("break-all  ", ii !== null && "pt-1")}> */}
+    <>
+      <MessageWrapper message={message}>
+        {ii !== null && (
+          <img
+            src={`data:image/jpeg;base64,${ii}`}
+            alt={`uploaded-img`}
+            width={600}
+            height={600}
+            className={cn(
+              "h-auto max-h-[calc(55dvh)] bg-[#0f141981] shrink-0 object-cover",
+              message.status === "DELIVERED" ? "blur-md" : "blur-0"
+            )}
+          />
+        )}
+        {message.replyMess && (
+          <ReplyMessage
+            message={message.replyMess}
+            current_user={current_user}
+            other_user={other_user}
+          />
+        )}
+        {message.type === "AUDIO" && <AudioMessage message={message} />}
+        {message.content && (
+          <span className={cn(" ", ii !== null && "pt-1")}>
+            {/* <span className={cn("break-all  ", ii !== null && "pt-1")}> */}
 
-          {message.content}
-        </span>
-      )}
-      <MessageFooter message={message} imageLoaded={imageLoaded} />
-    </MessageWrapper>
+            {message.content}
+          </span>
+        )}
+        <MessageFooter
+          message={message}
+          imageLoaded={imageLoaded}
+          isCurrentUser={isCurrentUser}
+        />
+      </MessageWrapper>
+    </>
   );
 };
 
@@ -161,7 +167,7 @@ const AudioMessage = ({ message }: { message: messageItem }) => {
     }
   };
   return (
-    <div className="flex items-center md:w-[300px]  w-[220px] gap-x-2  ">
+    <div className="flex items-center md:w-[300px]  w-[220px] gap-x-2 pt-[8px]  ">
       <div
         className="bg-blue-400 size-[40px] rounded-full flex items-center justify-center shrink-0 "
         onClick={handlePlayPause}
@@ -175,9 +181,9 @@ const AudioMessage = ({ message }: { message: messageItem }) => {
 
       <div className="rounded-lg   w-full h-full ">
         <div id="waveform" ref={audioRef} className="w-full h-[24px]" />
-        <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-          <span>{formatTime(currentTime)}</span>
-          <span>{formatTime(audioDuration)}</span>
+        <div className="flex items-center mt-2 text-xs text-muted-foreground">
+          <span>{formatTime(currentTime)} / </span>
+          <span> {formatTime(audioDuration)}</span>
         </div>
       </div>
     </div>
@@ -207,7 +213,7 @@ export function ReplyMessage({ message, current_user, other_user }: replyType) {
     : null;
   return (
     <div
-      className="flex item-center justify-between  mb-[12px]  "
+      className="flex item-center justify-between  mb-[12px] mt-[5px] "
       onClick={() => {
         // setReplyMessageIdScroll(true);
         // setReplyMessageId(message);
@@ -303,7 +309,8 @@ const ImageItem: React.FC<{
 const MessageFooter: React.FC<{
   message: messageItem;
   imageLoaded: boolean;
-}> = ({ message, imageLoaded }) => {
+  isCurrentUser: boolean;
+}> = ({ message, imageLoaded, isCurrentUser }) => {
   const renderStatusIcon = () => {
     if (message.status === "DELIVERED") {
       return <Loader2 className="size-[12px] text-[#1d9bf0] animate-spin " />;
@@ -349,7 +356,12 @@ const MessageFooter: React.FC<{
   };
 
   return (
-    <div className="text-[#6a7485] text-xs leading-4 mt-1 flex items-center  ">
+    <div
+      className={cn(
+        "text-[#6a7485] text-[0.65rem] leading-4 mt-1 flex  items-center  ",
+        isCurrentUser && "justify-end "
+      )}
+    >
       {formatPersianDate(new Date(message._creationTime))}
       <span className="ml-2 ">{renderStatusIcon()}</span>
     </div>
@@ -442,7 +454,7 @@ const MessRight: React.FC<{
   }, [inView, replyMessageIdScroll, replyMessageId, message._id]);
   return (
     <div
-      className="pb-1 md:p-2 p-1  w-full group flex items-end gap-2 justify-end z-[9] rounded-md  "
+      className=" md:p-2 p-1  w-full group flex items-end gap-2 justify-end z-[9] rounded-md  "
       // className="md:p-2 "
 
       ref={setRefs}
@@ -470,7 +482,7 @@ const MessRight: React.FC<{
       </div>
 
       <div className="flex flex-col items-end max-w-[75%]">
-        <div className="bg-[#dcfaf5] rounded-tl-2xl rounded-tr-sm rounded-bl-2xl p-3 text-[#091e42]">
+        <div className="bg-[#dcfaf5] rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl p-3 pt-1 pb-1 text-[#091e42]">
           {children}
         </div>
       </div>
@@ -568,11 +580,10 @@ const MessLeft: React.FC<{
       className={cn(
         "pb-1 md:p-2 p-1 w-full group flex items-end gap-2 z-[9] transition-all duration-200 rounded-md "
       )}
-      onClick={() => setReplyMessageId(message)}
       ref={setRefs}
     >
       <div className="flex flex-col items-start max-w-[75%]">
-        <div className="bg-[#f4f5f7] rounded-tr-2xl rounded-tl-sm rounded-br-2xl p-3 text-[#091e42]">
+        <div className="bg-[#f4f5f7] rounded-tr-2xl  rounded-br-2xl rounded-tl-2xl p-3 pt-1 pb-1 text-[#091e42]">
           {children}
         </div>
       </div>
