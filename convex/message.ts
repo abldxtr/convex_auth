@@ -97,7 +97,7 @@ export const messages = query({
       }))
     );
 
-    console.log({ ress });
+    // console.log({ ress });
 
     return ress;
   },
@@ -127,16 +127,21 @@ export const seenMessage = mutation({
   },
   handler: async (ctx, args) => {
     const { id, chatId, userId } = args;
-
-    await ctx.db.patch(id, {
-      status: "READ",
-    });
-
-    const chat = await ctx.db.get(chatId);
-
-    if (!chat) {
-      throw new Error(`Chat with id ${chatId} not found.`);
+    const userIdAuth = await getAuthUserId(ctx);
+    if (userIdAuth === null) {
+      //   throw new Error("Client is not authenticated!");
+      return null;
     }
+
+    const message = await ctx.db.get(id);
+    if (message !== null && message.receiverId === userIdAuth) {
+      await ctx.db.patch(id, {
+        status: "READ",
+      });
+
+      return;
+    }
+    return null;
   },
 });
 

@@ -13,7 +13,7 @@ export const InputWithRef = forwardRef<
   }
 >(({ value, onChange, onSubmit }, ref) => {
   const { imgTemp, changeIcon, setChangeIcon } = useGlobalContext();
-  console.log({ changeIcon });
+  // console.log({ changeIcon });
   const {
     handleDelete,
     recordingDuration,
@@ -50,7 +50,7 @@ export const InputWithRef = forwardRef<
     // - هیچ محتوایی (متن یا تصویر یا صدا) نداشته باشیم
     return isRecording || (!hasText && !hasImage && !hasAudio);
   }, [value, imgTemp, audioURL, isRecording]);
-  console.log({ isButtonDisabled });
+  // console.log({ isButtonDisabled });
 
   return (
     <div className="grow shrink w-full h-full">

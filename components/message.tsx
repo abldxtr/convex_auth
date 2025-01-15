@@ -228,12 +228,6 @@ export default function Messages({
         )}
         ref={chatRef}
       >
-        {/* {isloadingData && (
-          <div className="flex justify-center">
-            <Loader2 className="h-6 w-6 text-zinc-500 animate-spin my-4" />
-          </div>
-        )} */}
-
         {Object.entries(groupedMessages).map(([date, msgs]) => (
           <div key={date} className="mb-4 isolate">
             <div className="text-center text-sm text-gray-500 my-2 sticky top-0 rtlDir z-[200] w-full flex items-center justify-center">
