@@ -11,13 +11,7 @@ const ConversationId = async (props: {
   }>;
 }) => {
   const param = (await props.params).conversationId;
-  // if (!!param) {
-  //   redirect("/");
-  // }
-
   const token = await convexAuthNextjsToken();
-  // const user = await fetchQuery(api.user.getUser, {}, { token });
-  //
 
   const Ispart = await fetchQuery(
     api.chat.getChat,
@@ -31,9 +25,7 @@ const ConversationId = async (props: {
 
   return (
     <>
-      <div className="w-full h-full">
-        <Main param={param} />
-      </div>
+      <Main param={param} />
     </>
   );
 };

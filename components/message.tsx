@@ -258,7 +258,7 @@ export default function Messages({
                 <div
                   key={message._id}
                   id={`message-${message._id}`}
-                  className=" hover:bg-[rgba(66,82,110,0.03)] transition-all group   "
+                  className=" hover:bg-[rgba(66,82,110,0.03)] transition-all group  rounded-md  "
                 >
                   {isFirstUnread && (
                     <div className="bg-yellow-100 text-yellow-800 text-center py-1 rounded-md ">
