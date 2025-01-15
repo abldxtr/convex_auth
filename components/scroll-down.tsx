@@ -149,9 +149,9 @@ const AudioMessage = ({ message }: { message: messageItem }) => {
 
   useEffect(() => {
     if (wavesurfer) {
-      console.log({ wavesurfer });
+      // console.log({ wavesurfer });
       wavesurfer.on("timeupdate", (currentTime: number) => {
-        console.log({ currentTime });
+        // console.log({ currentTime });
         setCurrentTime(currentTime);
       });
 
@@ -499,7 +499,7 @@ const MessLeft: React.FC<{
 }> = ({ message, children, current_user }) => {
   const { replyMessageId, replyMessageIdScroll, setReplyMessageId } =
     useGlobalContext();
-  console.log(replyMessageId, replyMessageIdScroll);
+  // console.log(replyMessageId, replyMessageIdScroll);
   const other = message.senderId;
   const seenMess = useMutation(api.message.seenMessage);
 
@@ -555,7 +555,7 @@ const MessLeft: React.FC<{
       isReplyMessage &&
       messageRef.current
     ) {
-      console.log("cccccc", replyMessageId, replyMessageIdScroll);
+      // console.log("cccccc", replyMessageId, replyMessageIdScroll);
 
       // Clear any existing timeout
       if (highlightTimeoutRef.current) {

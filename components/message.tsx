@@ -123,12 +123,8 @@ export default function Messages({
 
   useLayoutEffect(() => {
     const storedScrollPosition = sessionStorage.getItem(`scrollPos-${chatId}`);
-    console.log("useLayoutEffect");
-    console.log(bottomRef.current);
 
     if (!firstUnreadRef.current && messages) {
-      console.log("firstUnreadMessage && message");
-
       const firstUnreadMessage = messages.find(
         (message) =>
           message.status !== "READ" && message.senderId !== currentUser
@@ -139,7 +135,6 @@ export default function Messages({
         const unreadElement = document.getElementById(
           `message-${firstUnreadRef.current}`
         );
-        console.log("firstUnreadMessage");
 
         if (unreadElement) {
           unreadElement.scrollIntoView({
@@ -148,16 +143,12 @@ export default function Messages({
           });
         }
       } else if (storedScrollPosition && chatRef.current) {
-        console.log("storedScrollPosition");
-
         chatRef.current.scrollTop = parseInt(storedScrollPosition, 10);
       } else if (bottomRef.current) {
-        console.log("bottomRef.current");
         bottomRef.current.scrollIntoView({
           behavior: "instant",
           block: "center",
         });
-        console.log("bottomref");
       }
     }
 
@@ -269,27 +260,3 @@ export default function Messages({
     </div>
   );
 }
-
-// }
-
-// if (firstUnreadRef.current) {
-//   const unreadElement = document.getElementById(
-//     `message-${firstUnreadRef.current}`
-//   );
-
-//   if (unreadElement) {
-//     unreadElement.scrollIntoView({
-//       behavior: "instant",
-//       block: "end",
-//     });
-//   }
-//   console.log("firstUnreadMessage");
-// } else if (storedScrollPosition && chatRef.current) {
-//   chatRef.current.scrollTop = parseInt(storedScrollPosition, 10);
-//   console.log("storedScrollPosition");
-// } else if (bottomRef.current) {
-//   bottomRef.current.scrollIntoView({
-//     behavior: "instant",
-//   });
-//   console.log("bottomref");
-// }

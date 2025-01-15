@@ -18,6 +18,13 @@ export default function ReplyMessageComp({
 }: replyType) {
   const { setReplyMessageId, replyMessageIdScroll, setReplyMessageIdScroll } =
     useGlobalContext();
+
+  if (message.chatId !== chatId) {
+    // setReplyMessageId(null)
+
+    return null;
+  }
+
   const name =
     message.senderId === currentUser?._id ? currentUser.name : otherUser?.name;
 

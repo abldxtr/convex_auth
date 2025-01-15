@@ -91,6 +91,8 @@ interface CounterContextType {
   setReplyMessageId: React.Dispatch<React.SetStateAction<replyMess | null>>;
   replyMessageIdScroll: boolean;
   setReplyMessageIdScroll: React.Dispatch<React.SetStateAction<boolean>>;
+  isPendingForUploadAudio: boolean;
+  setIspendingForUploadingAudio: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const GlobalContext = createContext<CounterContextType | undefined>(undefined);
@@ -100,6 +102,9 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
 
   const [replyMessageId, setReplyMessageId] = useState<replyMess | null>(null);
   const [replyMessageIdScroll, setReplyMessageIdScroll] =
+    useState<boolean>(false);
+
+  const [isPendingForUploadAudio, setIspendingForUploadingAudio] =
     useState<boolean>(false);
 
   const [imgTemp, setImgTemp] = useState<FileState[]>([]);
@@ -181,6 +186,8 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
         setReplyMessageId,
         replyMessageIdScroll,
         setReplyMessageIdScroll,
+        isPendingForUploadAudio,
+        setIspendingForUploadingAudio,
       }}
     >
       {children}

@@ -13,7 +13,6 @@ export const InputWithRef = forwardRef<
   }
 >(({ value, onChange, onSubmit }, ref) => {
   const { imgTemp, changeIcon, setChangeIcon } = useGlobalContext();
-  // console.log({ changeIcon });
   const {
     handleDelete,
     recordingDuration,
@@ -27,30 +26,14 @@ export const InputWithRef = forwardRef<
     isWaveSurferPlaying,
     audioURL,
   } = useVoiceRecorder();
-  // console.log({ changeIcon });
-  // const isButtonDisabled = useMemo(() => {
-  //   // return !value.trim() && !imgTemp.length;
-  //   // || isRecording
-  //   const hasUrl = audioURL === null ? true : !!audioURL ? true : false;
-  //   const hasImg = imgTemp.length > 0;
-  //   const hasText = value.trim().length > 0 ? true : hasImg ? true : false;
-  //   console.log({ hasText });
-  //   console.log(!hasText, !hasImg, !hasUrl, isRecording);
-  //   // console.log({ audioURL });
-  //   return !hasText || !hasImg || hasUrl || isRecording;
-  // }, [value, imgTemp, audioURL, isRecording]);
 
   const isButtonDisabled = useMemo(() => {
     const hasText = value.trim().length > 0;
     const hasImage = imgTemp.length > 0;
     const hasAudio = audioURL !== null;
 
-    // دکمه غیرفعال است اگر:
-    // - در حال ضبط باشیم یا
-    // - هیچ محتوایی (متن یا تصویر یا صدا) نداشته باشیم
     return isRecording || (!hasText && !hasImage && !hasAudio);
   }, [value, imgTemp, audioURL, isRecording]);
-  // console.log({ isButtonDisabled });
 
   return (
     <div className="grow shrink w-full h-full">
@@ -67,18 +50,12 @@ export const InputWithRef = forwardRef<
           />
           {changeIcon.type === "voice" && changeIcon.state && isRecording && (
             <div className="flex items-center gap-x-1 mr-2">
-              {/* {isRecording ? (
-                <span>{formatTime(recordingDuration)}</span>
-              ) : (
-                <span>{formatTime(audioDuration)}</span>
-              )} */}
               <span>{formatTime(recordingDuration)}</span>
               <div className=" size-2 bg-red-500 animate-pulse rounded-full  " />
             </div>
           )}
           {changeIcon.type === "voice" && changeIcon.state && (
             <div
-              // disabled={isRecording}
               className={cn(
                 "shrink-0 size-[34px] hover:bg-[#f01d1d1a] flex items-center  justify-center transition-all duration-300 rounded-full",
                 "disabled:opacity-70 disabled:cursor-not-allowed disabled:pointer-events-none",
@@ -102,8 +79,6 @@ export const InputWithRef = forwardRef<
                 "disabled:opacity-70 disabled:cursor-not-allowed disabled:pointer-events-none"
               )}
               onClick={() => {
-                // setChangeIcon({ type: "voice", state: true });
-                // handleDelete();
                 if (isRecording) {
                   stopRecording();
                 } else {

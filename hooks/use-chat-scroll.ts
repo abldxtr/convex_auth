@@ -9,16 +9,12 @@ import {
 type ChatScrollProps = {
   chatRef: React.RefObject<HTMLDivElement>;
   bottomRef: React.RefObject<HTMLDivElement>;
-  // shouldLoadMore: boolean;
-  // loadMore: () => void;
   setGoDown: Dispatch<SetStateAction<boolean>>;
 };
 
 export const useChatScroll = ({
   chatRef,
   bottomRef,
-  // shouldLoadMore,
-  // loadMore,
   setGoDown,
 }: ChatScrollProps) => {
   useEffect(() => {
@@ -28,17 +24,7 @@ export const useChatScroll = ({
         const distanceFromBottom =
           topDiv.scrollHeight - topDiv.scrollTop - topDiv.clientHeight;
         const distanceFromTop = topDiv.scrollTop;
-
-        // console.log({ distanceFromBottom });
-        // console.log({ distanceFromTop });
-        // console.log("scrollheight", topDiv.scrollHeight);
-        // console.log(topDiv.clientHeight);
-
         setGoDown(distanceFromBottom > 50);
-
-        // if (distanceFromTop < 100 && shouldLoadMore) {
-        //   // loadMore();
-        // }
       }
     };
 
@@ -47,6 +33,5 @@ export const useChatScroll = ({
     return () => {
       topDiv?.removeEventListener("scroll", handleScroll);
     };
-    // }, [shouldLoadMore, loadMore, chatRef, setGoDown]);
   }, [chatRef, setGoDown]);
 };

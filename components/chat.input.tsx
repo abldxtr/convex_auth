@@ -97,6 +97,8 @@ export default function InputChat({
     scrollBound,
     replyMessageId,
     setReplyMessageId,
+    isPendingForUploadAudio,
+    setIspendingForUploadingAudio,
   } = useGlobalContext();
   const {
     handleDelete,
@@ -147,14 +149,15 @@ export default function InputChat({
       img,
       type,
       replyMess,
+      url,
     } = mutationArg;
 
     // ایجاد پیام موقت
     // const typeImg = !!images?.length && "IMAGE";
     // const imgSrc = new Blob([img!]);
-    if (type === "AUDIO") {
-      return;
-    }
+    // if (type === "AUDIO") {
+    //   return;
+    // }
     const optimisticMessage = {
       _id: `optimistic-${opupId}` as Id<"messages">, // تبدیل به نوع مناسب
       _creationTime: Date.now() as number,
@@ -168,7 +171,9 @@ export default function InputChat({
       image: images,
       img: img,
       replyMess,
+      url,
     };
+    console.log({ optimisticMessage });
 
     const res = localStore.getQuery(api.message.messages, {
       chatId,
@@ -193,10 +198,27 @@ export default function InputChat({
 
     const messageContent = inputValue.trim();
     const messageId = crypto.randomUUID();
+    const replyMessageIdForSend = replyMessageId?.chatId !== chatId;
 
     // آپلود فایل صوتی
     if (audioURL && audioBlob !== null) {
-      console.log("audioBlob", audioBlob);
+      // console.log("audioBlob", audioBlob);
+      // const newMessageOpUdate = {
+      //   content: messageContent,
+      //   senderId: currentUser,
+      //   recieverId: other,
+      //   chatId: chatId as Id<"chats">,
+      //   opupId: messageId,
+
+      //   type: "AUDIO" as const,
+      //   audioStorageId: "kg2edacvakd80hms3gqj4636td78ftnq" as Id<"_storage">,
+      //   replyId: replyMessageIdForSend ? undefined : replyMessageId?._id,
+      //   replyMess: replyMessageIdForSend ? null : replyMessageId,
+      //   url: audioURL,
+      // };
+
+      // await createMessage(newMessageOpUdate);
+      setIspendingForUploadingAudio(true);
       const res = await uploadImg(audioBlob);
       const idStorage = res;
       if (!!!idStorage) {
@@ -209,13 +231,12 @@ export default function InputChat({
         recieverId: other,
         chatId: chatId as Id<"chats">,
         opupId: messageId,
-        images: imgTemp
-          .filter((img) => img.storageId)
-          .map((img) => img.storageId as Id<"_storage">),
+
         type: "AUDIO" as const,
         audioStorageId: idStorage,
-        replyId: replyMessageId?._id,
-        replyMess: replyMessageId,
+        replyId: replyMessageIdForSend ? undefined : replyMessageId?._id,
+        replyMess: replyMessageIdForSend ? null : replyMessageId,
+        url: audioURL,
       };
 
       await createMessage(newMessage);
@@ -226,7 +247,10 @@ export default function InputChat({
       setImgTemp([]);
       setIsShowImgTemp(false);
       setChangeIcon({ type: "voice", state: false });
-      setReplyMessageId(null);
+      if (!replyMessageIdForSend) {
+        setReplyMessageId(null);
+      }
+      setIspendingForUploadingAudio(false);
     }
 
     if (imgTemp.length > 0) {
@@ -250,8 +274,8 @@ export default function InputChat({
           .map((img) => img.storageId as Id<"_storage">),
         img: ImageArrayBuffer,
         type: "IMAGE" as const,
-        replyId: replyMessageId?._id,
-        replyMess: replyMessageId,
+        replyId: replyMessageIdForSend ? undefined : replyMessageId?._id,
+        replyMess: replyMessageIdForSend ? null : replyMessageId,
       };
 
       createMessage(newMessage);
@@ -259,7 +283,9 @@ export default function InputChat({
       setImgTemp([]);
       setIsShowImgTemp(false);
       setChangeIcon({ type: "voice", state: false });
-      setReplyMessageId(null);
+      if (!replyMessageIdForSend) {
+        setReplyMessageId(null);
+      }
     } else if (!!messageContent) {
       const newMessage = {
         content: messageContent,
@@ -268,8 +294,8 @@ export default function InputChat({
         chatId: chatId as Id<"chats">,
         opupId: messageId,
         type: "TEXT" as const,
-        replyId: replyMessageId?._id,
-        replyMess: replyMessageId,
+        replyId: replyMessageIdForSend ? undefined : replyMessageId?._id,
+        replyMess: replyMessageIdForSend ? null : replyMessageId,
       };
 
       const presenceUpdate = {
@@ -289,7 +315,9 @@ export default function InputChat({
       setImgTemp([]);
       setIsShowImgTemp(false);
       setChangeIcon({ type: "voice", state: false });
-      setReplyMessageId(null);
+      if (!replyMessageIdForSend) {
+        setReplyMessageId(null);
+      }
     }
     if (scrollPos < scrollBound) {
       setToScroll(true);
@@ -301,9 +329,11 @@ export default function InputChat({
   };
 
   return (
-    // <DragContainer className=" bg-[#fcfdfd] border-t border-[#eff3f4] px-[12px]    py-1 isolate ">
     <DragContainer className=" bg-transparent px-[12px]    py-1 isolate ">
-      <div className="  flex flex-col w-full h-full bg-[#eff3f4] rounded-[16px] ">
+      <div className="  flex flex-col w-full h-full bg-[#eff3f4] rounded-[16px] relative">
+        {isPendingForUploadAudio && (
+          <div className=" absolute inset-0 bg-zinc-200/50 z-[10] " />
+        )}
         {replyMessageId && (
           <ReplyMessageComp
             message={replyMessageId}

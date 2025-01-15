@@ -57,7 +57,8 @@ const schema = defineSchema({
   })
     .index("by_sender_user", ["senderId"])
     .index("by_receiver_user", ["receiverId"])
-    .index("by_chatId", ["chatId"]),
+    .index("by_chatId", ["chatId"])
+    .index("by_audioStorageId", ["audioStorageId"]),
 });
 
 export default schema;

@@ -10,6 +10,7 @@ export const createMessage = mutation({
     content: v.string(),
     chatId: v.id("chats"),
     // images: v.optional(v.array(v.id("_storage"))),
+    url: v.optional(v.string()),
     images: v.optional(v.any()),
     audioStorageId: v.optional(v.id("_storage")),
     replyId: v.optional(v.id("messages")),
@@ -30,6 +31,42 @@ export const createMessage = mutation({
   },
   handler: async (ctx, args) => {
     if (args.type === "AUDIO") {
+      if (!!!args.audioStorageId) {
+        return null;
+      }
+      // if (args.audioStorageId === "kg2edacvakd80hms3gqj4636td78ftnq") {
+      //   const fakeId = "kg2edacvakd80hms3gqj4636td78ftnq" as Id<"_storage">;
+      //   // const user = await ctx.db
+      //   // .query("messages")
+      //   // .withIndex("by_chatId", (q) => q.eq("chatId", chatId))
+      //   // .filter((q) =>
+      //   //   q.and(
+      //   //     q.eq(q.field("receiverId"), userId),
+      //   //     q.eq(q.field("status"), "SENT")
+      //   //   )
+      //   // )
+      //   // .collect();
+      //   const isMessage = await ctx.db
+      //     .query("messages")
+      //     .withIndex("by_audioStorageId", (q) => q.eq("audioStorageId", fakeId))
+      //     .collect();
+      //   if (isMessage.length > 0) {
+      //     await ctx.db.replace(isMessage[0]._id, {
+      //       content: args.content,
+      //       type: args.type,
+      //       chatId: args.chatId,
+      //       senderId: args.senderId,
+      //       receiverId: args.recieverId,
+      //       status: "SENT",
+      //       opupId: args.opupId,
+      //       img: args.img,
+      //       // audioUrl: args.audio,
+      //       audioStorageId: args.audioStorageId,
+      //       replyMessage: args.replyId,
+      //     });
+      //   }
+      //   return null;
+      // }
       let messageId = await ctx.db.insert("messages", {
         content: args.content,
         type: args.type,
