@@ -14,6 +14,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import usePresence from "@/hooks/usePresence";
 import { TypingLeft } from "../scroll-down";
 import { getMessagePreview } from "../last-message";
+import { NumberCount } from "../framer-number";
 
 export type userList = {
   name: string | null;
@@ -116,19 +117,22 @@ export default function UserList({ user }: { user: userList }) {
           chatIdActive === user.id
             ? "bg-[rgba(0,184,147,0.15)] "
             : "hover:bg-[#f4f5f7]",
-          // user.active ? "bg-[rgba(0,184,147,0.15)]" : "hover:bg-[#f4f5f7]"
-          // chatIdActive?.active ? "bg-[#f7f9f9] border-r-2 border-blue-300 " : ""
           chatIdActive === user.id && "border-r-2 border-[#1d9bf0]"
         )}
       >
-        <div
+        {/* <div
           className={cn(
             " absolute bottom-2 flex items-center justify-center right-4 size-6 rounded-full bg-[#1d9bf0] text-white font-semibold  ",
             user.unReadMess === 0 && "hidden "
           )}
         >
           {user.unReadMess > 0 && user.unReadMess}
-        </div>
+        </div> */}
+        <NumberCount
+          num={user.unReadMess}
+          condition={user.unReadMess === 0}
+          classname="absolute bottom-2 flex items-center justify-center right-4 size-6 rounded-full bg-[#1d9bf0] text-white font-semibold"
+        />
         <div className="mr-[16px] flex relative size-[50px] cursor-pointer items-center justify-center rounded-full border border-[#e5eaec] bg-[#ffffff] transition-all duration-300  ">
           {user.img && (
             <Image
@@ -161,18 +165,6 @@ export default function UserList({ user }: { user: userList }) {
           </div>
           <div className="text-sm font-normal leading-[20px] text-[#7a869a] flex items-center justify-between  ">
             <p>
-              {/* {presentOthers && presentOthers.data.typing ? (
-                <span className=" animate-pulse ">typing...</span>
-              ) : user.lastMessage ? (
-                user.lastMessage?.content.length > 20 ? (
-                  user.lastMessage.content.substring(0, 40) + "..."
-                ) : (
-                  user.lastMessage?.content
-                )
-              ) : (
-                "هنوز گفت و گویی شروع نکرده اید."
-              )} */}
-
               {presentOthers && presentOthers.data.typing ? (
                 <span className=" animate-pulse ">typing...</span>
               ) : (
@@ -200,7 +192,6 @@ export function UserListLoading() {
         if (!matches) {
           setMobileMenue(false);
         }
-        // setChatIdActive(user);
       }}
     >
       <div
@@ -241,10 +232,7 @@ export type usr =
 
 export function Account({ user }: { user?: User }) {
   const me = user?.name;
-  const img =
-    "https://pbs.twimg.com/profile_images/1564361710554734593/jgWXrher_normal.jpg";
 
-  // const { isConnected } = useSocket();
   const { isCopied, copyToClipboard } = useCopyToClipboard({});
 
   if (!user) {
@@ -264,7 +252,7 @@ export function Account({ user }: { user?: User }) {
         <div className="mr-[16px] flex relative size-[48px] cursor-pointer items-center justify-center rounded-full border-y border-[#e5eaec]  transition-all duration-300  ">
           <Image
             alt="Aerospace"
-            src={user.image ?? img}
+            src={user.image!}
             className="size-full rounded-full shrink-0 "
             fill
           />
@@ -290,7 +278,7 @@ export function Account({ user }: { user?: User }) {
             {/* <span>{user.lastMessage.substring(0, 30)}</span> */}
           </div>
         </div>
-        <AnimatePresence>
+        <AnimatePresence mode="popLayout" initial={false}>
           <div
             className={cn(
               "   transition-[opacity] duration-300 mr-4 ",

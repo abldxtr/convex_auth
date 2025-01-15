@@ -12,6 +12,8 @@ import { useWavesurfer } from "@wavesurfer/react";
 import { replyMess, useGlobalContext } from "@/context/globalContext";
 import { User } from "./message.list";
 import CurrentUser from "./current-user";
+import { NumberCount } from "./framer-number";
+import { useMessageSeen } from "@/context/chatSeenContext";
 
 // interface messageItem {
 //   _id: Id<"messages">;
@@ -500,8 +502,34 @@ const MessLeft: React.FC<{
   const { replyMessageId, replyMessageIdScroll, setReplyMessageId } =
     useGlobalContext();
   // console.log(replyMessageId, replyMessageIdScroll);
+  // const { handleMessageSeen } = useMessageSeen();
   const other = message.senderId;
-  const seenMess = useMutation(api.message.seenMessage);
+  const seenMess = useMutation(api.message.seenMessage).withOptimisticUpdate(
+    (localStore, mutationArg) => {
+      const { chatId, userId, id } = mutationArg;
+
+      const res = localStore.getQuery(api.message.messages, {
+        chatId,
+      });
+      if (res) {
+        const updatedMessages = res.map((item) => {
+          if (
+            // item.receiverId === userId &&
+            // item.status === "SENT" &&
+            item._id === id
+          ) {
+            return {
+              ...item,
+              status: "READ" as const,
+            };
+          }
+          return item;
+        });
+
+        localStore.setQuery(api.message.messages, { chatId }, updatedMessages);
+      }
+    }
+  );
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const highlightTimeoutRef = useRef<NodeJS.Timeout>();
@@ -545,7 +573,6 @@ const MessLeft: React.FC<{
     };
   }, [message.status, inView, message._id, message.chatId, current_user]);
 
-  // Handle reply message highlighting
   useEffect(() => {
     const isReplyMessage = replyMessageId?._id === message._id;
 
@@ -557,17 +584,14 @@ const MessLeft: React.FC<{
     ) {
       // console.log("cccccc", replyMessageId, replyMessageIdScroll);
 
-      // Clear any existing timeout
       if (highlightTimeoutRef.current) {
         clearTimeout(highlightTimeoutRef.current);
       }
 
-      // Add highlight class after a short delay
       highlightTimeoutRef.current = setTimeout(() => {
         if (messageRef.current) {
           messageRef.current.classList.add("bg-[rgba(66,82,110,0.1)]");
 
-          // Remove highlight after animation
           setTimeout(() => {
             if (messageRef.current) {
               messageRef.current.classList.remove("bg-[rgba(66,82,110,0.1)]");
@@ -701,16 +725,13 @@ export function ScrollDown({
           func();
         }}
       >
-        <div
-          className={cn(
-            " absolute -top-5 md:right-3 right-0 flex items-center justify-center bg-[#1d9bf0] text-white font-semibold rounded-full size-8 ",
-            !!unreadMessagesCount === false && "hidden"
-          )}
-        >
-          {!!unreadMessagesCount &&
-            unreadMessagesCount > 0 &&
-            unreadMessagesCount}
-        </div>
+        {!!unreadMessagesCount && unreadMessagesCount > 0 && (
+          <NumberCount
+            num={unreadMessagesCount}
+            condition={!!unreadMessagesCount === false}
+            classname="absolute -top-5 md:right-3 right-0 flex items-center justify-center bg-[#1d9bf0] text-white font-semibold rounded-full size-8 "
+          />
+        )}
 
         <svg
           viewBox="0 0 24 24"
@@ -727,45 +748,3 @@ export function ScrollDown({
 }
 
 export default ChatMessage;
-
-{
-  /* {message.type === "IMAGE" &&
-        message.image &&
-        message.image.length > 0 && (
-          <ImageContent
-            images={message.image}
-            setImageLoaded={setImageLoaded}
-            uploading={message.status === "DELIVERED" ? true : false}
-            iii=[ii]
-          />
-        )} */
-}
-
-// console.log(message.audio!.byteLength);
-
-// const audioBlob = new Blob([message.audio!], { type: "audio/wav" });
-// const url = URL.createObjectURL(audioBlob);
-// console.log({ url });
-
-// function playAudioBlob(blob: Blob) {
-//   const url = URL.createObjectURL(blob);
-//   const audio = new Audio(url);
-//   audio.play();
-// }
-
-// playAudioBlob(audioBlob);
-
-// const setUrl = () => {
-//   setAudioURL(url);
-// };
-
-// const setUrl = useCallback(() => {
-//   setAudioURL(url);
-// }, [url]);
-// // setAudioURL(url);
-// audioURL = url;
-// setUrl();
-
-// const ii = message.audio
-//   ? btoa(String.fromCharCode(...new Uint8Array(message.audio)))
-//   : null;

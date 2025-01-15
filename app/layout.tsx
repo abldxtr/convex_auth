@@ -9,6 +9,7 @@ import { EmojiProvider } from "@/context/EmojiContext";
 import { ConvexQueryCacheProvider } from "convex-helpers/react/cache/provider";
 import { VoiceRecorderProvider } from "@/context/audio-context";
 import { Toaster } from "@/components/ui/sonner";
+// import { ChatSeenProvider } from "../context/chatSeenContext";
 // import { Monitoring } from "react-scan/monitoring/next"; // Import this first before React
 // import { ReactScan } from "@/components/react-scan";
 
@@ -30,6 +31,7 @@ export default function RootLayout({
         <body className="">
           <ConvexClientProvider>
             <GlobalProvider>
+              {/* <ChatSeenProvider> */}
               <EmojiProvider>
                 <VoiceRecorderProvider>
                   <ConvexQueryCacheProvider>
@@ -42,6 +44,7 @@ export default function RootLayout({
                   </ConvexQueryCacheProvider>
                 </VoiceRecorderProvider>
               </EmojiProvider>
+              {/* </ChatSeenProvider> */}
             </GlobalProvider>
           </ConvexClientProvider>
         </body>

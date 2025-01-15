@@ -24,6 +24,7 @@ import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
 import { useGlobalContext } from "@/context/globalContext";
 import { useMessageScroll } from "@/hooks/use-message-scroll";
 import { otherUser } from "./chat.input";
+import { useMutation } from "convex/react";
 
 export default function Messages({
   chatId,
@@ -59,8 +60,33 @@ export default function Messages({
     }
   );
   const presentOthers = (others ?? []).filter((p) => p.present)[0];
-  const { mutate, isPending: seenMessageAllLoading } = TanStackMutation({
-    mutationFn: useConvexMutation(api.message.seenMessageAll),
+  // const { mutate, isPending: seenMessageAllLoading } = TanStackMutation({
+  //   mutationFn: useConvexMutation(api.message.seenMessageAll),
+  // });
+
+  const makeAllMessageSeen = useMutation(
+    api.message.seenMessageAll
+  ).withOptimisticUpdate((localStore, mutationArg) => {
+    const { chatId, userId } = mutationArg;
+
+    const res = localStore.getQuery(api.message.messages, {
+      chatId,
+    });
+    if (res) {
+      // Map through messages and update status if conditions match
+      const updatedMessages = res.map((item) => {
+        if (item.receiverId === userId && item.status === "SENT") {
+          return {
+            ...item,
+            status: "READ" as const,
+          };
+        }
+        return item;
+      });
+
+      // Set the updated messages array
+      localStore.setQuery(api.message.messages, { chatId }, updatedMessages);
+    }
   });
   const {
     setScrollPos,
@@ -211,7 +237,7 @@ export default function Messages({
         chatId={paramValue!}
         userId={currentUser!}
         unreadMessagesCount={unreadMessagesCount}
-        mutate={mutate}
+        mutate={makeAllMessageSeen}
       />
       <div
         className={cn(
