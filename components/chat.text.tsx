@@ -62,7 +62,7 @@ export default function Chat_text(props: {
   const x = useMotionValue(mobileMenue ? -SIDEBAR_WIDTH : 0);
 
   // Use spring for smoother motion
-  const springConfig = { damping: 25, stiffness: 200, mass: 0.5 };
+  const springConfig = { damping: 15, stiffness: 150, mass: 0.1 };
   const springX = useSpring(x, springConfig);
 
   const [isDragging, setIsDragging] = React.useState(false);
@@ -78,7 +78,7 @@ export default function Chat_text(props: {
   const overlayOpacity = useTransform(springX, [-SIDEBAR_WIDTH, 0], [0, 0.4]);
 
   // تغییر تابع transform برای opacity
-  const opacity = useTransform(springX, [-SIDEBAR_WIDTH, 0], [0, 1]);
+  const opacity = useTransform(springX, [-SIDEBAR_WIDTH, 0], [0.7, 1]);
 
   // Update x and isOpen when mobileMenue changes
   useEffect(() => {
@@ -226,7 +226,7 @@ export default function Chat_text(props: {
           </section>
         </motion.div>
         <motion.div
-          style={{ x: sidebarX }}
+          style={{ x: sidebarX, opacity: opacity }}
           className={cn(
             " overflow-y-auto overflow-x-hidden z-[1000] bg-[#fcfdfd]  scrl fixed top-0 left-0 h-dvh md:w-[400px] w-full  ",
             mobileMenue ? "  -translate-x-full    " : " translate-x-0  "
