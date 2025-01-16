@@ -19,6 +19,7 @@ import {
   motion,
   useAnimation,
   useMotionValue,
+  useSpring,
   useTransform,
 } from "framer-motion";
 
@@ -58,21 +59,47 @@ export default function Chat_text(props: {
 
   const SIDEBAR_WIDTH = matches ? 400 : window.innerWidth;
   const controls = useAnimation();
-  const x = useMotionValue(0);
-  const [isDragging, setIsDragging] = React.useState(false);
-  const [isOpen, setIsOpen] = React.useState(false);
+  const x = useMotionValue(mobileMenue ? -SIDEBAR_WIDTH : 0);
 
-  // Transform x motion value to sidebar position and overlay opacity
+  // Use spring for smoother motion
+  const springConfig = { damping: 25, stiffness: 200, mass: 0.5 };
+  const springX = useSpring(x, springConfig);
+
+  const [isDragging, setIsDragging] = React.useState(false);
+  const [isOpen, setIsOpen] = React.useState(!mobileMenue);
+
+  // Transform spring value instead of raw x
   const sidebarX = useTransform(
-    x,
-    [matches ? SIDEBAR_WIDTH : -SIDEBAR_WIDTH, 0],
-    [matches ? 0 : -SIDEBAR_WIDTH, 0]
+    springX,
+    [-SIDEBAR_WIDTH, 0],
+    [-SIDEBAR_WIDTH, 0]
   );
-  console.log(sidebarX.get());
-  const overlayOpacity = useTransform(x, [-SIDEBAR_WIDTH, 0], [0, 0.4]);
+
+  const overlayOpacity = useTransform(springX, [-SIDEBAR_WIDTH, 0], [0, 0.4]);
+
+  // تغییر تابع transform برای opacity
+  const opacity = useTransform(springX, [-SIDEBAR_WIDTH, 0], [0, 1]);
+
+  // Update x and isOpen when mobileMenue changes
+  useEffect(() => {
+    const targetX = mobileMenue ? -SIDEBAR_WIDTH : 0;
+    controls.start({
+      x: targetX,
+      opacity: mobileMenue ? 0 : 1, // Added opacity control
+      transition: {
+        type: "spring",
+        stiffness: 200,
+        damping: 25,
+        mass: 0.5,
+      },
+    });
+    x.set(targetX);
+    setIsOpen(!mobileMenue);
+  }, [mobileMenue, SIDEBAR_WIDTH, controls, x]);
 
   const handleDragStart = () => {
     setIsDragging(true);
+    controls.stop();
   };
 
   const handleDragEnd = (
@@ -83,30 +110,21 @@ export default function Chat_text(props: {
     const velocity = info.velocity.x;
     const offset = info.offset.x;
 
-    // If velocity is high enough, use it to determine direction
-    if (Math.abs(velocity) > 500) {
-      if (velocity > 0) {
-        openSidebar();
-      } else {
-        closeSidebar();
-      }
-      return;
-    }
+    // Calculate the target position based on velocity and current position
+    const currentX = x.get();
+    const projectedEndpoint = currentX + velocity * 0.2;
 
-    // Otherwise use the drag distance
-    if (Math.abs(offset) > SIDEBAR_WIDTH / 2) {
-      if (offset > 0) {
-        openSidebar();
-      } else {
-        closeSidebar();
-      }
+    // Determine direction based on velocity and offset
+    const shouldOpen =
+      (Math.abs(velocity) > 300 && velocity > 0) ||
+      (Math.abs(velocity) <= 300 && offset > SIDEBAR_WIDTH * 0.4);
+
+    if (shouldOpen) {
+      openSidebar(velocity);
+      setMobileMenue(false);
     } else {
-      // Return to previous state
-      if (isOpen) {
-        openSidebar();
-      } else {
-        closeSidebar();
-      }
+      closeSidebar(velocity);
+      setMobileMenue(true);
     }
   };
 
@@ -117,70 +135,73 @@ export default function Chat_text(props: {
     const currentX = x.get();
     const newX = currentX + info.delta.x;
 
-    // Limit the drag range
+    // Add resistance at edges
     if (newX > 0) {
-      x.set(0);
-      return;
+      x.set(newX * 0.4); // More resistance when pulling beyond open position
+    } else if (newX < -SIDEBAR_WIDTH) {
+      const overflowX = newX + SIDEBAR_WIDTH;
+      x.set(-SIDEBAR_WIDTH + overflowX * 0.4); // Resistance when pulling beyond closed position
+    } else {
+      x.set(newX);
     }
-    if (newX < -SIDEBAR_WIDTH) {
-      x.set(-SIDEBAR_WIDTH);
-      return;
-    }
-
-    x.set(newX);
   };
-  useEffect(() => {
-    if (mobileMenue) {
-      sidebarX.set(SIDEBAR_WIDTH);
-    }
-  }, [mobileMenue]);
 
-  const openSidebar = React.useCallback(() => {
-    setIsOpen(true);
-    controls.start({
-      x: 0,
-      transition: {
+  const openSidebar = React.useCallback(
+    (velocity = 0) => {
+      setIsOpen(true);
+      const transition = {
         type: "spring",
-        stiffness: 400,
-        damping: 40,
-        duration: 0.5,
-      },
-    });
-    x.set(0);
-  }, [controls, x]);
+        stiffness: 200,
+        damping: 25,
+        mass: 0.5,
+        velocity: velocity * 0.001,
+      };
 
-  const closeSidebar = React.useCallback(() => {
-    setIsOpen(false);
-    controls.start({
-      x: -SIDEBAR_WIDTH,
-      transition: {
+      controls.start({
+        x: 0,
+        opacity: 1, // Added opacity control
+        transition,
+      });
+      x.set(0);
+    },
+    [controls, x]
+  );
+
+  const closeSidebar = React.useCallback(
+    (velocity = 0) => {
+      setIsOpen(false);
+      const transition = {
         type: "spring",
-        stiffness: 400,
-        damping: 40,
-        duration: 0.5,
-      },
-    });
-    x.set(-SIDEBAR_WIDTH);
-  }, [controls, SIDEBAR_WIDTH, x]);
+        stiffness: 200,
+        damping: 25,
+        mass: 0.5,
+        velocity: velocity * 0.001,
+      };
 
-  // Initialize position
-  React.useEffect(() => {
-    x.set(-SIDEBAR_WIDTH);
-  }, [SIDEBAR_WIDTH, x]);
+      controls.start({
+        x: -SIDEBAR_WIDTH,
+        opacity: 0, // Added opacity control
+        transition,
+      });
+      x.set(-SIDEBAR_WIDTH);
+    },
+    [controls, SIDEBAR_WIDTH, x]
+  );
 
   return (
     <>
       <div className="w-full max-w-[2400px] isolate mx-auto flex h-dvh  overflow-hidden">
         <motion.div
-          drag="x"
-          dragDirectionLock
-          onDragStart={handleDragStart}
-          onDrag={handleDrag}
-          onDragEnd={handleDragEnd}
-          // dragConstraints={{ left: -SIDEBAR_WIDTH, right: 0 }}
-          dragConstraints={{ left: 0, right: 0 }}
-          // dragElastic={0.1}
-          dragElastic={0}
+          {...(!matches && {
+            // Only enable drag functionality on mobile
+            drag: "x",
+            dragDirectionLock: true,
+            onDragStart: handleDragStart,
+            onDrag: handleDrag,
+            onDragEnd: handleDragEnd,
+            dragConstraints: { left: 0, right: 0 },
+            dragElastic: 0,
+          })}
           className=" overflow-auto flex flex-1 h-full md:pl-[400px] z-[9] w-full relative"
         >
           {/* <div className=" overflow-auto flex flex-1 h-full md:pl-[400px] z-[9] w-full relative"> */}
@@ -216,6 +237,12 @@ export default function Chat_text(props: {
 
             // : " translate-x-0 transition-all duration-300 "
           )}
+          // transition={{
+          //   type: "spring",
+          //   stiffness: 300,
+          //   damping: 30,
+          //   mass: 1,
+          // }}
           //     <motion.div
           //   style={{ x: sidebarX }}
           //   className="fixed left-0 top-0 z-40 h-full w-[300px] bg-sidebar shadow-lg will-change-transform"
