@@ -7,29 +7,14 @@ import { Id } from "@/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { UseMutateFunction } from "@tanstack/react-query";
-import { useVoiceRecorder } from "@/context/audio-context";
 import { useWavesurfer } from "@wavesurfer/react";
 import { replyMess, useGlobalContext } from "@/context/globalContext";
 import { User } from "./message.list";
-import CurrentUser from "./current-user";
 import { NumberCount } from "./framer-number";
-import { useMessageSeen } from "@/context/chatSeenContext";
-
-// interface messageItem {
-//   _id: Id<"messages">;
-//   _creationTime: number;
-//   image?: string[] | undefined;
-//   chatId: string;
-//   content: string;
-//   status: "SENT" | "DELIVERED" | "READ";
-//   type: "IMAGE" | "TEXT" | "VIDEO" | "AUDIO" | "FILE";
-//   senderId: string;
-//   receiverId: string;
-//   opupId: string;
-//   img?: ArrayBuffer | undefined;
-//   audio?: ArrayBuffer | undefined;
-//   url?: string | null | undefined;
-// }
+import { useLongPress } from "use-long-press";
+import { Checkbox } from "./ui/checkbox";
+import { useDeleteItem } from "@/context/delete-items-context";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface messageItem {
   replyMess?:
@@ -127,6 +112,352 @@ export const ChatMessage = ({
   );
 };
 
+const MessRight: React.FC<{
+  message: messageItem;
+  children: React.ReactNode;
+  current_user: User | undefined;
+}> = ({ message, children }) => {
+  const { replyMessageId, replyMessageIdScroll, setReplyMessageId } =
+    useGlobalContext();
+  const { deleteItems, setDeleteItems, items, setItems } = useDeleteItem();
+  const [backGroundColor, setBackGroundColor] = useState(false);
+  const [checkState, setCheckState] = useState(false);
+
+  const bind = useLongPress(() => {
+    setDeleteItems(true);
+    // setBackGroundColor(true);
+    // setCheckState(true);
+  });
+
+  // useEffect(() => {
+  //   const check = items?.every((item) => item === message._id);
+  //   if (check) {
+  //     setCheckState(() => !checkState);
+  //   }
+  // }, [deleteItems, items, setCheckState]);
+
+  const handleCheck = () => {
+    if (deleteItems) {
+      setItems((prev) => {
+        // اگر قبلاً انتخاب شده باشد، آن را از آرایه حذف می‌کنیم
+        if (!prev) return [message._id];
+        return prev.includes(message._id)
+          ? prev.filter((id) => id !== message._id)
+          : [...prev, message._id];
+      });
+    }
+  };
+
+  const other = message.senderId;
+  const seenMess = useMutation(api.message.seenMessage);
+
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const highlightTimeoutRef = useRef<NodeJS.Timeout>();
+
+  // Create a separate ref for the DOM element
+  const messageRef = useRef<HTMLDivElement | null>(null);
+
+  // Use inView with a callback ref
+  const { ref: inViewRef, inView } = useInView({
+    threshold: 0.5,
+    triggerOnce: true,
+  });
+
+  // Combine refs using callback ref pattern
+  const setRefs = (node: HTMLDivElement | null) => {
+    // Set the messageRef
+    if (messageRef.current !== node) {
+      messageRef.current = node ?? null;
+    }
+    // Set the inView ref
+    inViewRef(node);
+  };
+
+  useEffect(() => {
+    if (message.status === "SENT" && inView) {
+      seenMess({
+        id: message._id,
+        chatId: message.chatId as Id<"chats">,
+        userId: message.receiverId,
+      });
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, [message.status, inView, message._id, message.chatId]);
+
+  // Handle reply message highlighting
+  useEffect(() => {
+    const isReplyMessage = replyMessageId?._id === message._id;
+
+    if (
+      inView &&
+      replyMessageIdScroll &&
+      isReplyMessage &&
+      messageRef.current
+    ) {
+      // Clear any existing timeout
+      if (highlightTimeoutRef.current) {
+        clearTimeout(highlightTimeoutRef.current);
+      }
+
+      // Add highlight class after a short delay
+      highlightTimeoutRef.current = setTimeout(() => {
+        if (messageRef.current) {
+          messageRef.current.classList.add("bg-[rgba(66,82,110,0.1)]");
+
+          // Remove highlight after animation
+          setTimeout(() => {
+            if (messageRef.current) {
+              messageRef.current.classList.remove("bg-[rgba(66,82,110,0.1)]");
+            }
+          }, 500);
+        }
+      }, 600);
+    }
+
+    return () => {
+      if (highlightTimeoutRef.current) {
+        clearTimeout(highlightTimeoutRef.current);
+      }
+    };
+  }, [inView, replyMessageIdScroll, replyMessageId, message._id]);
+  return (
+    <div
+      className={cn(
+        " md:p-2 p-1  w-full group flex items-end gap-2 justify-end z-[9] rounded-md  ",
+        backGroundColor && "bg-[rgba(66,82,110,0.1)]"
+      )}
+      // className="md:p-2 "
+      {...bind()}
+      ref={setRefs}
+      id={message._id}
+      onClick={handleCheck}
+      // htmlFor={message._id}
+    >
+      <div
+        className={cn(
+          " opacity-0 group-hover:opacity-100 ",
+          deleteItems ? "hidden pointer-events-none " : ""
+        )}
+      >
+        <div
+          className="  size-[32px] bg-gray-100/10 hover:bg-gray-100/80 transition-all flex items-center justify-center rounded-full cursor-pointer  "
+          onClick={() => setReplyMessageId(message)}
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3.33973 8.89844L9.87426 3.09021C9.9291 3.04361 9.99607 3.01358 10.0673 3.00363C10.1386 2.99369 10.2113 3.00425 10.2768 3.03406C10.3423 3.06388 10.3979 3.11173 10.4372 3.17202C10.4765 3.2323 10.4979 3.30253 10.4987 3.37449L10.4997 6.68555H11.5C16.5876 6.68555 21 9.60312 21 13.8721C20.9019 15.3604 20.4163 16.7971 19.5913 18.0397C18.7663 19.2823 17.6306 20.2875 16.2971 20.9555C16.2438 20.9844 16.1843 20.9997 16.1237 21H16.1151C16.0153 20.9978 15.9201 20.9572 15.8495 20.8866C15.7789 20.816 15.7383 20.7208 15.7361 20.621C15.7359 20.561 15.7503 20.5019 15.7778 20.4486C15.8053 20.3953 15.8453 20.3494 15.8943 20.3149C16.6549 19.4579 17.1293 18.3849 17.2513 17.2456C17.2513 14.4283 14.0096 12.7444 10.8749 12.7444C10.7858 12.7444 10.6968 12.7444 10.6096 12.7388H10.4997V15.3722C10.4988 15.4441 10.4775 15.5143 10.4382 15.5746C10.3989 15.6349 10.3432 15.6828 10.2777 15.7126C10.2122 15.7424 10.1396 15.753 10.0683 15.743C9.99702 15.7331 9.93005 15.703 9.87521 15.6564L3.12358 9.65524C3.08464 9.61972 3.05354 9.57647 3.03227 9.52826C3.01099 9.48004 3 9.42792 3 9.37522C3 9.32252 3.01099 9.2704 3.03227 9.22218C3.05354 9.17397 3.3008 8.93396 3.33973 8.89844Z"
+              stroke="#42526E"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            ></path>
+          </svg>
+        </div>
+      </div>
+
+      <motion.div
+        className="flex flex-col items-end max-w-[75%]"
+        initial={{ x: 0 }}
+        animate={deleteItems ? { x: -5 } : { x: 0 }}
+      >
+        <div className="bg-[#dcfaf5] rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl p-3 pt-1 pb-1 text-[#091e42]">
+          {children}
+        </div>
+      </motion.div>
+      {/* checkbox */}
+      {deleteItems && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className=""
+        >
+          {items?.includes(message._id) ? (
+            <Checkbox
+              id={message._id}
+              className="rounded-full data-[state=checked]:border-[#1d9bf0] border-[#1d9bf0] data-[state=checked]:bg-[#1d9bf0]"
+              checked={true}
+            />
+          ) : (
+            <Checkbox
+              id={message._id}
+              className="rounded-full data-[state=checked]:border-[#1d9bf0] border-[#0d344e] data-[state=checked]:bg-[#1d9bf0]"
+              checked={false}
+            />
+          )}
+        </motion.div>
+      )}
+    </div>
+  );
+};
+
+const MessLeft: React.FC<{
+  message: messageItem;
+  children: React.ReactNode;
+  current_user: User | undefined;
+}> = ({ message, children, current_user }) => {
+  const { replyMessageId, replyMessageIdScroll, setReplyMessageId } =
+    useGlobalContext();
+  const [backGroundColor, setBackGroundColor] = useState(false);
+  const bind = useLongPress(() => {
+    // alert("Long pressed!");
+    setBackGroundColor(true);
+  });
+  // console.log(replyMessageId, replyMessageIdScroll);
+  // const { handleMessageSeen } = useMessageSeen();
+  const other = message.senderId;
+  const seenMess = useMutation(api.message.seenMessage).withOptimisticUpdate(
+    (localStore, mutationArg) => {
+      const { chatId, userId, id } = mutationArg;
+
+      const res = localStore.getQuery(api.message.messages, {
+        chatId,
+      });
+      if (res) {
+        const updatedMessages = res.map((item) => {
+          if (
+            // item.receiverId === userId &&
+            // item.status === "SENT" &&
+            item._id === id
+          ) {
+            return {
+              ...item,
+              status: "READ" as const,
+            };
+          }
+          return item;
+        });
+
+        localStore.setQuery(api.message.messages, { chatId }, updatedMessages);
+      }
+    }
+  );
+
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const highlightTimeoutRef = useRef<NodeJS.Timeout>();
+
+  // Create a separate ref for the DOM element
+  const messageRef = useRef<HTMLDivElement | null>(null);
+
+  // Use inView with a callback ref
+  const { ref: inViewRef, inView } = useInView({
+    threshold: 0.5,
+    triggerOnce: true,
+  });
+
+  // Combine refs using callback ref pattern
+  const setRefs = (node: HTMLDivElement | null) => {
+    // Set the messageRef
+    if (messageRef.current !== node) {
+      messageRef.current = node ?? null;
+    }
+    // Set the inView ref
+    inViewRef(node);
+  };
+
+  useEffect(() => {
+    if (
+      message.status === "SENT" &&
+      inView &&
+      message.receiverId === current_user?._id
+    ) {
+      seenMess({
+        id: message._id,
+        chatId: message.chatId as Id<"chats">,
+        userId: message.receiverId,
+      });
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, [message.status, inView, message._id, message.chatId, current_user]);
+
+  useEffect(() => {
+    const isReplyMessage = replyMessageId?._id === message._id;
+
+    if (
+      inView &&
+      replyMessageIdScroll &&
+      isReplyMessage &&
+      messageRef.current
+    ) {
+      // console.log("cccccc", replyMessageId, replyMessageIdScroll);
+
+      if (highlightTimeoutRef.current) {
+        clearTimeout(highlightTimeoutRef.current);
+      }
+
+      highlightTimeoutRef.current = setTimeout(() => {
+        if (messageRef.current) {
+          messageRef.current.classList.add("bg-[rgba(66,82,110,0.1)]");
+
+          setTimeout(() => {
+            if (messageRef.current) {
+              messageRef.current.classList.remove("bg-[rgba(66,82,110,0.1)]");
+            }
+          }, 500);
+        }
+      }, 800);
+    }
+
+    return () => {
+      if (highlightTimeoutRef.current) {
+        clearTimeout(highlightTimeoutRef.current);
+      }
+    };
+  }, [inView, replyMessageIdScroll, replyMessageId, message._id]);
+
+  return (
+    <div
+      className={cn(
+        "pb-1 md:p-2 p-1 w-full group flex items-end gap-2 z-[9] transition-all duration-200 rounded-md "
+        // backGroundColor && "bg-[rgba(66,82,110,0.2)]"
+      )}
+      {...bind()}
+      ref={setRefs}
+    >
+      <div className="flex flex-col items-start max-w-[75%]">
+        <div className="bg-[#f4f5f7] rounded-tr-2xl  rounded-br-2xl rounded-tl-2xl p-3 pt-1 pb-1 text-[#091e42]">
+          {children}
+        </div>
+      </div>
+      <div className=" opacity-0 group-hover:opacity-100 ">
+        <div
+          className="  size-[32px] bg-gray-100/10 hover:bg-gray-100/80 transition-all flex items-center justify-center rounded-full cursor-pointer  "
+          onClick={() => setReplyMessageId(message)}
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3.33973 8.89844L9.87426 3.09021C9.9291 3.04361 9.99607 3.01358 10.0673 3.00363C10.1386 2.99369 10.2113 3.00425 10.2768 3.03406C10.3423 3.06388 10.3979 3.11173 10.4372 3.17202C10.4765 3.2323 10.4979 3.30253 10.4987 3.37449L10.4997 6.68555H11.5C16.5876 6.68555 21 9.60312 21 13.8721C20.9019 15.3604 20.4163 16.7971 19.5913 18.0397C18.7663 19.2823 17.6306 20.2875 16.2971 20.9555C16.2438 20.9844 16.1843 20.9997 16.1237 21H16.1151C16.0153 20.9978 15.9201 20.9572 15.8495 20.8866C15.7789 20.816 15.7383 20.7208 15.7361 20.621C15.7359 20.561 15.7503 20.5019 15.7778 20.4486C15.8053 20.3953 15.8453 20.3494 15.8943 20.3149C16.6549 19.4579 17.1293 18.3849 17.2513 17.2456C17.2513 14.4283 14.0096 12.7444 10.8749 12.7444C10.7858 12.7444 10.6968 12.7444 10.6096 12.7388H10.4997V15.3722C10.4988 15.4441 10.4775 15.5143 10.4382 15.5746C10.3989 15.6349 10.3432 15.6828 10.2777 15.7126C10.2122 15.7424 10.1396 15.753 10.0683 15.743C9.99702 15.7331 9.93005 15.703 9.87521 15.6564L3.12358 9.65524C3.08464 9.61972 3.05354 9.57647 3.03227 9.52826C3.01099 9.48004 3 9.42792 3 9.37522C3 9.32252 3.01099 9.2704 3.03227 9.22218C3.05354 9.17397 3.3008 8.93396 3.33973 8.89844Z"
+              stroke="#42526E"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            ></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+  );
+};
 const AudioMessage = ({ message }: { message: messageItem }) => {
   const audioRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -242,6 +573,109 @@ export function ReplyMessage({ message, current_user, other_user }: replyType) {
     </div>
   );
 }
+export function BackMenue({ func }: { func: () => void }) {
+  return (
+    <div
+      className={cn(
+        "  flex items-center justify-center size-[36px] rounded-full hover:bg-gray-100 transition-colors duration-300 border-transparent     ",
+        "cursor-pointer transiton-all duration-300 md:hidden "
+      )}
+      onClick={func}
+    >
+      <svg
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+        className=" fill-[rgba(53,55,56,0.86)] shrink-0 size-[24px] rotate-90 "
+      >
+        <g>
+          <path d="M13 3v13.59l5.043-5.05 1.414 1.42L12 20.41l-7.457-7.45 1.414-1.42L11 16.59V3h2z"></path>
+        </g>
+      </svg>
+    </div>
+  );
+}
+
+export function TypingLeft({ message }: { message: string }) {
+  return (
+    <div
+      className={cn(
+        " absolute md:bottom-2 md:left-10 bottom-2 left-8 flex items-center z-[10] shrink-0       ",
+        "cursor-pointer transiton-all duration-300  "
+      )}
+    >
+      <div className="flex flex-col w-full items-start animate-pulse ">
+        <div className="flex items-center flex-row-reverse gap-2 max-w-[calc((100%_/_2)_+_(100%_/_3))]  ">
+          <div className=" flex cursor-pointer flex-col text-[#0f1419] bg-gray-300 rounded-bl-sm rounded-2xl py-[12px] px-[16px] text-right leading-[20px] text-[15px] transition-all duration-300    ">
+            <span className={cn("  shrink-0  ")}>{message}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface ScrollDownProps {
+  goDown: boolean;
+  func: () => void;
+  chatId: Id<"chats">;
+  userId: Id<"users">;
+  unreadMessagesCount: number | null | undefined;
+  mutate: UseMutateFunction<
+    null,
+    Error,
+    {
+      chatId: Id<"chats">;
+      userId: Id<"users">;
+    },
+    unknown
+  >;
+}
+export function ScrollDown({
+  goDown,
+  func,
+  chatId,
+  userId,
+  unreadMessagesCount,
+  mutate,
+}: ScrollDownProps) {
+  return (
+    <>
+      <div
+        className={cn(
+          " absolute bottom-6 right-8 flex items-center z-[10] justify-center md:size-[54px] size-[32px] rounded-full bg-white border-transparent  px-[16px] [box-shadow:rgb(101_119_134_/_20%)_0px_0px_8px,_rgb(101_119_134_/_25%)_0px_1px_3px_1px]   ",
+          "cursor-pointer transiton-all duration-300  ",
+          goDown ? "opacity-100" : "opacity-0 pointer-events-none "
+        )}
+        onClick={() => {
+          if (!!unreadMessagesCount && unreadMessagesCount > 0) {
+            mutate({ chatId, userId });
+          }
+          func();
+        }}
+      >
+        {!!unreadMessagesCount && unreadMessagesCount > 0 && (
+          <NumberCount
+            num={unreadMessagesCount}
+            condition={!!unreadMessagesCount === false}
+            classname="absolute -top-5 md:right-3 right-0 flex items-center justify-center bg-[#1d9bf0] text-white font-semibold rounded-full size-8 "
+          />
+        )}
+
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+          className=" fill-[#707579] shrink-0 md:size-[24px] size-[18px] "
+        >
+          <g>
+            <path d="M13 3v13.59l5.043-5.05 1.414 1.42L12 20.41l-7.457-7.45 1.414-1.42L11 16.59V3h2z"></path>
+          </g>
+        </svg>
+      </div>
+    </>
+  );
+}
+
+export default ChatMessage;
 
 const ImageContent: React.FC<{
   images: string[];
@@ -370,381 +804,3 @@ const MessageFooter: React.FC<{
     </div>
   );
 };
-
-const MessRight: React.FC<{
-  message: messageItem;
-  children: React.ReactNode;
-  current_user: User | undefined;
-}> = ({ message, children }) => {
-  const { replyMessageId, replyMessageIdScroll, setReplyMessageId } =
-    useGlobalContext();
-  const [backGroundColor, setBackGroundColor] = useState(false);
-  const other = message.senderId;
-  const seenMess = useMutation(api.message.seenMessage);
-
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const highlightTimeoutRef = useRef<NodeJS.Timeout>();
-
-  // Create a separate ref for the DOM element
-  const messageRef = useRef<HTMLDivElement | null>(null);
-
-  // Use inView with a callback ref
-  const { ref: inViewRef, inView } = useInView({
-    threshold: 0.5,
-    triggerOnce: true,
-  });
-
-  // Combine refs using callback ref pattern
-  const setRefs = (node: HTMLDivElement | null) => {
-    // Set the messageRef
-    if (messageRef.current !== node) {
-      messageRef.current = node ?? null;
-    }
-    // Set the inView ref
-    inViewRef(node);
-  };
-
-  useEffect(() => {
-    if (message.status === "SENT" && inView) {
-      seenMess({
-        id: message._id,
-        chatId: message.chatId as Id<"chats">,
-        userId: message.receiverId,
-      });
-    }
-
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-    };
-  }, [message.status, inView, message._id, message.chatId]);
-
-  // Handle reply message highlighting
-  useEffect(() => {
-    const isReplyMessage = replyMessageId?._id === message._id;
-
-    if (
-      inView &&
-      replyMessageIdScroll &&
-      isReplyMessage &&
-      messageRef.current
-    ) {
-      // Clear any existing timeout
-      if (highlightTimeoutRef.current) {
-        clearTimeout(highlightTimeoutRef.current);
-      }
-
-      // Add highlight class after a short delay
-      highlightTimeoutRef.current = setTimeout(() => {
-        if (messageRef.current) {
-          messageRef.current.classList.add("bg-[rgba(66,82,110,0.1)]");
-
-          // Remove highlight after animation
-          setTimeout(() => {
-            if (messageRef.current) {
-              messageRef.current.classList.remove("bg-[rgba(66,82,110,0.1)]");
-            }
-          }, 500);
-        }
-      }, 600);
-    }
-
-    return () => {
-      if (highlightTimeoutRef.current) {
-        clearTimeout(highlightTimeoutRef.current);
-      }
-    };
-  }, [inView, replyMessageIdScroll, replyMessageId, message._id]);
-  return (
-    <div
-      className=" md:p-2 p-1  w-full group flex items-end gap-2 justify-end z-[9] rounded-md  "
-      // className="md:p-2 "
-
-      ref={setRefs}
-    >
-      <div className=" opacity-0 group-hover:opacity-100 ">
-        <div
-          className="  size-[32px] bg-gray-100/10 hover:bg-gray-100/80 transition-all flex items-center justify-center rounded-full cursor-pointer  "
-          onClick={() => setReplyMessageId(message)}
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M3.33973 8.89844L9.87426 3.09021C9.9291 3.04361 9.99607 3.01358 10.0673 3.00363C10.1386 2.99369 10.2113 3.00425 10.2768 3.03406C10.3423 3.06388 10.3979 3.11173 10.4372 3.17202C10.4765 3.2323 10.4979 3.30253 10.4987 3.37449L10.4997 6.68555H11.5C16.5876 6.68555 21 9.60312 21 13.8721C20.9019 15.3604 20.4163 16.7971 19.5913 18.0397C18.7663 19.2823 17.6306 20.2875 16.2971 20.9555C16.2438 20.9844 16.1843 20.9997 16.1237 21H16.1151C16.0153 20.9978 15.9201 20.9572 15.8495 20.8866C15.7789 20.816 15.7383 20.7208 15.7361 20.621C15.7359 20.561 15.7503 20.5019 15.7778 20.4486C15.8053 20.3953 15.8453 20.3494 15.8943 20.3149C16.6549 19.4579 17.1293 18.3849 17.2513 17.2456C17.2513 14.4283 14.0096 12.7444 10.8749 12.7444C10.7858 12.7444 10.6968 12.7444 10.6096 12.7388H10.4997V15.3722C10.4988 15.4441 10.4775 15.5143 10.4382 15.5746C10.3989 15.6349 10.3432 15.6828 10.2777 15.7126C10.2122 15.7424 10.1396 15.753 10.0683 15.743C9.99702 15.7331 9.93005 15.703 9.87521 15.6564L3.12358 9.65524C3.08464 9.61972 3.05354 9.57647 3.03227 9.52826C3.01099 9.48004 3 9.42792 3 9.37522C3 9.32252 3.01099 9.2704 3.03227 9.22218C3.05354 9.17397 3.3008 8.93396 3.33973 8.89844Z"
-              stroke="#42526E"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            ></path>
-          </svg>
-        </div>
-      </div>
-
-      <div className="flex flex-col items-end max-w-[75%]">
-        <div className="bg-[#dcfaf5] rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl p-3 pt-1 pb-1 text-[#091e42]">
-          {children}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const MessLeft: React.FC<{
-  message: messageItem;
-  children: React.ReactNode;
-  current_user: User | undefined;
-}> = ({ message, children, current_user }) => {
-  const { replyMessageId, replyMessageIdScroll, setReplyMessageId } =
-    useGlobalContext();
-  // console.log(replyMessageId, replyMessageIdScroll);
-  // const { handleMessageSeen } = useMessageSeen();
-  const other = message.senderId;
-  const seenMess = useMutation(api.message.seenMessage).withOptimisticUpdate(
-    (localStore, mutationArg) => {
-      const { chatId, userId, id } = mutationArg;
-
-      const res = localStore.getQuery(api.message.messages, {
-        chatId,
-      });
-      if (res) {
-        const updatedMessages = res.map((item) => {
-          if (
-            // item.receiverId === userId &&
-            // item.status === "SENT" &&
-            item._id === id
-          ) {
-            return {
-              ...item,
-              status: "READ" as const,
-            };
-          }
-          return item;
-        });
-
-        localStore.setQuery(api.message.messages, { chatId }, updatedMessages);
-      }
-    }
-  );
-
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const highlightTimeoutRef = useRef<NodeJS.Timeout>();
-
-  // Create a separate ref for the DOM element
-  const messageRef = useRef<HTMLDivElement | null>(null);
-
-  // Use inView with a callback ref
-  const { ref: inViewRef, inView } = useInView({
-    threshold: 0.5,
-    triggerOnce: true,
-  });
-
-  // Combine refs using callback ref pattern
-  const setRefs = (node: HTMLDivElement | null) => {
-    // Set the messageRef
-    if (messageRef.current !== node) {
-      messageRef.current = node ?? null;
-    }
-    // Set the inView ref
-    inViewRef(node);
-  };
-
-  useEffect(() => {
-    if (
-      message.status === "SENT" &&
-      inView &&
-      message.receiverId === current_user?._id
-    ) {
-      seenMess({
-        id: message._id,
-        chatId: message.chatId as Id<"chats">,
-        userId: message.receiverId,
-      });
-    }
-
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-    };
-  }, [message.status, inView, message._id, message.chatId, current_user]);
-
-  useEffect(() => {
-    const isReplyMessage = replyMessageId?._id === message._id;
-
-    if (
-      inView &&
-      replyMessageIdScroll &&
-      isReplyMessage &&
-      messageRef.current
-    ) {
-      // console.log("cccccc", replyMessageId, replyMessageIdScroll);
-
-      if (highlightTimeoutRef.current) {
-        clearTimeout(highlightTimeoutRef.current);
-      }
-
-      highlightTimeoutRef.current = setTimeout(() => {
-        if (messageRef.current) {
-          messageRef.current.classList.add("bg-[rgba(66,82,110,0.1)]");
-
-          setTimeout(() => {
-            if (messageRef.current) {
-              messageRef.current.classList.remove("bg-[rgba(66,82,110,0.1)]");
-            }
-          }, 500);
-        }
-      }, 800);
-    }
-
-    return () => {
-      if (highlightTimeoutRef.current) {
-        clearTimeout(highlightTimeoutRef.current);
-      }
-    };
-  }, [inView, replyMessageIdScroll, replyMessageId, message._id]);
-
-  return (
-    <div
-      className={cn(
-        "pb-1 md:p-2 p-1 w-full group flex items-end gap-2 z-[9] transition-all duration-200 rounded-md "
-      )}
-      ref={setRefs}
-    >
-      <div className="flex flex-col items-start max-w-[75%]">
-        <div className="bg-[#f4f5f7] rounded-tr-2xl  rounded-br-2xl rounded-tl-2xl p-3 pt-1 pb-1 text-[#091e42]">
-          {children}
-        </div>
-      </div>
-      <div className=" opacity-0 group-hover:opacity-100 ">
-        <div
-          className="  size-[32px] bg-gray-100/10 hover:bg-gray-100/80 transition-all flex items-center justify-center rounded-full cursor-pointer  "
-          onClick={() => setReplyMessageId(message)}
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M3.33973 8.89844L9.87426 3.09021C9.9291 3.04361 9.99607 3.01358 10.0673 3.00363C10.1386 2.99369 10.2113 3.00425 10.2768 3.03406C10.3423 3.06388 10.3979 3.11173 10.4372 3.17202C10.4765 3.2323 10.4979 3.30253 10.4987 3.37449L10.4997 6.68555H11.5C16.5876 6.68555 21 9.60312 21 13.8721C20.9019 15.3604 20.4163 16.7971 19.5913 18.0397C18.7663 19.2823 17.6306 20.2875 16.2971 20.9555C16.2438 20.9844 16.1843 20.9997 16.1237 21H16.1151C16.0153 20.9978 15.9201 20.9572 15.8495 20.8866C15.7789 20.816 15.7383 20.7208 15.7361 20.621C15.7359 20.561 15.7503 20.5019 15.7778 20.4486C15.8053 20.3953 15.8453 20.3494 15.8943 20.3149C16.6549 19.4579 17.1293 18.3849 17.2513 17.2456C17.2513 14.4283 14.0096 12.7444 10.8749 12.7444C10.7858 12.7444 10.6968 12.7444 10.6096 12.7388H10.4997V15.3722C10.4988 15.4441 10.4775 15.5143 10.4382 15.5746C10.3989 15.6349 10.3432 15.6828 10.2777 15.7126C10.2122 15.7424 10.1396 15.753 10.0683 15.743C9.99702 15.7331 9.93005 15.703 9.87521 15.6564L3.12358 9.65524C3.08464 9.61972 3.05354 9.57647 3.03227 9.52826C3.01099 9.48004 3 9.42792 3 9.37522C3 9.32252 3.01099 9.2704 3.03227 9.22218C3.05354 9.17397 3.3008 8.93396 3.33973 8.89844Z"
-              stroke="#42526E"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            ></path>
-          </svg>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export function BackMenue({ func }: { func: () => void }) {
-  return (
-    <div
-      className={cn(
-        "  flex items-center justify-center size-[36px] rounded-full hover:bg-gray-100 transition-colors duration-300 border-transparent     ",
-        "cursor-pointer transiton-all duration-300 md:hidden "
-      )}
-      onClick={func}
-    >
-      <svg
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-        className=" fill-[rgba(53,55,56,0.86)] shrink-0 size-[24px] rotate-90 "
-      >
-        <g>
-          <path d="M13 3v13.59l5.043-5.05 1.414 1.42L12 20.41l-7.457-7.45 1.414-1.42L11 16.59V3h2z"></path>
-        </g>
-      </svg>
-    </div>
-  );
-}
-
-export function TypingLeft({ message }: { message: string }) {
-  return (
-    <div
-      className={cn(
-        " absolute md:bottom-2 md:left-10 bottom-2 left-8 flex items-center z-[10] shrink-0       ",
-        "cursor-pointer transiton-all duration-300  "
-      )}
-    >
-      <div className="flex flex-col w-full items-start animate-pulse ">
-        <div className="flex items-center flex-row-reverse gap-2 max-w-[calc((100%_/_2)_+_(100%_/_3))]  ">
-          <div className=" flex cursor-pointer flex-col text-[#0f1419] bg-gray-300 rounded-bl-sm rounded-2xl py-[12px] px-[16px] text-right leading-[20px] text-[15px] transition-all duration-300    ">
-            <span className={cn("  shrink-0  ")}>{message}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-interface ScrollDownProps {
-  goDown: boolean;
-  func: () => void;
-  chatId: Id<"chats">;
-  userId: Id<"users">;
-  unreadMessagesCount: number | null | undefined;
-  mutate: UseMutateFunction<
-    null,
-    Error,
-    {
-      chatId: Id<"chats">;
-      userId: Id<"users">;
-    },
-    unknown
-  >;
-}
-export function ScrollDown({
-  goDown,
-  func,
-  chatId,
-  userId,
-  unreadMessagesCount,
-  mutate,
-}: ScrollDownProps) {
-  return (
-    <>
-      <div
-        className={cn(
-          " absolute bottom-6 right-8 flex items-center z-[10] justify-center md:size-[54px] size-[32px] rounded-full bg-white border-transparent  px-[16px] [box-shadow:rgb(101_119_134_/_20%)_0px_0px_8px,_rgb(101_119_134_/_25%)_0px_1px_3px_1px]   ",
-          "cursor-pointer transiton-all duration-300  ",
-          goDown ? "opacity-100" : "opacity-0 pointer-events-none "
-        )}
-        onClick={() => {
-          if (!!unreadMessagesCount && unreadMessagesCount > 0) {
-            mutate({ chatId, userId });
-          }
-          func();
-        }}
-      >
-        {!!unreadMessagesCount && unreadMessagesCount > 0 && (
-          <NumberCount
-            num={unreadMessagesCount}
-            condition={!!unreadMessagesCount === false}
-            classname="absolute -top-5 md:right-3 right-0 flex items-center justify-center bg-[#1d9bf0] text-white font-semibold rounded-full size-8 "
-          />
-        )}
-
-        <svg
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-          className=" fill-[#707579] shrink-0 md:size-[24px] size-[18px] "
-        >
-          <g>
-            <path d="M13 3v13.59l5.043-5.05 1.414 1.42L12 20.41l-7.457-7.45 1.414-1.42L11 16.59V3h2z"></path>
-          </g>
-        </svg>
-      </div>
-    </>
-  );
-}
-
-export default ChatMessage;

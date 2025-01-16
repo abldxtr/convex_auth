@@ -2,6 +2,7 @@
 
 import { Id } from "@/convex/_generated/dataModel";
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { DeleteItemsProvider } from "./delete-items-context";
 
 export type FileState = {
   file: File;
@@ -93,6 +94,8 @@ interface CounterContextType {
   setReplyMessageIdScroll: React.Dispatch<React.SetStateAction<boolean>>;
   isPendingForUploadAudio: boolean;
   setIspendingForUploadingAudio: React.Dispatch<React.SetStateAction<boolean>>;
+  deleteItems: boolean;
+  setDeleteItems: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const GlobalContext = createContext<CounterContextType | undefined>(undefined);
@@ -106,6 +109,7 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
 
   const [isPendingForUploadAudio, setIspendingForUploadingAudio] =
     useState<boolean>(false);
+  const [deleteItems, setDeleteItems] = useState<boolean>(false);
 
   const [imgTemp, setImgTemp] = useState<FileState[]>([]);
   const [currentView, setCurrentView] = useState<string>("all-chats");
@@ -188,9 +192,11 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
         setReplyMessageIdScroll,
         isPendingForUploadAudio,
         setIspendingForUploadingAudio,
+        deleteItems,
+        setDeleteItems,
       }}
     >
-      {children}
+      <DeleteItemsProvider>{children}</DeleteItemsProvider>
     </GlobalContext.Provider>
   );
 };

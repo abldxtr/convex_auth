@@ -36,7 +36,7 @@ export default function RootLayout({
                   <ConvexQueryCacheProvider>
                     {/* <div className="w-full max-w-[2400px] isolate mx-auto flex h-dvh  overflow-hidden"> */}
                     {children}
-                    <Toaster />
+                    <Toaster position="top-center" />
                     {/* </div> */}
                   </ConvexQueryCacheProvider>
                 </VoiceRecorderProvider>

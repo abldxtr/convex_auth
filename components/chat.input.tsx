@@ -19,9 +19,11 @@ import useSingleFlight from "@/hooks/useSingleFlight";
 import { User } from "./message.list";
 import { useVoiceRecorder } from "@/context/audio-context";
 import { formatTime } from "@/lib/utils";
-import { Pause, Play } from "lucide-react";
+import { Pause, Play, Trash2, X } from "lucide-react";
 import { useUploadImage } from "@/hooks/useUploadImage";
 import ReplyMessageComp from "./reply-message";
+import { useDeleteItem } from "@/context/delete-items-context";
+import { toast } from "sonner";
 
 interface imageOptions {
   contentType?: string;
@@ -202,22 +204,6 @@ export default function InputChat({
 
     // آپلود فایل صوتی
     if (audioURL && audioBlob !== null) {
-      // console.log("audioBlob", audioBlob);
-      // const newMessageOpUdate = {
-      //   content: messageContent,
-      //   senderId: currentUser,
-      //   recieverId: other,
-      //   chatId: chatId as Id<"chats">,
-      //   opupId: messageId,
-
-      //   type: "AUDIO" as const,
-      //   audioStorageId: "kg2edacvakd80hms3gqj4636td78ftnq" as Id<"_storage">,
-      //   replyId: replyMessageIdForSend ? undefined : replyMessageId?._id,
-      //   replyMess: replyMessageIdForSend ? null : replyMessageId,
-      //   url: audioURL,
-      // };
-
-      // await createMessage(newMessageOpUdate);
       setIspendingForUploadingAudio(true);
       const res = await uploadImg(audioBlob);
       const idStorage = res;
@@ -327,12 +313,46 @@ export default function InputChat({
   const handleEmoji = (emoji: any) => {
     setInputValue(inputValue + emoji.native);
   };
+  const { deleteItems, setDeleteItems, items, setItems, DisableDeleteItmes } =
+    useDeleteItem();
+  const deleteMessages = useMutation(api.message.deleteMessageById);
 
   return (
     <DragContainer className=" bg-transparent px-[12px]    py-1 isolate ">
       <div className="  flex flex-col w-full h-full bg-[#eff3f4] rounded-[16px] relative">
         {isPendingForUploadAudio && (
           <div className=" absolute inset-0 bg-zinc-200/50 z-[10] " />
+        )}
+        {deleteItems && (
+          <div className=" absolute inset-0 bg-zinc-200 z-[10] flex items-center justify-center ">
+            <div
+              className=" size-[42px] p-1 rounded-full hover:bg-red-200 transition-all flex items-center justify-center cursor-pointer   "
+              onClick={async () => {
+                if (items === null) {
+                  return;
+                }
+                const res = await deleteMessages({ messageIds: items });
+                if (res?.success) {
+                  setDeleteItems(false);
+                  toast.success("succesfull to delete messages");
+                } else {
+                  toast.error("error to delete messages!");
+                }
+              }}
+            >
+              <Trash2 className="size-[18px] shrink-0" color="red" />
+            </div>
+
+            <div
+              className=" size-[42px] p-1 rounded-full hover:bg-[#1d9bf01a] transition-all flex items-center justify-center cursor-pointer   "
+              onClick={() => {
+                setDeleteItems(false);
+                setItems(null);
+              }}
+            >
+              <X className="size-[18px] shrink-0" color="black" />
+            </div>
+          </div>
         )}
         {replyMessageId && (
           <ReplyMessageComp
@@ -365,11 +385,6 @@ export default function InputChat({
             onChange={(e) => {
               setInputValue(e.target.value);
               updatePresence({ text: e.target.value });
-              // if (e.target.value.trim().length > 0) {
-              //   setChangeIcon({ type: "text", state: true });
-              // } else {
-              //   setChangeIcon({ type: "voice", state: false });
-              // }
             }}
             onSubmit={handleSubmit}
             ref={textRef}
