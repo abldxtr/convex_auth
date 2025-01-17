@@ -75,8 +75,9 @@ export const InputWithRef = forwardRef<
           {changeIcon.type === "voice" && changeIcon.state && (
             <div
               className={cn(
-                "shrink-0 size-[34px] hover:bg-[#1d9bf01a] hidden md:flex items-center cursor-pointer  justify-center transition-all duration-300 rounded-full",
-                "disabled:opacity-70 disabled:cursor-not-allowed disabled:pointer-events-none  "
+                "shrink-0 size-[34px] hover:bg-[#1d9bf01a]  items-center cursor-pointer  justify-center transition-all duration-300 rounded-full",
+                "disabled:opacity-70 disabled:cursor-not-allowed disabled:pointer-events-none  ",
+                !isRecording ? "hidden md:flex " : ""
               )}
               onClick={() => {
                 if (isRecording) {

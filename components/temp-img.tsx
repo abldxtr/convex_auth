@@ -1,12 +1,9 @@
 import { FileState, useGlobalContext } from "@/context/globalContext";
-import { AnimatePresence, motion } from "framer-motion";
-// import { useEdgeStore } from "@/lib/edgestore";
 import { CircleProgress } from "./circle-progress";
 import { useMemo } from "react";
 
 export default function TempImg() {
   const { imgTemp, setImgTemp } = useGlobalContext();
-  // const { edgestore } = useEdgeStore();
 
   const imageUrls = useMemo(() => {
     if (imgTemp) {
@@ -24,25 +21,6 @@ export default function TempImg() {
     return [];
   }, [imgTemp]);
 
-  // console.log("imageUrls", imageUrls);
-
-  // if (!imgTemp) {
-  //   return null;
-  // }
-
-  // function updateFileProgress(key: string, progress: FileState["progress"]) {
-  //   setImgTemp((fileStates) => {
-  //     const newFileStates = structuredClone(fileStates);
-  //     const fileState = newFileStates.find(
-  //       (fileState) => fileState.key === key
-  //     );
-  //     if (fileState) {
-  //       fileState.progress = progress;
-  //     }
-  //     return newFileStates;
-  //   });
-  // }
-
   return (
     <>
       {imgTemp.length > 0 && (
@@ -52,25 +30,6 @@ export default function TempImg() {
               <div
                 key={index}
                 className="relative w-[150px] h-[150px] overflow-hidden rounded-md"
-                // onClick={async () => {
-                //   try {
-                //     const res = await edgestore.publicFiles.upload({
-                //       file: file.file as File,
-                //       onProgressChange: async (progress) => {
-                //         updateFileProgress(file.key, progress);
-                //         if (progress === 100) {
-                //           await new Promise((resolve) =>
-                //             setTimeout(resolve, 1000)
-                //           );
-                //           updateFileProgress(file.key, "COMPLETE");
-                //         }
-                //       },
-                //     });
-                //     // console.log(res);
-                //   } catch (err) {
-                //     updateFileProgress(file.key, "ERROR");
-                //   }
-                // }}
               >
                 {typeof file.progress === "number" && (
                   <CircleProgress progress={file.progress} />

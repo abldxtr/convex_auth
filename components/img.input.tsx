@@ -3,9 +3,10 @@
 import { FileState, useGlobalContext } from "@/context/globalContext";
 import { ChangeEvent, useMemo, useRef, useState } from "react";
 import { useDropzone, type DropzoneOptions } from "react-dropzone";
-import { twMerge } from "tailwind-merge";
 import { toast } from "sonner";
 import { useUploadImages } from "@/hooks/useUploadImages";
+import { useVoiceRecorder } from "@/context/audio-context";
+import { cn } from "@/lib/utils";
 
 type InputProps = {
   className?: string;
@@ -29,6 +30,7 @@ export default function ImgInput({
   const [errorMsg, setErrorMsg] = useState("");
   const { imgTemp, setImgTemp } = useGlobalContext();
   const { uploadImage } = useUploadImages();
+  const { isRecording } = useVoiceRecorder();
 
   // Setup dropzone
   const isFileDuplicate = (file: File) => {
@@ -83,51 +85,8 @@ export default function ImgInput({
       }));
       console.log({ newFileStates });
       // آپلود هر فایل به صورت جداگانه
-      const uploadPromises = newFileStates.map(async (fileState) => {
-        // try {
-        //   const storageId = await uploadImage(
-        //     fileState.file as File,
-        //     (progress) => {
-        //       // بروزرسانی درصد پیشرفت برای این فایل
-        //       setImgTemp((prev) =>
-        //         prev.map((item) =>
-        //           item.key === fileState.key ? { ...item, progress } : item
-        //         )
-        //       );
-        //     }
-        //   );
-        //   // بروزرسانی وضعیت فایل پس از آپلود موفق
-        //   setImgTemp((prev) =>
-        //     prev.map((item) =>
-        //       item.key === fileState.key
-        //         ? { ...item, storageId, progress: "COMPLETE" }
-        //         : item
-        //     )
-        //   );
-        //   return { ...fileState, storageId, progress: "COMPLETE" };
-        // } catch (error) {
-        //   console.error(`Error uploading file ${fileState.file.name}:`, error);
-        //   // بروزرسانی وضعیت خطا برای این فایل
-        //   setImgTemp((prev) =>
-        //     prev.map((item) =>
-        //       item.key === fileState.key
-        //         ? { ...item, progress: "ERROR", error: "خطا در آپلود فایل" }
-        //         : item
-        //     )
-        //   );
-        //   return {
-        //     ...fileState,
-        //     progress: "ERROR",
-        //     error: "خطا در آپلود فایل",
-        //   };
-        // }
-      });
 
       try {
-        // const results = await Promise.all(uploadPromises);
-        // console.log({ results });
-        // void onFilesAdded?.(results);
-        // void onChange?.([...(value ?? []), ...results]);
       } catch (error) {
         console.error("Error handling files:", error);
         toast.error("خطا در آپلود فایل‌ها");
@@ -143,21 +102,18 @@ export default function ImgInput({
     accept: { "image/*": [] },
     disabled,
     onDrop: handleFiles,
-    // onDragEnter: () => setIsDragging(true),
-    // onDragLeave: () => setIsDragging(false),
+
     ...dropzoneOptions,
   });
 
   return (
-    <div {...getRootProps()} className="cursor-pointer">
-      <input {...getInputProps()} />
+    <div
+      {...getRootProps()}
+      className={cn("cursor-pointer", isRecording && " pointer-events-none ")}
+    >
+      <input {...getInputProps()} disabled={isRecording} />
 
-      {/* {errorMsg && <p className="text-red-500">{errorMsg}</p>} */}
-
-      <button
-        className="size-[34px] hover:bg-[#1d9bf01a] flex items-center justify-center transition-all duration-300 rounded-full"
-        // onClick={() => imagesRef.current?.click()}
-      >
+      <button className="size-[34px] hover:bg-[#1d9bf01a] flex items-center justify-center transition-all duration-300 rounded-full">
         <svg
           viewBox="0 0 24 24"
           aria-hidden="true"

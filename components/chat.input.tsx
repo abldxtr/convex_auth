@@ -320,13 +320,15 @@ export default function InputChat({
   return (
     <DragContainer className=" bg-transparent px-[12px]    py-1 isolate ">
       <div className="  flex flex-col w-full h-full bg-[#eff3f4] rounded-[16px] relative">
+        {/* wait for send audio */}
         {isPendingForUploadAudio && (
           <div className=" absolute inset-0 bg-zinc-200/50 z-[10] " />
         )}
+        {/* delete messages */}
         {deleteItems && (
           <div className=" absolute inset-0 bg-zinc-200 z-[10] flex items-center justify-center ">
             <div
-              className=" size-[42px] p-1 rounded-full hover:bg-red-200 transition-all flex items-center justify-center cursor-pointer   "
+              className=" size-[50px] p-1 rounded-full hover:bg-red-200 transition-all flex items-center justify-center cursor-pointer   "
               onClick={async () => {
                 if (items === null) {
                   return;
@@ -344,7 +346,7 @@ export default function InputChat({
             </div>
 
             <div
-              className=" size-[42px] p-1 rounded-full hover:bg-[#1d9bf01a] transition-all flex items-center justify-center cursor-pointer   "
+              className=" size-[50px] p-1 rounded-full hover:bg-[#1d9bf01a] transition-all flex items-center justify-center cursor-pointer   "
               onClick={() => {
                 setDeleteItems(false);
                 setItems(null);
@@ -415,11 +417,6 @@ export const AudioContainer = () => {
         className="bg-blue-400 size-[32px] rounded-full flex items-center justify-center shrink-0 "
         onClick={handlePlayPause}
       >
-        {/* {isPlaying || isWaveSurferPlaying ? (
-          <Pause className="size-4 fill-white " color="white" />
-        ) : (
-          <Play className="size-4 fill-white " color="white" />
-        )} */}
         {isWaveSurferPlaying ? (
           <Pause className="size-4 fill-white " color="white" />
         ) : (

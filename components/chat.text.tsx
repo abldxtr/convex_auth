@@ -85,12 +85,6 @@ export default function Chat_text(props: {
     [-SIDEBAR_WIDTH, 0]
   );
 
-  const overlayOpacity = useTransform(springX, [-SIDEBAR_WIDTH, 0], [0, 0.4]);
-
-  // تغییر تابع transform برای opacity
-  // const opacity = useTransform(springX, [-SIDEBAR_WIDTH, 0], [0, 1]);
-  const opacity = useTransform(springX, [-SIDEBAR_WIDTH, 0], [0.7, 1]);
-
   // Update x and isOpen when mobileMenue changes
   useEffect(() => {
     const targetX = mobileMenue ? -SIDEBAR_WIDTH : 0;
@@ -165,7 +159,6 @@ export default function Chat_text(props: {
 
       controls.start({
         x: 0,
-        opacity: 1, // Added opacity control
         transition,
       });
       x.set(0);
@@ -183,7 +176,6 @@ export default function Chat_text(props: {
 
       controls.start({
         x: -SIDEBAR_WIDTH,
-        opacity: 0, // Added opacity control
         transition,
       });
       x.set(-SIDEBAR_WIDTH);
@@ -230,7 +222,6 @@ export default function Chat_text(props: {
         </motion.div>
         <motion.div
           style={{ x: sidebarX }}
-          // style={{ x: sidebarX, opacity: opacity }}
           className={cn(
             " overflow-y-auto overflow-x-hidden z-[1000] bg-[#fcfdfd]  scrl fixed top-0 left-0 h-dvh md:w-[400px] w-full  ",
             mobileMenue ? "  -translate-x-full    " : " translate-x-0  "

@@ -4,6 +4,7 @@ import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 import { cn } from "@/lib/utils";
 import { useMediaQuery } from "usehooks-ts";
+import { useVoiceRecorder } from "@/context/audio-context";
 
 export const EmojiPicker = forwardRef<
   HTMLInputElement,
@@ -16,9 +17,13 @@ export const EmojiPicker = forwardRef<
 >(({ value, onChange, onSubmit, handleEmoji }, ref) => {
   const { openEmoji, setOpenEmoji, open, setOpen } = useEmojiState();
   const matches = useMediaQuery("(min-width: 768px)");
+  const { isRecording } = useVoiceRecorder();
 
   return (
-    <div className=" relative " onClick={() => setOpenEmoji(true)}>
+    <div
+      className={cn(" relative ", isRecording && " pointer-events-none ")}
+      onClick={() => setOpenEmoji(true)}
+    >
       <button
         className="size-[34px] hover:bg-[#1d9bf01a] flex items-center justify-center rounded-full"
         onClick={() => setOpenEmoji(!openEmoji)}
@@ -34,7 +39,6 @@ export const EmojiPicker = forwardRef<
         <div
           className={cn(
             " absolute  bottom-full isolate  md:right-[-16rem] right-[-150px] z-[100]   "
-            // openEmoji ? " flex " : "opacity-0 pointer-events-none hidden",
           )}
           ref={ref}
         >
