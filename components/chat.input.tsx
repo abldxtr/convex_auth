@@ -202,22 +202,6 @@ export default function InputChat({
 
     // آپلود فایل صوتی
     if (audioURL && audioBlob !== null) {
-      // console.log("audioBlob", audioBlob);
-      // const newMessageOpUdate = {
-      //   content: messageContent,
-      //   senderId: currentUser,
-      //   recieverId: other,
-      //   chatId: chatId as Id<"chats">,
-      //   opupId: messageId,
-
-      //   type: "AUDIO" as const,
-      //   audioStorageId: "kg2edacvakd80hms3gqj4636td78ftnq" as Id<"_storage">,
-      //   replyId: replyMessageIdForSend ? undefined : replyMessageId?._id,
-      //   replyMess: replyMessageIdForSend ? null : replyMessageId,
-      //   url: audioURL,
-      // };
-
-      // await createMessage(newMessageOpUdate);
       setIspendingForUploadingAudio(true);
       const res = await uploadImg(audioBlob);
       const idStorage = res;
@@ -365,11 +349,6 @@ export default function InputChat({
             onChange={(e) => {
               setInputValue(e.target.value);
               updatePresence({ text: e.target.value });
-              // if (e.target.value.trim().length > 0) {
-              //   setChangeIcon({ type: "text", state: true });
-              // } else {
-              //   setChangeIcon({ type: "voice", state: false });
-              // }
             }}
             onSubmit={handleSubmit}
             ref={textRef}
