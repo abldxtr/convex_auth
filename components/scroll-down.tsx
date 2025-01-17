@@ -119,12 +119,22 @@ const MessRight: React.FC<{
 }> = ({ message, children }) => {
   const { replyMessageId, replyMessageIdScroll, setReplyMessageId } =
     useGlobalContext();
-  const { deleteItems, setDeleteItems, items, setItems } = useDeleteItem();
+  const {
+    deleteItems,
+    setDeleteItems,
+    items,
+    setItems,
+    isDragging,
+    setIsDragging,
+  } = useDeleteItem();
   const [backGroundColor, setBackGroundColor] = useState(false);
   const [checkState, setCheckState] = useState(false);
 
   const bind = useLongPress(() => {
-    setDeleteItems(true);
+    if (!isDragging) {
+      // Only activate if not dragging
+      setDeleteItems(true);
+    }
     // setBackGroundColor(true);
     // setCheckState(true);
   });

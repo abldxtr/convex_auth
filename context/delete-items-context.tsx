@@ -9,6 +9,8 @@ interface DeleteItmesContextType {
   items: Id<"messages">[] | null;
   setItems: React.Dispatch<React.SetStateAction<Id<"messages">[] | null>>;
   DisableDeleteItmes: () => void;
+  isDragging: boolean;
+  setIsDragging: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const DeleteItems = createContext<DeleteItmesContextType | undefined>(
@@ -22,6 +24,7 @@ export const DeleteItemsProvider = ({
 }) => {
   const [deleteItems, setDeleteItems] = useState<boolean>(false);
   const [items, setItems] = useState<Id<"messages">[] | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const handleDeleteItems = ({ item }: { item: Id<"messages"> }) => {};
 
@@ -38,6 +41,8 @@ export const DeleteItemsProvider = ({
         items,
         setItems,
         DisableDeleteItmes,
+        isDragging,
+        setIsDragging,
       }}
     >
       {children}

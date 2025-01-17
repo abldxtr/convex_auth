@@ -97,8 +97,15 @@ export default function Messages({
     setScrollBound,
     setReplyMessageId,
   } = useGlobalContext();
-  const { deleteItems, setDeleteItems, items, setItems, DisableDeleteItmes } =
-    useDeleteItem();
+  const {
+    deleteItems,
+    setDeleteItems,
+    items,
+    setItems,
+    DisableDeleteItmes,
+    isDragging,
+    setIsDragging,
+  } = useDeleteItem();
   useEffect(() => {
     setDeleteItems(false);
     setItems(null);
