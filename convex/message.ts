@@ -225,6 +225,39 @@ export const seenMessageAll = mutation({
   },
 });
 
+export const deleteMessageById = mutation({
+  args: {
+    messageIds: v.array(v.id("messages")),
+    userId: v.optional(v.id("users")),
+  },
+  handler: async (ctx, args) => {
+    const { messageIds, userId } = args;
+
+    const userIdAuth = await getAuthUserId(ctx);
+    if (userIdAuth === null || messageIds.length === 0) {
+      //   throw new Error("Client is not authenticated!");
+      return null;
+    }
+
+    // const deletemItem = messageIds.map((item,index)=>{
+    //   if()
+    // })
+    // اجرای عملیات حذف پیام‌ها
+    await Promise.all(
+      messageIds.map(async (messageId) => {
+        const message = await ctx.db.get(messageId); // گرفتن پیام از دیتابیس
+        if (message?.senderId !== userIdAuth) {
+          return null; // اگر پیام متعلق به کاربر نباشد، حذف نمی‌شود
+        } else {
+          await ctx.db.delete(messageId); // حذف پیام از دیتابیس
+        }
+      })
+    );
+
+    return { success: true }; // موفقیت‌آمیز بودن عملیات حذف پیام‌ها
+  },
+});
+
 export const MessageWithImg = action({
   args: {
     file: v.any(),

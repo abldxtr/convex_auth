@@ -31,20 +31,16 @@ export default function RootLayout({
         <body className="">
           <ConvexClientProvider>
             <GlobalProvider>
-              {/* <ChatSeenProvider> */}
               <EmojiProvider>
                 <VoiceRecorderProvider>
                   <ConvexQueryCacheProvider>
-                    <div className="w-full max-w-[2400px] isolate mx-auto flex h-dvh  overflow-hidden">
-                      <div className=" overflow-auto  h-full scrl flex w-full  ">
-                        {children}
-                      </div>
-                      <Toaster />
-                    </div>
+                    {/* <div className="w-full max-w-[2400px] isolate mx-auto flex h-dvh  overflow-hidden"> */}
+                    {children}
+                    <Toaster position="top-center" />
+                    {/* </div> */}
                   </ConvexQueryCacheProvider>
                 </VoiceRecorderProvider>
               </EmojiProvider>
-              {/* </ChatSeenProvider> */}
             </GlobalProvider>
           </ConvexClientProvider>
         </body>

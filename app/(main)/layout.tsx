@@ -13,12 +13,11 @@ export default async function ChatLayout({
   children: React.ReactNode;
 }) {
   const token = await convexAuthNextjsToken();
-  const isAuth = await isAuthenticatedNextjs();
-  // console.log({ isAuth });
+  // const isAuth = await isAuthenticatedNextjs();
 
-  if (!isAuth) {
-    redirect("/register");
-  }
+  // if (!isAuth) {
+  //   redirect("/register");
+  // }
   const user = await fetchQuery(api.user.getUser, {}, { token });
   // const chatList = await fetchQuery(
   //   api.chat.chatList,
@@ -32,16 +31,11 @@ export default async function ChatLayout({
     { token }
   );
   return (
-    // <div className="w-full max-w-[2400px] isolate mx-auto flex h-dvh  overflow-hidden">
     <>
-      <Message_list
-        user={user}
-        // chatlist={chatList}
-        preloadedChatList={preloadedChatList}
-      />
-
+      {/* <div className="w-full max-w-[2400px] isolate mx-auto flex h-dvh  overflow-hidden"> */}
+      {/* <Message_list user={user} preloadedChatList={preloadedChatList} /> */}
       {children}
+      {/* </div> */}
     </>
-    // </div>
   );
 }

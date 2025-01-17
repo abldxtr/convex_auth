@@ -25,6 +25,8 @@ import { useGlobalContext } from "@/context/globalContext";
 import { useMessageScroll } from "@/hooks/use-message-scroll";
 import { otherUser } from "./chat.input";
 import { useMutation } from "convex/react";
+import { useDeleteItem } from "@/context/delete-items-context";
+import { toast } from "sonner";
 
 export default function Messages({
   chatId,
@@ -95,6 +97,20 @@ export default function Messages({
     setScrollBound,
     setReplyMessageId,
   } = useGlobalContext();
+  const {
+    deleteItems,
+    setDeleteItems,
+    items,
+    setItems,
+    DisableDeleteItmes,
+    isDragging,
+    setIsDragging,
+  } = useDeleteItem();
+  useEffect(() => {
+    setDeleteItems(false);
+    setItems(null);
+  }, [chatId]);
+
   const { data: messages, isPending } = useQuery(
     convexQuery(api.message.messages, { chatId: cc })
   );
@@ -248,7 +264,10 @@ export default function Messages({
         {Object.entries(groupedMessages).map(([date, msgs]) => (
           <div key={date} className="mb-4 isolate">
             <div className="text-center text-sm text-gray-500 my-2 sticky top-0 rtlDir z-[200] w-full flex items-center justify-center">
-              <div className="px-2 py-1 bg-gray-100 rounded-full mt-2  ">
+              <div
+                className="px-2 py-1 bg-gray-100 rounded-full mt-2  "
+                onClick={() => DisableDeleteItmes()}
+              >
                 {date}
               </div>
             </div>
@@ -258,7 +277,7 @@ export default function Messages({
                 <div
                   key={message._id}
                   id={`message-${message._id}`}
-                  className=" hover:bg-[rgba(66,82,110,0.03)] transition-all group   "
+                  className=" hover:bg-[rgba(66,82,110,0.03)] transition-all group  rounded-md  "
                 >
                   {isFirstUnread && (
                     <div className="bg-yellow-100 text-yellow-800 text-center py-1 rounded-md ">
