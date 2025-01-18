@@ -96,13 +96,15 @@ interface CounterContextType {
   setIspendingForUploadingAudio: React.Dispatch<React.SetStateAction<boolean>>;
   deleteItems: boolean;
   setDeleteItems: React.Dispatch<React.SetStateAction<boolean>>;
+  functionName: string;
+  setFunctionName: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const GlobalContext = createContext<CounterContextType | undefined>(undefined);
 
 export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
   const [convexFile, setConvexFile] = useState<convexFile | null>(null);
-
+  const [functionName, setFunctionName] = useState("");
   const [replyMessageId, setReplyMessageId] = useState<replyMess | null>(null);
   const [replyMessageIdScroll, setReplyMessageIdScroll] =
     useState<boolean>(false);
@@ -134,16 +136,6 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
   const [unreadCountMenue, setUnreadCountMenue] = useState<
     { id: string; count: number }[]
   >([]);
-
-  // useEffect(()=>{
-
-  //   if
-
-  // },[scrollPos])
-
-  // const [unreadMessages, setUnreadMessages] = useState<MessageData[]>([]);
-
-  // const [final, setFinal] = useState<final>([]);
 
   return (
     <GlobalContext.Provider
@@ -194,6 +186,8 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
         setIspendingForUploadingAudio,
         deleteItems,
         setDeleteItems,
+        functionName,
+        setFunctionName,
       }}
     >
       <DeleteItemsProvider>{children}</DeleteItemsProvider>

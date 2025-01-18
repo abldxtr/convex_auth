@@ -117,8 +117,12 @@ const MessRight: React.FC<{
   children: React.ReactNode;
   current_user: User | undefined;
 }> = ({ message, children }) => {
-  const { replyMessageId, replyMessageIdScroll, setReplyMessageId } =
-    useGlobalContext();
+  const {
+    replyMessageId,
+    replyMessageIdScroll,
+    setReplyMessageId,
+    setFunctionName,
+  } = useGlobalContext();
   const {
     deleteItems,
     setDeleteItems,
@@ -246,7 +250,10 @@ const MessRight: React.FC<{
       >
         <div
           className="  size-[32px] bg-gray-100/10 hover:bg-gray-100/80 transition-all flex items-center justify-center rounded-full cursor-pointer  "
-          onClick={() => setReplyMessageId(message)}
+          onClick={() => {
+            setFunctionName("");
+            setReplyMessageId(message);
+          }}
         >
           <svg
             width="20"
@@ -306,8 +313,12 @@ const MessLeft: React.FC<{
   children: React.ReactNode;
   current_user: User | undefined;
 }> = ({ message, children, current_user }) => {
-  const { replyMessageId, replyMessageIdScroll, setReplyMessageId } =
-    useGlobalContext();
+  const {
+    replyMessageId,
+    replyMessageIdScroll,
+    setReplyMessageId,
+    setFunctionName,
+  } = useGlobalContext();
   const { deleteItems, setDeleteItems, items, setItems, DisableDeleteItmes } =
     useDeleteItem();
   const [backGroundColor, setBackGroundColor] = useState(false);
@@ -440,7 +451,10 @@ const MessLeft: React.FC<{
         <div className=" opacity-0 group-hover:opacity-100 ">
           <div
             className="  size-[32px] bg-gray-100/10 hover:bg-gray-100/80 transition-all flex items-center justify-center rounded-full cursor-pointer  "
-            onClick={() => setReplyMessageId(message)}
+            onClick={() => {
+              setFunctionName("");
+              setReplyMessageId(message);
+            }}
           >
             <svg
               width="20"
@@ -535,8 +549,12 @@ export type replyType = {
 };
 
 export function ReplyMessage({ message, current_user, other_user }: replyType) {
-  const { setReplyMessageId, replyMessageIdScroll, setReplyMessageIdScroll } =
-    useGlobalContext();
+  const {
+    setReplyMessageId,
+    replyMessageIdScroll,
+    setReplyMessageIdScroll,
+    setFunctionName,
+  } = useGlobalContext();
   const name =
     message.senderId === current_user?._id
       ? current_user.name
@@ -551,10 +569,11 @@ export function ReplyMessage({ message, current_user, other_user }: replyType) {
     : null;
   return (
     <div
-      className="flex item-center justify-between  mb-[12px] mt-[5px] "
+      className="flex item-center justify-between  mb-[12px] mt-[5px]   "
       onClick={() => {
-        // setReplyMessageIdScroll(true);
-        // setReplyMessageId(message);
+        setFunctionName("chatroom");
+        setReplyMessageId(message);
+        setReplyMessageIdScroll(true);
       }}
     >
       <div className="  flex  flex-col pl-2 border-l-2 border-blue-400 rounded-sm  ">

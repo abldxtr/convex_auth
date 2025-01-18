@@ -17,8 +17,13 @@ export function useMessageScroll({
     block: "center",
   },
 }: UseMessageScrollOptions = {}) {
-  const { replyMessageId, replyMessageIdScroll, setReplyMessageIdScroll } =
-    useGlobalContext();
+  const {
+    replyMessageId,
+    replyMessageIdScroll,
+    setReplyMessageIdScroll,
+    functionName,
+    setReplyMessageId,
+  } = useGlobalContext();
 
   const scrollToMessage = useCallback(() => {
     if (!replyMessageId?._id || !replyMessageIdScroll) return;
@@ -42,6 +47,9 @@ export function useMessageScroll({
         // Reset scroll state after delay
         const timeoutId = setTimeout(() => {
           setReplyMessageIdScroll(false);
+          if (functionName === "chatroom") {
+            setReplyMessageId(null);
+          }
         }, resetDelay);
 
         // Cleanup timeout if component unmounts

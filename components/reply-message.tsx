@@ -16,12 +16,19 @@ export default function ReplyMessageComp({
   currentUser,
   otherUser,
 }: replyType) {
-  const { setReplyMessageId, replyMessageIdScroll, setReplyMessageIdScroll } =
-    useGlobalContext();
+  const {
+    setReplyMessageId,
+    replyMessageIdScroll,
+    setReplyMessageIdScroll,
+    functionName,
+  } = useGlobalContext();
 
   if (message.chatId !== chatId) {
     // setReplyMessageId(null)
 
+    return null;
+  }
+  if (functionName === "chatroom") {
     return null;
   }
 
