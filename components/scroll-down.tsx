@@ -135,16 +135,7 @@ const MessRight: React.FC<{
       // Only activate if not dragging
       setDeleteItems(true);
     }
-    // setBackGroundColor(true);
-    // setCheckState(true);
   });
-
-  // useEffect(() => {
-  //   const check = items?.every((item) => item === message._id);
-  //   if (check) {
-  //     setCheckState(() => !checkState);
-  //   }
-  // }, [deleteItems, items, setCheckState]);
 
   const handleCheck = () => {
     if (deleteItems) {
@@ -237,7 +228,7 @@ const MessRight: React.FC<{
   return (
     <div
       className={cn(
-        " md:p-2 p-1  w-full group flex items-end gap-2 justify-end z-[9] rounded-md  ",
+        "  p-1  w-full group flex items-end gap-2 justify-end z-[9] rounded-md  ",
         backGroundColor && "bg-[rgba(66,82,110,0.1)]"
       )}
       // className="md:p-2 "
@@ -434,7 +425,7 @@ const MessLeft: React.FC<{
   return (
     <div
       className={cn(
-        "pb-1 md:p-2 p-1 w-full group flex items-end gap-2 z-[9] transition-all duration-200 rounded-md "
+        " p-1 w-full group flex items-end gap-2 z-[9] transition-all duration-200 rounded-md "
         // backGroundColor && "bg-[rgba(66,82,110,0.2)]"
       )}
       // {...bind()}
