@@ -14,19 +14,19 @@ import ChatMessage, { ScrollDown, TypingLeft } from "./scroll-down";
 import { api } from "@/convex/_generated/api";
 import usePresence from "@/hooks/usePresence";
 import { User } from "./message.list";
-import { InView, useInView } from "react-intersection-observer";
 import { Id } from "@/convex/_generated/dataModel";
 import {
   useMutation as TanStackMutation,
   useQuery,
+  QueryClient,
 } from "@tanstack/react-query";
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
+
 import { useGlobalContext } from "@/context/globalContext";
 import { useMessageScroll } from "@/hooks/use-message-scroll";
 import { otherUser } from "./chat.input";
 import { useMutation } from "convex/react";
 import { useDeleteItem } from "@/context/delete-items-context";
-import { toast } from "sonner";
 
 export default function Messages({
   chatId,
@@ -51,6 +51,53 @@ export default function Messages({
   const paramValue = chatId ?? chatId;
   const chatIdd = chatId ?? chatId;
   const cc = chatIdd!;
+
+  useLayoutEffect(() => {
+    const storedScrollPosition = sessionStorage.getItem(`scrollPos-${chatId}`);
+
+    if (!firstUnreadRef.current && messages) {
+      const firstUnreadMessage = messages.find(
+        (message) =>
+          message.status !== "READ" && message.senderId !== currentUser
+      );
+
+      if (firstUnreadMessage) {
+        firstUnreadRef.current = firstUnreadMessage._id; // ذخیره ID پیام
+        const unreadElement = document.getElementById(
+          `message-${firstUnreadRef.current}`
+        );
+
+        if (unreadElement) {
+          unreadElement.scrollIntoView({
+            behavior: "instant",
+            block: "center",
+          });
+        }
+      } else if (storedScrollPosition && chatRef.current) {
+        chatRef.current.scrollTop = parseInt(storedScrollPosition, 10);
+      } else if (bottomRef.current) {
+        bottomRef.current.scrollIntoView({
+          behavior: "instant",
+          block: "center",
+        });
+      }
+    }
+
+    return () => {
+      if (chatRef.current && isScroll) {
+        sessionStorage.setItem(
+          `scrollPos-${chatId}`,
+          chatRef.current.scrollTop.toString()
+        );
+      }
+    };
+  }, [
+    chatId,
+    firstUnreadRef.current,
+    bottomRef.current,
+    chatRef.current,
+    isScroll,
+  ]);
 
   const [data, others, updatePresence] = usePresence(
     paramValue!,
@@ -162,53 +209,6 @@ export default function Messages({
       setToScroll(false);
     }
   }, [toScroll, setToScroll, bottomRef.current]);
-
-  useLayoutEffect(() => {
-    const storedScrollPosition = sessionStorage.getItem(`scrollPos-${chatId}`);
-
-    if (!firstUnreadRef.current && messages) {
-      const firstUnreadMessage = messages.find(
-        (message) =>
-          message.status !== "READ" && message.senderId !== currentUser
-      );
-
-      if (firstUnreadMessage) {
-        firstUnreadRef.current = firstUnreadMessage._id; // ذخیره ID پیام
-        const unreadElement = document.getElementById(
-          `message-${firstUnreadRef.current}`
-        );
-
-        if (unreadElement) {
-          unreadElement.scrollIntoView({
-            behavior: "instant",
-            block: "center",
-          });
-        }
-      } else if (storedScrollPosition && chatRef.current) {
-        chatRef.current.scrollTop = parseInt(storedScrollPosition, 10);
-      } else if (bottomRef.current) {
-        bottomRef.current.scrollIntoView({
-          behavior: "instant",
-          block: "center",
-        });
-      }
-    }
-
-    return () => {
-      if (chatRef.current && isScroll) {
-        sessionStorage.setItem(
-          `scrollPos-${chatId}`,
-          chatRef.current.scrollTop.toString()
-        );
-      }
-    };
-  }, [
-    chatId,
-    firstUnreadRef.current,
-    bottomRef.current,
-    chatRef.current,
-    isScroll,
-  ]);
 
   useMessageScroll({
     resetDelay: 1000,
