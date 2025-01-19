@@ -1,5 +1,5 @@
 import { useEmojiState } from "@/context/EmojiContext";
-import { forwardRef } from "react";
+import { forwardRef, useRef, useState } from "react";
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 import { cn } from "@/lib/utils";
@@ -18,11 +18,33 @@ export const EmojiPicker = forwardRef<
   const { openEmoji, setOpenEmoji, open, setOpen } = useEmojiState();
   const matches = useMediaQuery("(min-width: 768px)");
   const { isRecording } = useVoiceRecorder();
+  const timeoutRef = useRef<NodeJS.Timeout>();
+
+  const handleMouseEnter = () => {
+    if (openEmoji) {
+      return;
+    }
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = setTimeout(() => {
+      setOpenEmoji(true);
+    }, 600); // Adjust the delay (in milliseconds) as needed
+  };
+
+  const handleMouseLeave = () => {
+    clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      setOpenEmoji(false);
+    }, 400);
+  };
 
   return (
     <div
       className={cn(" relative ", isRecording && " pointer-events-none ")}
       onClick={() => setOpenEmoji(true)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <button
         className="size-[34px] hover:bg-[#1d9bf01a] flex items-center justify-center rounded-full"
