@@ -17,7 +17,7 @@ export default function DeleteMessage({ chatId }: { chatId: Id<"chats"> }) {
     });
     if (res) {
       const NewMessages = res.filter((i) => items?.includes(i._id));
-      localStore.setQuery(api.message.messages, { chatId }, [...NewMessages]);
+      localStore.setQuery(api.message.messages, { chatId }, NewMessages);
     }
   });
 
@@ -38,6 +38,7 @@ export default function DeleteMessage({ chatId }: { chatId: Id<"chats"> }) {
           const res = await deleteMessages({ messageIds: items });
           if (res?.success) {
             setDeleteItems(false);
+            setItems(null);
             toast.success("succesfull to delete messages");
           } else {
             toast.error("error to delete messages!");
