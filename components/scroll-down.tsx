@@ -82,8 +82,8 @@ export const ChatMessage = ({
             width={600}
             height={600}
             className={cn(
-              "h-auto max-h-[calc(55dvh)] bg-[#0f141981] shrink-0 object-cover",
-              message.status === "DELIVERED" ? "blur-md" : "blur-0"
+              "h-auto max-h-[calc(50dvh)] bg-[#0f141981] shrink-0 object-cover",
+              message.status === "DELIVERED" ? "blur-sm " : "blur-0"
             )}
           />
         )}

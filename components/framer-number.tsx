@@ -7,7 +7,7 @@ export function NumberCount({
   condition,
 }: {
   num: number;
-  classname: string;
+  classname?: string;
   condition: boolean;
 }) {
   return (
