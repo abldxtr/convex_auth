@@ -230,81 +230,90 @@ const MessRight: React.FC<{
     };
   }, [inView, replyMessageIdScroll, replyMessageId, message._id]);
   return (
-    <div
-      className={cn(
-        "  p-1  w-full group flex items-end gap-2 justify-end z-[9] rounded-md  ",
-        backGroundColor && "bg-[rgba(66,82,110,0.1)]"
-      )}
-      // className="md:p-2 "
-      {...bind()}
-      ref={setRefs}
-      id={message._id}
-      onClick={handleCheck}
-      // htmlFor={message._id}
-    >
-      <div
+    <AnimatePresence mode="wait">
+      <motion.div
         className={cn(
-          " opacity-0 group-hover:opacity-100 ",
-          deleteItems ? "hidden pointer-events-none " : ""
+          "  p-1  w-full group flex items-end gap-2 justify-end z-[9] rounded-md  ",
+          backGroundColor && "bg-[rgba(66,82,110,0.1)]"
         )}
+        // className="md:p-2 "
+        {...bind()}
+        ref={setRefs}
+        id={message._id}
+        onClick={handleCheck}
+        exit={{
+          height: 0,
+          transition: {
+            type: "spring",
+            bounce: 0,
+          },
+        }}
+        // htmlFor={message._id}
       >
         <div
-          className="  size-[32px] bg-gray-100/10 hover:bg-gray-100/80 transition-all flex items-center justify-center rounded-full cursor-pointer  "
-          onClick={() => {
-            setFunctionName("");
-            setReplyMessageId(message);
-          }}
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M3.33973 8.89844L9.87426 3.09021C9.9291 3.04361 9.99607 3.01358 10.0673 3.00363C10.1386 2.99369 10.2113 3.00425 10.2768 3.03406C10.3423 3.06388 10.3979 3.11173 10.4372 3.17202C10.4765 3.2323 10.4979 3.30253 10.4987 3.37449L10.4997 6.68555H11.5C16.5876 6.68555 21 9.60312 21 13.8721C20.9019 15.3604 20.4163 16.7971 19.5913 18.0397C18.7663 19.2823 17.6306 20.2875 16.2971 20.9555C16.2438 20.9844 16.1843 20.9997 16.1237 21H16.1151C16.0153 20.9978 15.9201 20.9572 15.8495 20.8866C15.7789 20.816 15.7383 20.7208 15.7361 20.621C15.7359 20.561 15.7503 20.5019 15.7778 20.4486C15.8053 20.3953 15.8453 20.3494 15.8943 20.3149C16.6549 19.4579 17.1293 18.3849 17.2513 17.2456C17.2513 14.4283 14.0096 12.7444 10.8749 12.7444C10.7858 12.7444 10.6968 12.7444 10.6096 12.7388H10.4997V15.3722C10.4988 15.4441 10.4775 15.5143 10.4382 15.5746C10.3989 15.6349 10.3432 15.6828 10.2777 15.7126C10.2122 15.7424 10.1396 15.753 10.0683 15.743C9.99702 15.7331 9.93005 15.703 9.87521 15.6564L3.12358 9.65524C3.08464 9.61972 3.05354 9.57647 3.03227 9.52826C3.01099 9.48004 3 9.42792 3 9.37522C3 9.32252 3.01099 9.2704 3.03227 9.22218C3.05354 9.17397 3.3008 8.93396 3.33973 8.89844Z"
-              stroke="#42526E"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            ></path>
-          </svg>
-        </div>
-      </div>
-
-      <motion.div
-        className="flex flex-col items-end max-w-[75%]"
-        initial={{ x: 0 }}
-        animate={deleteItems ? { x: -5 } : { x: 0 }}
-      >
-        <div className="bg-[#dcfaf5] rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl p-3 pt-1 pb-1 text-[#091e42]">
-          {children}
-        </div>
-      </motion.div>
-      {/* checkbox */}
-      {deleteItems && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className=" -ml-[5px] "
-        >
-          {items?.includes(message._id) ? (
-            <Checkbox
-              id={message._id}
-              className="rounded-full data-[state=checked]:border-[#1d9bf0] border-[#1d9bf0] data-[state=checked]:bg-[#1d9bf0]"
-              checked={true}
-            />
-          ) : (
-            <Checkbox
-              id={message._id}
-              className="rounded-full data-[state=checked]:border-[#1d9bf0] border-[#0d344e] data-[state=checked]:bg-[#1d9bf0]"
-              checked={false}
-            />
+          className={cn(
+            " opacity-0 group-hover:opacity-100 ",
+            deleteItems ? "hidden pointer-events-none " : ""
           )}
+        >
+          <div
+            className="  size-[32px] bg-gray-100/10 hover:bg-gray-100/80 transition-all flex items-center justify-center rounded-full cursor-pointer  "
+            onClick={() => {
+              setFunctionName("");
+              setReplyMessageId(message);
+            }}
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M3.33973 8.89844L9.87426 3.09021C9.9291 3.04361 9.99607 3.01358 10.0673 3.00363C10.1386 2.99369 10.2113 3.00425 10.2768 3.03406C10.3423 3.06388 10.3979 3.11173 10.4372 3.17202C10.4765 3.2323 10.4979 3.30253 10.4987 3.37449L10.4997 6.68555H11.5C16.5876 6.68555 21 9.60312 21 13.8721C20.9019 15.3604 20.4163 16.7971 19.5913 18.0397C18.7663 19.2823 17.6306 20.2875 16.2971 20.9555C16.2438 20.9844 16.1843 20.9997 16.1237 21H16.1151C16.0153 20.9978 15.9201 20.9572 15.8495 20.8866C15.7789 20.816 15.7383 20.7208 15.7361 20.621C15.7359 20.561 15.7503 20.5019 15.7778 20.4486C15.8053 20.3953 15.8453 20.3494 15.8943 20.3149C16.6549 19.4579 17.1293 18.3849 17.2513 17.2456C17.2513 14.4283 14.0096 12.7444 10.8749 12.7444C10.7858 12.7444 10.6968 12.7444 10.6096 12.7388H10.4997V15.3722C10.4988 15.4441 10.4775 15.5143 10.4382 15.5746C10.3989 15.6349 10.3432 15.6828 10.2777 15.7126C10.2122 15.7424 10.1396 15.753 10.0683 15.743C9.99702 15.7331 9.93005 15.703 9.87521 15.6564L3.12358 9.65524C3.08464 9.61972 3.05354 9.57647 3.03227 9.52826C3.01099 9.48004 3 9.42792 3 9.37522C3 9.32252 3.01099 9.2704 3.03227 9.22218C3.05354 9.17397 3.3008 8.93396 3.33973 8.89844Z"
+                stroke="#42526E"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              ></path>
+            </svg>
+          </div>
+        </div>
+
+        <motion.div
+          className="flex flex-col items-end max-w-[75%]"
+          initial={{ x: 0 }}
+          animate={deleteItems ? { x: -5 } : { x: 0 }}
+        >
+          <div className="bg-[#dcfaf5] rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl p-3 pt-1 pb-1 text-[#091e42]">
+            {children}
+          </div>
         </motion.div>
-      )}
-    </div>
+        {/* checkbox */}
+        {deleteItems && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className=" -ml-[5px] "
+          >
+            {items?.includes(message._id) ? (
+              <Checkbox
+                id={message._id}
+                className="rounded-full data-[state=checked]:border-[#1d9bf0] border-[#1d9bf0] data-[state=checked]:bg-[#1d9bf0]"
+                checked={true}
+              />
+            ) : (
+              <Checkbox
+                id={message._id}
+                className="rounded-full data-[state=checked]:border-[#1d9bf0] border-[#0d344e] data-[state=checked]:bg-[#1d9bf0]"
+                checked={false}
+              />
+            )}
+          </motion.div>
+        )}
+      </motion.div>
+    </AnimatePresence>
   );
 };
 

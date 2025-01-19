@@ -11,15 +11,16 @@ export default function DeleteMessage({ chatId }: { chatId: Id<"chats"> }) {
     useDeleteItem();
   const deleteMessages = useMutation(
     api.message.deleteMessageById
-  ).withOptimisticUpdate((localStore, mutationArg) => {
-    const res = localStore.getQuery(api.message.messages, {
-      chatId,
-    });
-    if (res) {
-      const NewMessages = res.filter((i) => items?.includes(i._id));
-      localStore.setQuery(api.message.messages, { chatId }, NewMessages);
-    }
-  });
+  )
+  // .withOptimisticUpdate((localStore, mutationArg) => {
+  //   const res = localStore.getQuery(api.message.messages, {
+  //     chatId,
+  //   });
+  //   if (res) {
+  //     const NewMessages = res.filter((i) => items?.includes(i._id));
+  //     localStore.setQuery(api.message.messages, { chatId }, NewMessages);
+  //   }
+  // });
 
   return (
     <div className=" absolute inset-0 bg-zinc-200 z-[10] flex items-center justify-center ">
