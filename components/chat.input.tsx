@@ -325,7 +325,7 @@ export default function InputChat({
           <div className=" absolute inset-0 bg-zinc-200/50 z-[10] " />
         )}
         {/* delete messages */}
-        {deleteItems && <DeleteMessage />}
+        {deleteItems && <DeleteMessage chatId={chatId} />}
         {replyMessageId && (
           <ReplyMessageComp
             message={replyMessageId}
