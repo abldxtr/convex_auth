@@ -493,6 +493,8 @@ const AudioMessage = ({ message }: { message: messageItem }) => {
   // const [audioURL, setAudioURL] = useState<string | null>(null);
   const [audioDuration, setAudioDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
+  const [shouldLoadAudio, setShouldLoadAudio] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   // let audioURL;
 
   const { wavesurfer, isPlaying: isWaveSurferPlaying } = useWavesurfer({
@@ -505,36 +507,74 @@ const AudioMessage = ({ message }: { message: messageItem }) => {
     barGap: 1,
     normalize: true,
     dragToSeek: true,
-    url: message.url || "",
+    // url: message.url || "",
+    url: shouldLoadAudio ? message.url! : "",
     cursorWidth: 2,
   });
 
-  useEffect(() => {
-    if (wavesurfer) {
-      // console.log({ wavesurfer });
-      wavesurfer.on("timeupdate", (currentTime: number) => {
-        // console.log({ currentTime });
-        setCurrentTime(currentTime);
-      });
+  // useEffect(() => {
+  //   if (wavesurfer) {
+  //     // console.log({ wavesurfer });
+  //     wavesurfer.on("timeupdate", (currentTime: number) => {
+  //       // console.log({ currentTime });
+  //       setCurrentTime(currentTime);
+  //     });
 
-      wavesurfer.on("ready", () => {
-        setAudioDuration(wavesurfer.getDuration());
-      });
-    }
+  //     wavesurfer.on("ready", () => {
+  //       setAudioDuration(wavesurfer.getDuration());
+  //     });
+  //   }
+  // }, [wavesurfer]);
+
+  useEffect(() => {
+    if (!wavesurfer) return;
+    wavesurfer.on("ready", () => {
+      // setWavesurfer(wavesurfer)
+      // setIsLoading(false)
+      setIsDownloading(false);
+    });
+
+    wavesurfer.on("loading", (percent) => {
+      setIsDownloading(true);
+    });
+
+    wavesurfer.on("timeupdate", (currentTime: number) => {
+      setCurrentTime(currentTime);
+    });
+
+    // wavesurfer.on("ready", () => {
+    //   setDuration(wavesurfer.getDuration())
+    // })
+
+    return () => {
+      wavesurfer.unAll();
+    };
   }, [wavesurfer]);
 
   const handlePlayPause = async () => {
-    if (wavesurfer) {
-      wavesurfer.playPause();
-      setIsPlaying(!isPlaying);
+    if (!shouldLoadAudio) {
+      setShouldLoadAudio(true);
+      return;
     }
+    if (!wavesurfer) return;
+    wavesurfer.playPause();
   };
   return (
     <div className="flex items-center md:w-[300px]  w-[220px] gap-x-2 pt-[8px]  ">
       <div
-        className="bg-blue-400 size-[40px] rounded-full flex items-center justify-center shrink-0 "
+        className={cn(
+          "bg-blue-400 size-[40px] rounded-full flex items-center justify-center shrink-0 relative "
+          // isDownloading && " before:absolute before:inset-0 before:bg-gray-100 "
+        )}
         onClick={handlePlayPause}
       >
+        {/* Loading Spinner */}
+        {isDownloading && (
+          <div
+            className="absolute inset-0 rounded-full border-2 border-t-transparent border-blue-200 animate-spin"
+            aria-label="Loading audio..."
+          />
+        )}
         {isWaveSurferPlaying ? (
           <Pause className="size-4 fill-white " color="white" />
         ) : (
