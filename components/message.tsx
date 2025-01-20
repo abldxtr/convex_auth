@@ -17,10 +17,11 @@ import { User } from "./message.list";
 import { Id } from "@/convex/_generated/dataModel";
 import {
   useMutation as TanStackMutation,
-  useQuery,
+  useQuery as TanStackQuery,
   QueryClient,
 } from "@tanstack/react-query";
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
+import { useQuery } from "convex-helpers/react/cache/hooks";
 
 import { useGlobalContext } from "@/context/globalContext";
 import { useMessageScroll } from "@/hooks/use-message-scroll";
@@ -158,9 +159,10 @@ export default function Messages({
     setItems(null);
   }, [chatId]);
 
-  const { data: messages, isPending } = useQuery(
-    convexQuery(api.message.messages, { chatId: cc })
-  );
+  // const { data: messages, isPending } = TanStackQuery(
+  //   convexQuery(api.message.messages, { chatId: cc })
+  // );
+  const messages = useQuery(api.message.messages, { chatId: cc });
 
   useEffect(() => {
     const chatContainer = chatRef?.current;
@@ -237,7 +239,8 @@ export default function Messages({
     });
   }, []);
 
-  if (isPending) {
+  // if (isPending) {
+  if (messages === undefined) {
     return (
       <div className=" w-full h-full flex justify-center my-2 ">
         <Loader2 className="size-8 text-zinc-500 animate-spin " />
