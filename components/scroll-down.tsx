@@ -26,6 +26,7 @@ interface messageItem {
         img?: ArrayBuffer | undefined;
         audioUrl?: ArrayBuffer | undefined;
         audioStorageId?: Id<"_storage"> | undefined;
+        duration?: number | undefined;
         type: "TEXT" | "IMAGE" | "VIDEO" | "AUDIO" | "FILE";
         content: string;
         senderId: Id<"users">;
@@ -44,6 +45,7 @@ interface messageItem {
   img?: ArrayBuffer | undefined;
   audioUrl?: ArrayBuffer | undefined;
   audioStorageId?: Id<"_storage"> | undefined;
+  duration?: number | undefined;
   type: "TEXT" | "IMAGE" | "VIDEO" | "AUDIO" | "FILE";
   content: string;
   senderId: Id<"users">;
@@ -544,7 +546,7 @@ const AudioMessage = ({ message }: { message: messageItem }) => {
         <div id="waveform" ref={audioRef} className="w-full h-[24px]" />
         <div className="flex items-center mt-2 text-xs text-muted-foreground">
           <span>{formatTime(currentTime)} / </span>
-          <span> {formatTime(audioDuration)}</span>
+          <span> {formatTime(message.duration || audioDuration)}</span>
         </div>
       </div>
     </div>

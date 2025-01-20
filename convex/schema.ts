@@ -54,6 +54,7 @@ const schema = defineSchema({
     img: v.optional(v.bytes()),
     audioUrl: v.optional(v.bytes()),
     audioStorageId: v.optional(v.id("_storage")),
+    duration: v.optional(v.number()),
   })
     .index("by_sender_user", ["senderId"])
     .index("by_receiver_user", ["receiverId"])

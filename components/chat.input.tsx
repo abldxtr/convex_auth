@@ -110,7 +110,9 @@ export default function InputChat({
     stopRecording,
     audioURL,
     audioBlob,
+    recordingDuration,
   } = useVoiceRecorder();
+  console.log({ recordingDuration });
   const uploadImg = useUploadImage();
 
   // console.log({ scrollPos });
@@ -153,6 +155,7 @@ export default function InputChat({
       type,
       replyMess,
       url,
+      duration,
     } = mutationArg;
 
     // ایجاد پیام موقت
@@ -175,6 +178,7 @@ export default function InputChat({
       img: img,
       replyMess,
       url,
+      duration,
     };
     console.log({ optimisticMessage });
 
@@ -224,6 +228,7 @@ export default function InputChat({
         replyId: replyMessageIdForSend ? undefined : replyMessageId?._id,
         replyMess: replyMessageIdForSend ? null : replyMessageId,
         url: audioURL,
+        duration: recordingDuration,
       };
 
       await createMessage(newMessage);

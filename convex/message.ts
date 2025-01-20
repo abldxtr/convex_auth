@@ -1,7 +1,5 @@
 import { v } from "convex/values";
 import { action, mutation, query } from "./_generated/server";
-import { Id } from "./_generated/dataModel";
-import { paginationOptsValidator } from "convex/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { internal } from "./_generated/api";
 
@@ -9,18 +7,17 @@ export const createMessage = mutation({
   args: {
     content: v.string(),
     chatId: v.id("chats"),
-    // images: v.optional(v.array(v.id("_storage"))),
     url: v.optional(v.string()),
     images: v.optional(v.any()),
     audioStorageId: v.optional(v.id("_storage")),
     replyId: v.optional(v.id("messages")),
     replyMess: v.optional(v.any()),
-
     senderId: v.id("users"),
     recieverId: v.id("users"),
     opupId: v.string(),
     img: v.optional(v.bytes()),
     audio: v.optional(v.bytes()),
+    duration: v.optional(v.number()),
     type: v.union(
       v.literal("TEXT"),
       v.literal("IMAGE"),
@@ -34,39 +31,7 @@ export const createMessage = mutation({
       if (!!!args.audioStorageId) {
         return null;
       }
-      // if (args.audioStorageId === "kg2edacvakd80hms3gqj4636td78ftnq") {
-      //   const fakeId = "kg2edacvakd80hms3gqj4636td78ftnq" as Id<"_storage">;
-      //   // const user = await ctx.db
-      //   // .query("messages")
-      //   // .withIndex("by_chatId", (q) => q.eq("chatId", chatId))
-      //   // .filter((q) =>
-      //   //   q.and(
-      //   //     q.eq(q.field("receiverId"), userId),
-      //   //     q.eq(q.field("status"), "SENT")
-      //   //   )
-      //   // )
-      //   // .collect();
-      //   const isMessage = await ctx.db
-      //     .query("messages")
-      //     .withIndex("by_audioStorageId", (q) => q.eq("audioStorageId", fakeId))
-      //     .collect();
-      //   if (isMessage.length > 0) {
-      //     await ctx.db.replace(isMessage[0]._id, {
-      //       content: args.content,
-      //       type: args.type,
-      //       chatId: args.chatId,
-      //       senderId: args.senderId,
-      //       receiverId: args.recieverId,
-      //       status: "SENT",
-      //       opupId: args.opupId,
-      //       img: args.img,
-      //       // audioUrl: args.audio,
-      //       audioStorageId: args.audioStorageId,
-      //       replyMessage: args.replyId,
-      //     });
-      //   }
-      //   return null;
-      // }
+
       let messageId = await ctx.db.insert("messages", {
         content: args.content,
         type: args.type,
@@ -79,6 +44,7 @@ export const createMessage = mutation({
         // audioUrl: args.audio,
         audioStorageId: args.audioStorageId,
         replyMessage: args.replyId,
+        duration: args.duration,
       });
 
       return messageId;
