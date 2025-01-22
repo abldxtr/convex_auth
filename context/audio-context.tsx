@@ -11,6 +11,7 @@ import {
 } from "react";
 import { useWavesurfer } from "@wavesurfer/react";
 import { base64ToArrayBuffer, blobToBase64 } from "@/components/chat.input";
+import { useAudioCache } from "./audio-cache-context";
 
 interface VoiceRecorderContextType {
   isRecording: boolean;
@@ -31,6 +32,8 @@ interface VoiceRecorderContextType {
   getArrayBuffer: () => Promise<ArrayBuffer | null>;
   audioBlob: Blob | null;
   setAudioBlob: Dispatch<SetStateAction<Blob | null>>;
+  messageIdAudio: string | null;
+  setMessageIdAudio: Dispatch<SetStateAction<string | null>>;
 }
 
 const VoiceRecorderContext = createContext<VoiceRecorderContextType | null>(
@@ -57,6 +60,8 @@ export function VoiceRecorderProvider({
   const chunksRef = useRef<Blob[]>([]);
   const reff = useRef<HTMLDivElement>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const [messageIdAudio, setMessageIdAudio] = useState<string | null>(null);
+  const { getAudio, setAudio } = useAudioCache();
 
   const { wavesurfer, isPlaying: isWaveSurferPlaying } = useWavesurfer({
     container: reff,
@@ -121,14 +126,19 @@ export function VoiceRecorderProvider({
         setAudioURL(url);
 
         // Convert to ArrayBuffer
-        // const buffer = await audioBlob.arrayBuffer();
+        const buffer = await audioBlob.arrayBuffer();
         // setAudioArrayBuffer(buffer);
+        const messageId = crypto.randomUUID();
+        setMessageIdAudio(messageId);
+        // await setAudio(messageId, buffer);
 
-        // const AudioArrayBufferr = await blobToBase64(audioBlob).then((res) => {
-        //   const ddd = base64ToArrayBuffer(res as string);
-        //   const arrayBuffer = new Response(ddd).arrayBuffer();
-        //   return arrayBuffer;
-        // });
+        const AudioArrayBufferr = await blobToBase64(audioBlob).then((res) => {
+          const ddd = base64ToArrayBuffer(res as string);
+          const arrayBuffer = new Response(ddd).arrayBuffer();
+          return arrayBuffer;
+        });
+        await setAudio(messageId, AudioArrayBufferr);
+
         // setAudioArrayBuffer(AudioArrayBufferr);
       };
 
@@ -213,6 +223,8 @@ export function VoiceRecorderProvider({
     getArrayBuffer,
     audioBlob,
     setAudioBlob,
+    messageIdAudio,
+    setMessageIdAudio,
   };
 
   return (

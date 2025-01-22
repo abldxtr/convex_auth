@@ -15,6 +15,7 @@ import { useLongPress } from "use-long-press";
 import { Checkbox } from "./ui/checkbox";
 import { useDeleteItem } from "@/context/delete-items-context";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAudioCache } from "@/context/audio-cache-context";
 
 interface messageItem {
   replyMess?:
@@ -495,8 +496,102 @@ const AudioMessage = ({ message }: { message: messageItem }) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [shouldLoadAudio, setShouldLoadAudio] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
-  // let audioURL;
+  const { getAudio, setAudio } = useAudioCache();
+  const [audioURL, setAudioURL] = useState("");
+  const [isReady, setIsReady] = useState(false); // Add isReady state
 
+  useEffect(() => {
+    setIsReady(true); // Set isReady to true when the component mounts
+  }, []);
+  useEffect(() => {
+    const checkCache = async () => {
+      if (!isReady) return;
+      const audioData = await getAudio(message._id);
+      console.log("new id", message._id);
+      console.log("audioData", audioData);
+
+      if (audioData === null || audioData === undefined) {
+        console.log(message.opupId);
+
+        const response = await getAudio(message.opupId);
+        if (response) {
+          const audioBlob = new Blob([response], { type: "audio/wav" });
+          const url = URL.createObjectURL(audioBlob);
+          setAudioURL(url);
+          return;
+        }
+
+        // setShouldLoadAudio(true);
+        return;
+      }
+      if (audioData) {
+        const audioBlob = new Blob([audioData], { type: "audio/wav" });
+        const url = URL.createObjectURL(audioBlob);
+        setAudioURL(url);
+        // setShouldLoadAudio(true);
+        return;
+      }
+      // return
+    };
+
+    checkCache();
+  }, [isReady, message._id, message.opupId]);
+  // console.log(message.opupId);
+  // let audioURL;
+  const loadAudio = async () => {
+    try {
+      setIsDownloading(true);
+
+      // Try to get from cache first
+      let audioData = await getAudio(message._id);
+
+      if (!audioData) {
+        // If not in cache, download it in chunks
+        const response = await fetch(message.url!);
+        const contentLength = response.headers.get("content-length");
+
+        if (
+          contentLength &&
+          Number.parseInt(contentLength) > 50 * 1024 * 1024
+        ) {
+          throw new Error("File size too large (max 50MB)");
+        }
+
+        audioData = await response.arrayBuffer();
+        const audioBlob = new Blob([audioData], { type: "audio/wav" });
+        // setAudioBlob(audioBlob);
+
+        const url = URL.createObjectURL(audioBlob);
+        setAudioURL(url);
+
+        try {
+          await setAudio(message._id, audioData);
+          setShouldLoadAudio(true);
+          return;
+        } catch (cacheError) {
+          console.warn("Failed to cache audio:", cacheError);
+          // Continue without caching
+        }
+      }
+
+      // Load the audio data into WaveSurfer
+      // await ws.loadArrayBuffer(audioData);
+
+      // setWavesurfer(ws)
+      // setIsLoading(false)
+      const audioBlob = new Blob([audioData], { type: "audio/wav" });
+      // setAudioBlob(audioBlob);
+
+      const url = URL.createObjectURL(audioBlob);
+      setAudioURL(url);
+      setIsDownloading(false);
+      setShouldLoadAudio(true);
+    } catch (err) {
+      // setError(err as Error)
+      setIsDownloading(false);
+    }
+  };
+  // let audioData = await getAudio(message._id);
   const { wavesurfer, isPlaying: isWaveSurferPlaying } = useWavesurfer({
     container: audioRef,
     height: "auto",
@@ -508,29 +603,15 @@ const AudioMessage = ({ message }: { message: messageItem }) => {
     normalize: true,
     dragToSeek: true,
     // url: message.url || "",
-    url: shouldLoadAudio ? message.url! : "",
+    // url: shouldLoadAudio ? message.url! : "",
+    // url: shouldLoadAudio ? audioURL : "",
+    url: !!audioURL ? audioURL : "",
     cursorWidth: 2,
   });
-
-  // useEffect(() => {
-  //   if (wavesurfer) {
-  //     // console.log({ wavesurfer });
-  //     wavesurfer.on("timeupdate", (currentTime: number) => {
-  //       // console.log({ currentTime });
-  //       setCurrentTime(currentTime);
-  //     });
-
-  //     wavesurfer.on("ready", () => {
-  //       setAudioDuration(wavesurfer.getDuration());
-  //     });
-  //   }
-  // }, [wavesurfer]);
 
   useEffect(() => {
     if (!wavesurfer) return;
     wavesurfer.on("ready", () => {
-      // setWavesurfer(wavesurfer)
-      // setIsLoading(false)
       setIsDownloading(false);
     });
 
@@ -552,8 +633,9 @@ const AudioMessage = ({ message }: { message: messageItem }) => {
   }, [wavesurfer]);
 
   const handlePlayPause = async () => {
-    if (!shouldLoadAudio) {
-      setShouldLoadAudio(true);
+    if (!shouldLoadAudio && !!!audioURL) {
+      // setShouldLoadAudio(true);
+      await loadAudio();
       return;
     }
     if (!wavesurfer) return;

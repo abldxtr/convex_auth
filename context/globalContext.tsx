@@ -3,6 +3,7 @@
 import { Id } from "@/convex/_generated/dataModel";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { DeleteItemsProvider } from "./delete-items-context";
+import { AudioCacheProvider } from "./audio-cache-context";
 
 export type FileState = {
   file: File;
@@ -190,7 +191,9 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
         setFunctionName,
       }}
     >
-      <DeleteItemsProvider>{children}</DeleteItemsProvider>
+      <DeleteItemsProvider>
+        <AudioCacheProvider>{children}</AudioCacheProvider>
+      </DeleteItemsProvider>
     </GlobalContext.Provider>
   );
 };

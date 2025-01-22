@@ -111,8 +111,9 @@ export default function InputChat({
     audioURL,
     audioBlob,
     recordingDuration,
+    messageIdAudio,
   } = useVoiceRecorder();
-  console.log({ recordingDuration });
+  // console.log({ recordingDuration });
   const uploadImg = useUploadImage();
 
   // console.log({ scrollPos });
@@ -221,7 +222,7 @@ export default function InputChat({
         senderId: currentUser,
         recieverId: other,
         chatId: chatId as Id<"chats">,
-        opupId: messageId,
+        opupId: messageIdAudio!,
 
         type: "AUDIO" as const,
         audioStorageId: idStorage,
