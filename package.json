@@ -12,6 +12,7 @@
     "@auth/core": "~0.37.3",
     "@convex-dev/auth": "^0.0.77",
     "@convex-dev/react-query": "0.0.0-alpha.8",
+    "@ducanh2912/next-pwa": "^10.2.9",
     "@emoji-mart/data": "^1.2.1",
     "@emoji-mart/react": "^1.1.1",
     "@faker-js/faker": "^9.3.0",
@@ -65,6 +66,7 @@
     "eslint-config-next": "15.0.3",
     "postcss": "^8",
     "tailwindcss": "^3.4.15",
-    "typescript": "^5"
+    "typescript": "^5",
+    "webpack": "^5.97.1"
   }
 }

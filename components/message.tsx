@@ -22,6 +22,7 @@ import {
 } from "@tanstack/react-query";
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
 import { useQuery } from "convex-helpers/react/cache/hooks";
+import { AnimatePresence, motion } from "framer-motion";
 
 import { useGlobalContext } from "@/context/globalContext";
 import { useMessageScroll } from "@/hooks/use-message-scroll";
@@ -63,7 +64,7 @@ export default function Messages({
       );
 
       if (firstUnreadMessage) {
-        firstUnreadRef.current = firstUnreadMessage._id; // ذخیره ID پیام
+        firstUnreadRef.current = firstUnreadMessage._id;
         const unreadElement = document.getElementById(
           `message-${firstUnreadRef.current}`
         );
@@ -258,53 +259,69 @@ export default function Messages({
         unreadMessagesCount={unreadMessagesCount}
         mutate={makeAllMessageSeen}
       />
-      <div
+      <motion.div
         className={cn(
           "w-full    overflow-y-auto flex  flex-col h-full  [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-md"
         )}
         ref={chatRef}
       >
-        {Object.entries(groupedMessages).map(([date, msgs]) => (
-          <div key={date} className="mb-4 isolate">
-            <div className="text-center text-sm text-gray-500 my-2 sticky top-0 rtlDir z-[200] w-full flex items-center justify-center">
-              <div
-                className="px-2 py-1 bg-gray-100 rounded-full mt-2  "
-                onClick={() => DisableDeleteItmes()}
-              >
-                {date}
-              </div>
-            </div>
-            {msgs.map((message) => {
-              const isFirstUnread = message._id === firstUnreadRef.current; // فقط یک بار
-              return (
+        <AnimatePresence initial={false}>
+          {Object.entries(groupedMessages).map(([date, msgs], index) => (
+            <div key={`${index}-${date}`} className="mb-4 isolate">
+              <div className="text-center text-sm text-gray-500 my-2 sticky top-0 rtlDir z-[200] w-full flex items-center justify-center">
                 <div
-                  key={message._id}
-                  id={`message-${message._id}`}
-                  className=" hover:bg-[rgba(66,82,110,0.03)] transition-all group  rounded-md  "
+                  className="px-2 py-1 bg-gray-100 rounded-full mt-2  "
+                  // onClick={() => DisableDeleteItmes()}
                 >
-                  {isFirstUnread && (
-                    <div className="bg-yellow-100 text-yellow-800 text-center py-1 rounded-md ">
-                      پیام‌های خوانده‌نشده
-                    </div>
-                  )}
-                  <ChatMessage
-                    key={message._id}
-                    message={message}
-                    isCurrentUser={message.senderId === currentUser}
-                    current_user={user}
-                    other_user={otherUser}
-                  />
+                  {date}
                 </div>
-              );
-            })}
-          </div>
-        ))}
-        <div ref={bottomRef} />
+              </div>
+              {msgs.map((message, index) => {
+                const isFirstUnread = message._id === firstUnreadRef.current; // فقط یک بار
+                return (
+                  <motion.div
+                    key={message._id}
+                    id={`message-${message._id}`}
+                    className=" hover:bg-[rgba(66,82,110,0.03)] transition-all group  rounded-md  "
+                    // layout
+                    // exit={{
+                    //   height: 0,
+                    //   opacity: 0,
+                    //   transition: {
+                    //     // opacity: {
+                    //     //   duration: 0.2,
+                    //     // },
+                    //     duration: 3,
+                    //     layout: {
+                    //       duration: index * 5,
+                    //     },
+                    //   },
+                    // }}
+                  >
+                    {isFirstUnread && (
+                      <div className="bg-yellow-100 text-yellow-800 text-center py-1 rounded-md ">
+                        پیام‌های خوانده‌نشده
+                      </div>
+                    )}
+                    <ChatMessage
+                      key={message._id}
+                      message={message}
+                      isCurrentUser={message.senderId === currentUser}
+                      current_user={user}
+                      other_user={otherUser}
+                    />
+                  </motion.div>
+                );
+              })}
+            </div>
+          ))}
+          <div ref={bottomRef} />
 
-        {presentOthers && presentOthers.data.typing && (
-          <TypingLeft message="typing..." />
-        )}
-      </div>
+          {presentOthers && presentOthers.data.typing && (
+            <TypingLeft message="typing..." />
+          )}
+        </AnimatePresence>
+      </motion.div>
     </div>
   );
 }

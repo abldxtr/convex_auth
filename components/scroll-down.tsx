@@ -591,6 +591,7 @@ const AudioMessage = ({ message }: { message: messageItem }) => {
       setIsDownloading(false);
     }
   };
+
   // let audioData = await getAudio(message._id);
   const { wavesurfer, isPlaying: isWaveSurferPlaying } = useWavesurfer({
     container: audioRef,
@@ -609,10 +610,55 @@ const AudioMessage = ({ message }: { message: messageItem }) => {
     cursorWidth: 2,
   });
 
+  // Save position when component unmounts or audio pauses
+  useEffect(() => {
+    if (!wavesurfer) return;
+
+    // Handler to save current time
+    const handleTimeUpdate = () => {
+      const currentTime = wavesurfer.getCurrentTime();
+      console.log({ currentTime });
+      console.log(wavesurfer.getScroll());
+      const duration = wavesurfer.getDuration();
+      // Calculate progress as a number between 0-1
+      const progress = currentTime / duration;
+      localStorage.setItem(`audioProgress-${message._id}`, progress.toString());
+
+      // localStorage.setItem(`audioTime-${message._id}`, currentTime.toString());
+    };
+
+    // Save time every second during playback
+    const interval = setInterval(() => {
+      if (isWaveSurferPlaying) {
+        handleTimeUpdate();
+      }
+    }, 1000);
+
+    // Save time when paused
+    wavesurfer.on("pause", handleTimeUpdate);
+
+    // Save time before unmounting
+    return () => {
+      wavesurfer.un("pause", handleTimeUpdate);
+      handleTimeUpdate();
+      clearInterval(interval);
+    };
+  }, [wavesurfer, message._id, isWaveSurferPlaying]);
+
   useEffect(() => {
     if (!wavesurfer) return;
     wavesurfer.on("ready", () => {
       setIsDownloading(false);
+      const savedTime = localStorage.getItem(`audioTime-${message._id}`);
+
+      if (savedTime) {
+        // wavesurfer.setTime(Number.parseFloat(savedTime));
+        // wavesurfer.setScrollTime(Number.parseFloat(savedTime));
+        // wavesurfer.seekTo(Number.parseFloat("3"));
+
+        const progress = Number.parseFloat("0.6259246588693957");
+        wavesurfer.seekTo(progress);
+      }
     });
 
     wavesurfer.on("loading", (percent) => {
@@ -630,7 +676,7 @@ const AudioMessage = ({ message }: { message: messageItem }) => {
     return () => {
       wavesurfer.unAll();
     };
-  }, [wavesurfer]);
+  }, [wavesurfer, message._id]);
 
   const handlePlayPause = async () => {
     if (!shouldLoadAudio && !!!audioURL) {

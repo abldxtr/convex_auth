@@ -20,9 +20,9 @@ export function NumberCount({
             .map((value) => (
               <motion.span
                 key={value}
-                initial={{ y: -15 }}
+                initial={{ y: -0 }}
                 animate={{ y: 0 }}
-                exit={{ y: 15 }}
+                exit={{ y: 0, opacity: 0 }}
                 transition={{ duration: 0.2, type: "tween" }}
                 className="inline-block"
               >
