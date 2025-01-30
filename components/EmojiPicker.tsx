@@ -70,9 +70,12 @@ export const EmojiPicker = forwardRef<
             emojiSize={18}
             searchPosition="none"
             onClickOutside={() => setOpenEmoji(false)}
-            maxFrequentRows={0}
+            maxFrequentRows={matches ? 7 : 5}
             perLine={matches ? 8 : 6}
             showPreview={false}
+            previewPosition="none"
+            set="twitter"
+            skin={2}
           />
         </div>
       )}

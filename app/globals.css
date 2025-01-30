@@ -72,17 +72,77 @@
   }
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-}
-
 @layer components {
   .rtlDir {
     direction: rtl;
   }
+  .messages-parent {
+    background-color: #3a12ff;
+    background-image: linear-gradient(#faaf00, #ff2e2e, #3a12ff);
+    background-attachment: fixed;
+    border-left: 2px solid #fff;
+    border-right: 2px solid #fff;
+  }
+}
+@keyframes popIn {
+  0% {
+    transform: translate(-50%, 0) scale(0.5);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, 10px) scale(1);
+    opacity: 1;
+  }
+}
+
+.reaction-container {
+  animation: popIn 0.2s ease-out forwards;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.emoji-hover {
+  transition: all 0.2s ease;
+  will-change: transform;
+}
+
+.emoji-hover:hover {
+  transform: scale(1.2);
+  filter: brightness(1.1);
+}
+
+/* مخفی کردن اسکرول‌بار */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* انیمیشن برای انتخاب */
+@keyframes select {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.4);
+  }
+  100% {
+    transform: scale(1.2);
+  }
+}
+
+.selected {
+  animation: select 0.2s ease-out forwards;
+}
+
+/* استایل نشانگر برای راست کلیک */
+.cursor-context-menu {
+  cursor: context-menu;
 }

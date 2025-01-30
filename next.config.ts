@@ -24,6 +24,13 @@ const nextConfig = {
         pathname: "/**",
         // search: "",
       },
+      {
+        protocol: "https",
+        hostname: "assets.stickpng.com",
+        port: "",
+        pathname: "/**",
+        // search: "",
+      },
     ],
   },
 

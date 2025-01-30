@@ -16,20 +16,27 @@ import { Checkbox } from "./ui/checkbox";
 import { useDeleteItem } from "@/context/delete-items-context";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAudioCache } from "@/context/audio-cache-context";
+import ReactionPicker, { reactionsIcon } from "./reaction-picker";
 
 interface messageItem {
   replyMess?:
     | {
         _id: Id<"messages">;
         _creationTime: number;
-        replyMessage?: Id<"messages"> | undefined;
-        image?: string[] | undefined;
         img?: ArrayBuffer | undefined;
+        image?: string[] | undefined;
+        replyMessage?: Id<"messages"> | undefined;
         audioUrl?: ArrayBuffer | undefined;
         audioStorageId?: Id<"_storage"> | undefined;
         duration?: number | undefined;
-        type: "TEXT" | "IMAGE" | "VIDEO" | "AUDIO" | "FILE";
+        reaction?:
+          | {
+              userId: Id<"users">;
+              icon: string;
+            }[]
+          | undefined;
         content: string;
+        type: "TEXT" | "IMAGE" | "VIDEO" | "AUDIO" | "FILE";
         senderId: Id<"users">;
         receiverId: Id<"users">;
         chatId: Id<"chats">;
@@ -41,14 +48,20 @@ interface messageItem {
   url?: string | null | undefined;
   _id: Id<"messages">;
   _creationTime: number;
-  replyMessage?: Id<"messages"> | undefined;
-  image?: string[] | undefined;
   img?: ArrayBuffer | undefined;
+  image?: string[] | undefined;
+  replyMessage?: Id<"messages"> | undefined;
   audioUrl?: ArrayBuffer | undefined;
   audioStorageId?: Id<"_storage"> | undefined;
   duration?: number | undefined;
-  type: "TEXT" | "IMAGE" | "VIDEO" | "AUDIO" | "FILE";
+  reaction?:
+    | {
+        userId: Id<"users">;
+        icon: string;
+      }[]
+    | undefined;
   content: string;
+  type: "TEXT" | "IMAGE" | "VIDEO" | "AUDIO" | "FILE";
   senderId: Id<"users">;
   receiverId: Id<"users">;
   chatId: Id<"chats">;
@@ -109,6 +122,8 @@ export const ChatMessage = ({
           message={message}
           imageLoaded={imageLoaded}
           isCurrentUser={isCurrentUser}
+          current_user={current_user}
+          other_user={other_user}
         />
       </MessageWrapper>
     </>
@@ -136,6 +151,19 @@ const MessRight: React.FC<{
   } = useDeleteItem();
   const [backGroundColor, setBackGroundColor] = useState(false);
   const [checkState, setCheckState] = useState(false);
+
+  // reaction stuff
+  const [isVisible, setIsVisible] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault(); // جلوگیری از نمایش منوی راست کلیک مرورگر
+    setIsVisible(true);
+    setPosition({
+      x: e.clientX,
+      y: e.clientY,
+    });
+  };
 
   const bind = useLongPress(() => {
     if (!isDragging) {
@@ -233,90 +261,101 @@ const MessRight: React.FC<{
     };
   }, [inView, replyMessageIdScroll, replyMessageId, message._id]);
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        className={cn(
-          "  p-1  w-full group flex items-end gap-2 justify-end z-[9] rounded-md  ",
-          backGroundColor && "bg-[rgba(66,82,110,0.1)]"
-        )}
-        // className="md:p-2 "
-        {...bind()}
-        ref={setRefs}
-        id={message._id}
-        onClick={handleCheck}
-        exit={{
-          height: 0,
-          transition: {
-            type: "spring",
-            bounce: 0,
-          },
-        }}
-        // htmlFor={message._id}
-      >
-        <div
+    <>
+      <ReactionPicker
+        isVisible={isVisible}
+        position={position}
+        setIsVisible={setIsVisible}
+        setPosition={setPosition}
+        messageId={message._id}
+      />
+      <AnimatePresence mode="wait">
+        <motion.div
           className={cn(
-            " opacity-0 group-hover:opacity-100 ",
-            deleteItems ? "hidden pointer-events-none " : ""
+            "  p-1  w-full group flex items-end gap-2 justify-end z-[9] rounded-md  relative isolate  ",
+            backGroundColor && "bg-[rgba(66,82,110,0.1)]"
           )}
+          dir="auto"
+          // className="md:p-2 "
+          {...bind()}
+          ref={setRefs}
+          id={message._id}
+          onClick={handleCheck}
+          exit={{
+            height: 0,
+            transition: {
+              type: "spring",
+              bounce: 0,
+            },
+          }}
+          onContextMenu={handleContextMenu}
+          // htmlFor={message._id}
         >
           <div
-            className="  size-[32px] bg-gray-100/10 hover:bg-gray-100/80 transition-all flex items-center justify-center rounded-full cursor-pointer  "
-            onClick={() => {
-              setFunctionName("");
-              setReplyMessageId(message);
-            }}
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M3.33973 8.89844L9.87426 3.09021C9.9291 3.04361 9.99607 3.01358 10.0673 3.00363C10.1386 2.99369 10.2113 3.00425 10.2768 3.03406C10.3423 3.06388 10.3979 3.11173 10.4372 3.17202C10.4765 3.2323 10.4979 3.30253 10.4987 3.37449L10.4997 6.68555H11.5C16.5876 6.68555 21 9.60312 21 13.8721C20.9019 15.3604 20.4163 16.7971 19.5913 18.0397C18.7663 19.2823 17.6306 20.2875 16.2971 20.9555C16.2438 20.9844 16.1843 20.9997 16.1237 21H16.1151C16.0153 20.9978 15.9201 20.9572 15.8495 20.8866C15.7789 20.816 15.7383 20.7208 15.7361 20.621C15.7359 20.561 15.7503 20.5019 15.7778 20.4486C15.8053 20.3953 15.8453 20.3494 15.8943 20.3149C16.6549 19.4579 17.1293 18.3849 17.2513 17.2456C17.2513 14.4283 14.0096 12.7444 10.8749 12.7444C10.7858 12.7444 10.6968 12.7444 10.6096 12.7388H10.4997V15.3722C10.4988 15.4441 10.4775 15.5143 10.4382 15.5746C10.3989 15.6349 10.3432 15.6828 10.2777 15.7126C10.2122 15.7424 10.1396 15.753 10.0683 15.743C9.99702 15.7331 9.93005 15.703 9.87521 15.6564L3.12358 9.65524C3.08464 9.61972 3.05354 9.57647 3.03227 9.52826C3.01099 9.48004 3 9.42792 3 9.37522C3 9.32252 3.01099 9.2704 3.03227 9.22218C3.05354 9.17397 3.3008 8.93396 3.33973 8.89844Z"
-                stroke="#42526E"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-              ></path>
-            </svg>
-          </div>
-        </div>
-
-        <motion.div
-          className="flex flex-col items-end max-w-[75%]"
-          initial={{ x: 0 }}
-          animate={deleteItems ? { x: -5 } : { x: 0 }}
-        >
-          <div className="bg-[#dcfaf5] rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl p-3 pt-1 pb-1 text-[#091e42]">
-            {children}
-          </div>
-        </motion.div>
-        {/* checkbox */}
-        {deleteItems && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className=" -ml-[5px] "
-          >
-            {items?.includes(message._id) ? (
-              <Checkbox
-                id={message._id}
-                className="rounded-full data-[state=checked]:border-[#1d9bf0] border-[#1d9bf0] data-[state=checked]:bg-[#1d9bf0]"
-                checked={true}
-              />
-            ) : (
-              <Checkbox
-                id={message._id}
-                className="rounded-full data-[state=checked]:border-[#1d9bf0] border-[#0d344e] data-[state=checked]:bg-[#1d9bf0]"
-                checked={false}
-              />
+            className={cn(
+              " opacity-0 group-hover:opacity-100 ",
+              deleteItems ? "hidden pointer-events-none " : ""
             )}
+          >
+            <div
+              className="  size-[32px] bg-gray-100/10 hover:bg-gray-100/80 transition-all flex items-center justify-center rounded-full cursor-pointer  "
+              onClick={() => {
+                setFunctionName("");
+                setReplyMessageId(message);
+              }}
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M3.33973 8.89844L9.87426 3.09021C9.9291 3.04361 9.99607 3.01358 10.0673 3.00363C10.1386 2.99369 10.2113 3.00425 10.2768 3.03406C10.3423 3.06388 10.3979 3.11173 10.4372 3.17202C10.4765 3.2323 10.4979 3.30253 10.4987 3.37449L10.4997 6.68555H11.5C16.5876 6.68555 21 9.60312 21 13.8721C20.9019 15.3604 20.4163 16.7971 19.5913 18.0397C18.7663 19.2823 17.6306 20.2875 16.2971 20.9555C16.2438 20.9844 16.1843 20.9997 16.1237 21H16.1151C16.0153 20.9978 15.9201 20.9572 15.8495 20.8866C15.7789 20.816 15.7383 20.7208 15.7361 20.621C15.7359 20.561 15.7503 20.5019 15.7778 20.4486C15.8053 20.3953 15.8453 20.3494 15.8943 20.3149C16.6549 19.4579 17.1293 18.3849 17.2513 17.2456C17.2513 14.4283 14.0096 12.7444 10.8749 12.7444C10.7858 12.7444 10.6968 12.7444 10.6096 12.7388H10.4997V15.3722C10.4988 15.4441 10.4775 15.5143 10.4382 15.5746C10.3989 15.6349 10.3432 15.6828 10.2777 15.7126C10.2122 15.7424 10.1396 15.753 10.0683 15.743C9.99702 15.7331 9.93005 15.703 9.87521 15.6564L3.12358 9.65524C3.08464 9.61972 3.05354 9.57647 3.03227 9.52826C3.01099 9.48004 3 9.42792 3 9.37522C3 9.32252 3.01099 9.2704 3.03227 9.22218C3.05354 9.17397 3.3008 8.93396 3.33973 8.89844Z"
+                  stroke="#42526E"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                ></path>
+              </svg>
+            </div>
+          </div>
+
+          <motion.div
+            className="flex flex-col items-end max-w-[75%]"
+            initial={{ x: 0 }}
+            animate={deleteItems ? { x: -5 } : { x: 0 }}
+          >
+            <div className="bg-[#dcfaf5] rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl p-3 pt-1 pb-1 text-[#091e42]">
+              {children}
+            </div>
           </motion.div>
-        )}
-      </motion.div>
-    </AnimatePresence>
+          {/* checkbox */}
+          {deleteItems && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className=" -ml-[5px] "
+            >
+              {items?.includes(message._id) ? (
+                <Checkbox
+                  id={message._id}
+                  className="rounded-full data-[state=checked]:border-[#1d9bf0] border-[#1d9bf0] data-[state=checked]:bg-[#1d9bf0]"
+                  checked={true}
+                />
+              ) : (
+                <Checkbox
+                  id={message._id}
+                  className="rounded-full data-[state=checked]:border-[#1d9bf0] border-[#0d344e] data-[state=checked]:bg-[#1d9bf0]"
+                  checked={false}
+                />
+              )}
+            </motion.div>
+          )}
+        </motion.div>
+      </AnimatePresence>
+    </>
   );
 };
 
@@ -334,6 +373,18 @@ const MessLeft: React.FC<{
   const { deleteItems, setDeleteItems, items, setItems, DisableDeleteItmes } =
     useDeleteItem();
   const [backGroundColor, setBackGroundColor] = useState(false);
+  // reaction stuff
+  const [isVisible, setIsVisible] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault(); // جلوگیری از نمایش منوی راست کلیک مرورگر
+    setIsVisible(true);
+    setPosition({
+      x: e.clientX,
+      y: e.clientY,
+    });
+  };
   // const bind = useLongPress(() => {
   //   // alert("Long pressed!");
   //   setBackGroundColor(true);
@@ -446,46 +497,56 @@ const MessLeft: React.FC<{
   }, [inView, replyMessageIdScroll, replyMessageId, message._id]);
 
   return (
-    <div
-      className={cn(
-        " p-1 w-full group flex items-end gap-2 z-[9] transition-all duration-200 rounded-md "
-        // backGroundColor && "bg-[rgba(66,82,110,0.2)]"
-      )}
-      // {...bind()}
-      ref={setRefs}
-    >
-      <div className="flex flex-col items-start max-w-[75%]">
-        <div className="bg-[#f4f5f7] rounded-tr-2xl  rounded-br-2xl rounded-tl-2xl p-3 pt-1 pb-1 text-[#091e42]">
-          {children}
-        </div>
-      </div>
-      {!deleteItems && (
-        <div className=" opacity-0 group-hover:opacity-100 ">
-          <div
-            className="  size-[32px] bg-gray-100/10 hover:bg-gray-100/80 transition-all flex items-center justify-center rounded-full cursor-pointer  "
-            onClick={() => {
-              setFunctionName("");
-              setReplyMessageId(message);
-            }}
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M3.33973 8.89844L9.87426 3.09021C9.9291 3.04361 9.99607 3.01358 10.0673 3.00363C10.1386 2.99369 10.2113 3.00425 10.2768 3.03406C10.3423 3.06388 10.3979 3.11173 10.4372 3.17202C10.4765 3.2323 10.4979 3.30253 10.4987 3.37449L10.4997 6.68555H11.5C16.5876 6.68555 21 9.60312 21 13.8721C20.9019 15.3604 20.4163 16.7971 19.5913 18.0397C18.7663 19.2823 17.6306 20.2875 16.2971 20.9555C16.2438 20.9844 16.1843 20.9997 16.1237 21H16.1151C16.0153 20.9978 15.9201 20.9572 15.8495 20.8866C15.7789 20.816 15.7383 20.7208 15.7361 20.621C15.7359 20.561 15.7503 20.5019 15.7778 20.4486C15.8053 20.3953 15.8453 20.3494 15.8943 20.3149C16.6549 19.4579 17.1293 18.3849 17.2513 17.2456C17.2513 14.4283 14.0096 12.7444 10.8749 12.7444C10.7858 12.7444 10.6968 12.7444 10.6096 12.7388H10.4997V15.3722C10.4988 15.4441 10.4775 15.5143 10.4382 15.5746C10.3989 15.6349 10.3432 15.6828 10.2777 15.7126C10.2122 15.7424 10.1396 15.753 10.0683 15.743C9.99702 15.7331 9.93005 15.703 9.87521 15.6564L3.12358 9.65524C3.08464 9.61972 3.05354 9.57647 3.03227 9.52826C3.01099 9.48004 3 9.42792 3 9.37522C3 9.32252 3.01099 9.2704 3.03227 9.22218C3.05354 9.17397 3.3008 8.93396 3.33973 8.89844Z"
-                stroke="#42526E"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-              ></path>
-            </svg>
+    <>
+      <ReactionPicker
+        isVisible={isVisible}
+        position={position}
+        setIsVisible={setIsVisible}
+        setPosition={setPosition}
+        messageId={message._id}
+      />
+      <div
+        className={cn(
+          " p-1 w-full group flex items-end gap-2 z-[9] transition-all duration-200 rounded-md  isolate "
+          // backGroundColor && "bg-[rgba(66,82,110,0.2)]"
+        )}
+        // {...bind()}
+        ref={setRefs}
+        onContextMenu={handleContextMenu}
+      >
+        <div className="flex flex-col items-start max-w-[75%]">
+          <div className="bg-[#f4f5f7] rounded-tr-2xl  rounded-br-2xl rounded-tl-2xl p-3 pt-1 pb-1 text-[#091e42] ">
+            {children}
           </div>
         </div>
-      )}
-    </div>
+        {!deleteItems && (
+          <div className=" opacity-0 group-hover:opacity-100 ">
+            <div
+              className="  size-[32px] bg-gray-100/10 hover:bg-gray-100/80 transition-all flex items-center justify-center rounded-full cursor-pointer  "
+              onClick={() => {
+                setFunctionName("");
+                setReplyMessageId(message);
+              }}
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M3.33973 8.89844L9.87426 3.09021C9.9291 3.04361 9.99607 3.01358 10.0673 3.00363C10.1386 2.99369 10.2113 3.00425 10.2768 3.03406C10.3423 3.06388 10.3979 3.11173 10.4372 3.17202C10.4765 3.2323 10.4979 3.30253 10.4987 3.37449L10.4997 6.68555H11.5C16.5876 6.68555 21 9.60312 21 13.8721C20.9019 15.3604 20.4163 16.7971 19.5913 18.0397C18.7663 19.2823 17.6306 20.2875 16.2971 20.9555C16.2438 20.9844 16.1843 20.9997 16.1237 21H16.1151C16.0153 20.9978 15.9201 20.9572 15.8495 20.8866C15.7789 20.816 15.7383 20.7208 15.7361 20.621C15.7359 20.561 15.7503 20.5019 15.7778 20.4486C15.8053 20.3953 15.8453 20.3494 15.8943 20.3149C16.6549 19.4579 17.1293 18.3849 17.2513 17.2456C17.2513 14.4283 14.0096 12.7444 10.8749 12.7444C10.7858 12.7444 10.6968 12.7444 10.6096 12.7388H10.4997V15.3722C10.4988 15.4441 10.4775 15.5143 10.4382 15.5746C10.3989 15.6349 10.3432 15.6828 10.2777 15.7126C10.2122 15.7424 10.1396 15.753 10.0683 15.743C9.99702 15.7331 9.93005 15.703 9.87521 15.6564L3.12358 9.65524C3.08464 9.61972 3.05354 9.57647 3.03227 9.52826C3.01099 9.48004 3 9.42792 3 9.37522C3 9.32252 3.01099 9.2704 3.03227 9.22218C3.05354 9.17397 3.3008 8.93396 3.33973 8.89844Z"
+                  stroke="#42526E"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                ></path>
+              </svg>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 const AudioMessage = ({ message }: { message: messageItem }) => {
@@ -591,6 +652,7 @@ const AudioMessage = ({ message }: { message: messageItem }) => {
       setIsDownloading(false);
     }
   };
+
   // let audioData = await getAudio(message._id);
   const { wavesurfer, isPlaying: isWaveSurferPlaying } = useWavesurfer({
     container: audioRef,
@@ -609,10 +671,55 @@ const AudioMessage = ({ message }: { message: messageItem }) => {
     cursorWidth: 2,
   });
 
+  // Save position when component unmounts or audio pauses
+  useEffect(() => {
+    if (!wavesurfer) return;
+
+    // Handler to save current time
+    const handleTimeUpdate = () => {
+      const currentTime = wavesurfer.getCurrentTime();
+      console.log({ currentTime });
+      console.log(wavesurfer.getScroll());
+      const duration = wavesurfer.getDuration();
+      // Calculate progress as a number between 0-1
+      const progress = currentTime / duration;
+      localStorage.setItem(`audioProgress-${message._id}`, progress.toString());
+
+      // localStorage.setItem(`audioTime-${message._id}`, currentTime.toString());
+    };
+
+    // Save time every second during playback
+    const interval = setInterval(() => {
+      if (isWaveSurferPlaying) {
+        handleTimeUpdate();
+      }
+    }, 1000);
+
+    // Save time when paused
+    wavesurfer.on("pause", handleTimeUpdate);
+
+    // Save time before unmounting
+    return () => {
+      wavesurfer.un("pause", handleTimeUpdate);
+      handleTimeUpdate();
+      clearInterval(interval);
+    };
+  }, [wavesurfer, message._id, isWaveSurferPlaying]);
+
   useEffect(() => {
     if (!wavesurfer) return;
     wavesurfer.on("ready", () => {
       setIsDownloading(false);
+      const savedTime = localStorage.getItem(`audioTime-${message._id}`);
+
+      if (savedTime) {
+        // wavesurfer.setTime(Number.parseFloat(savedTime));
+        // wavesurfer.setScrollTime(Number.parseFloat(savedTime));
+        // wavesurfer.seekTo(Number.parseFloat("3"));
+
+        const progress = Number.parseFloat("0.6259246588693957");
+        wavesurfer.seekTo(progress);
+      }
     });
 
     wavesurfer.on("loading", (percent) => {
@@ -630,7 +737,7 @@ const AudioMessage = ({ message }: { message: messageItem }) => {
     return () => {
       wavesurfer.unAll();
     };
-  }, [wavesurfer]);
+  }, [wavesurfer, message._id]);
 
   const handlePlayPause = async () => {
     if (!shouldLoadAudio && !!!audioURL) {
@@ -903,7 +1010,10 @@ const MessageFooter: React.FC<{
   message: messageItem;
   imageLoaded: boolean;
   isCurrentUser: boolean;
-}> = ({ message, imageLoaded, isCurrentUser }) => {
+  current_user?: User;
+  other_user?: User;
+}> = ({ message, imageLoaded, isCurrentUser, current_user, other_user }) => {
+  const reactionIcons = reactionsIcon;
   const renderStatusIcon = () => {
     if (message.status === "DELIVERED") {
       return <Loader2 className="size-[12px] text-[#1d9bf0] animate-spin " />;
@@ -947,6 +1057,12 @@ const MessageFooter: React.FC<{
     }
     return null;
   };
+  const us = "dd";
+  const userPic =
+    message.senderId === current_user?._id
+      ? current_user.image
+      : other_user?.image;
+  // const Icon = reactionIcons.findIndex((item)=>item.alt ===message.reaction.)
 
   return (
     <div
@@ -955,6 +1071,54 @@ const MessageFooter: React.FC<{
         isCurrentUser && "justify-end "
       )}
     >
+      {message !== undefined &&
+        message?.reaction?.length !== undefined &&
+        message?.reaction?.length > 0 && (
+          <div className=" px-2 flex items-center gap-x-1">
+            {message.reaction.map((reaction, index) => {
+              const reactionIcon = reactionsIcon.find(
+                (icon) => icon.alt === reaction.icon
+              );
+              // const userPic = reaction.userId === message.
+
+              if (!reactionIcon) return null;
+
+              return (
+                <div
+                  key={`${reaction.userId}-${index}`}
+                  className="relative group flex items-center gap-x-1 bg-[#f8f8ff] rounded-full p-1 border border-gray-200 "
+                >
+                  <Image
+                    src={reactionIcon.url || "/placeholder.svg"}
+                    alt={reactionIcon.alt}
+                    width={16}
+                    height={16}
+                    className="object-contain"
+                  />
+                  {reaction.userId === current_user?._id ? (
+                    <div className="size-[16px] rounded-full overflow-hidden relative ">
+                      <Image
+                        src={current_user.image || "/placeholder.svg"}
+                        alt={`${reactionIcon.id}`}
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                  ) : (
+                    <div className="size-[16px] rounded-full overflow-hidden relative ">
+                      <Image
+                        src={other_user?.image || "/placeholder.svg"}
+                        alt={`${reactionIcon.id}`}
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       {formatPersianDate(new Date(message._creationTime))}
       <span className="ml-2 ">{renderStatusIcon()}</span>
     </div>

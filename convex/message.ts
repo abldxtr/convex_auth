@@ -276,3 +276,68 @@ export const getMessageById = query({
     };
   },
 });
+
+export const addReaction = mutation({
+  args: {
+    messageId: v.id("messages"),
+    icon: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const { messageId, icon } = args;
+
+    // Get authenticated user
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Unauthorized");
+    }
+
+    // Get the message
+    const message = await ctx.db.get(messageId);
+    if (!message) {
+      throw new Error("Message not found");
+    }
+
+    // Initialize reactions array if it doesn't exist
+    const currentReactions = message.reaction || [];
+
+    // Check if user already reacted
+    const existingReactionIndex = currentReactions.findIndex(
+      (reaction) => reaction.userId === userId
+    );
+
+    let updatedReactions;
+
+    if (existingReactionIndex !== -1) {
+      // Update existing reaction
+      if (currentReactions[existingReactionIndex].icon === icon) {
+        // Remove reaction if same icon is clicked
+        updatedReactions = currentReactions.filter(
+          (reaction) => reaction.userId !== userId
+        );
+      } else {
+        // Update to new icon
+        updatedReactions = [...currentReactions];
+        updatedReactions[existingReactionIndex] = {
+          userId,
+          icon,
+        };
+      }
+    } else {
+      // Add new reaction
+      updatedReactions = [
+        ...currentReactions,
+        {
+          userId,
+          icon,
+        },
+      ];
+    }
+
+    // Update the message with new reactions
+    const updatedMessage = await ctx.db.patch(messageId, {
+      reaction: updatedReactions,
+    });
+
+    return updatedMessage;
+  },
+});
