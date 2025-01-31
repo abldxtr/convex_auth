@@ -17,8 +17,9 @@ import { useDeleteItem } from "@/context/delete-items-context";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAudioCache } from "@/context/audio-cache-context";
 import ReactionPicker, { reactionsIcon } from "./reaction-picker";
+import { useMediaQuery } from "usehooks-ts";
 
-interface messageItem {
+export interface messageItem {
   replyMess?:
     | {
         _id: Id<"messages">;
@@ -135,6 +136,8 @@ const MessRight: React.FC<{
   children: React.ReactNode;
   current_user: User | undefined;
 }> = ({ message, children }) => {
+  const matches = useMediaQuery("(min-width: 768px)");
+
   const {
     replyMessageId,
     replyMessageIdScroll,
@@ -168,7 +171,9 @@ const MessRight: React.FC<{
   const bind = useLongPress(() => {
     if (!isDragging) {
       // Only activate if not dragging
-      setDeleteItems(true);
+      if (matches) {
+        setDeleteItems(true);
+      }
     }
   });
 
@@ -268,6 +273,7 @@ const MessRight: React.FC<{
         setIsVisible={setIsVisible}
         setPosition={setPosition}
         messageId={message._id}
+        message={message}
       />
       <AnimatePresence mode="wait">
         <motion.div
@@ -504,6 +510,7 @@ const MessLeft: React.FC<{
         setIsVisible={setIsVisible}
         setPosition={setPosition}
         messageId={message._id}
+        message={message}
       />
       <div
         className={cn(
