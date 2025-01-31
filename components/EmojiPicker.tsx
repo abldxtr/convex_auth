@@ -5,6 +5,7 @@ import Picker from "@emoji-mart/react";
 import { cn } from "@/lib/utils";
 import { useMediaQuery } from "usehooks-ts";
 import { useVoiceRecorder } from "@/context/audio-context";
+import { AnimatePresence, motion } from "framer-motion";
 
 export const EmojiPicker = forwardRef<
   HTMLInputElement,
@@ -56,13 +57,28 @@ export const EmojiPicker = forwardRef<
           </g>
         </svg>
       </button>
-
+      {/* <AnimatePresence> */}
       {openEmoji && (
         <div
           className={cn(
-            " absolute  bottom-full isolate  md:right-[-16rem] right-[-150px] z-[100]   "
+            " absolute  bottom-full isolate  md:right-[-16rem] right-[-150px] z-[100] origin-bottom-left emoji-container   "
           )}
           ref={ref}
+          // initial={{
+          //   scale: 0.75,
+          // }}
+          // animate={{
+          //   scale: 1,
+          // }}
+          // exit={{
+          //   scale: 0.75,
+          //   opacity: 0,
+          // }}
+          // transition={{
+          //   type: "spring",
+          //   bounce: 0,
+          //   duration: 0.3,
+          // }}
         >
           <Picker
             data={data}
@@ -70,7 +86,7 @@ export const EmojiPicker = forwardRef<
             emojiSize={18}
             searchPosition="none"
             onClickOutside={() => setOpenEmoji(false)}
-            maxFrequentRows={matches ? 7 : 5}
+            maxFrequentRows={matches ? 6 : 4}
             perLine={matches ? 8 : 6}
             showPreview={false}
             previewPosition="none"
@@ -79,6 +95,7 @@ export const EmojiPicker = forwardRef<
           />
         </div>
       )}
+      {/* </AnimatePresence> */}
     </div>
   );
 });

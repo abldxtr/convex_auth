@@ -146,3 +146,18 @@
 .cursor-context-menu {
   cursor: context-menu;
 }
+
+@keyframes emojiShow {
+  0% {
+    transform: scale(0.75);
+    /* opacity: 0; */
+  }
+  100% {
+    transform: scale(1);
+    /* opacity: 1; */
+  }
+}
+
+.emoji-container {
+  animation: emojiShow 0.2s ease-out forwards;
+}

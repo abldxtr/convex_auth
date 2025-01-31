@@ -145,6 +145,8 @@ export default function Messages({
     setToScroll,
     setScrollBound,
     setReplyMessageId,
+    isVisible,
+    setIsVisible,
   } = useGlobalContext();
   const {
     deleteItems,
@@ -182,6 +184,7 @@ export default function Messages({
         setScrollBound(scrollBound);
       }
       setInScroll(true);
+      setIsVisible(false);
     };
     if (chatContainer && !goDown) {
       const distanceFromBottom =
@@ -269,8 +272,8 @@ export default function Messages({
       >
         {/* <AnimatePresence initial={false}> */}
         {Object.entries(groupedMessages).map(([date, msgs], index) => (
-          <div key={`${index}-${date}`} className="mb-4 isolate  ">
-            <div className="text-center text-sm text-gray-500 my-2 sticky top-0 rtlDir z-[200] w-full flex items-center justify-center">
+          <div key={`${index}-${date}`} className="mb-4 isolate z-[1]  ">
+            <div className="text-center text-sm text-gray-500 my-2 sticky z-[100] top-0 rtlDir  w-full flex items-center justify-center">
               <div
                 className="px-2 py-1 bg-gray-100 rounded-full mt-2  "
                 // onClick={() => DisableDeleteItmes()}
@@ -284,7 +287,7 @@ export default function Messages({
                 <motion.div
                   key={message._id}
                   id={`message-${message._id}`}
-                  className=" hover:bg-[rgba(66,82,110,0.03)] transition-all group  rounded-md "
+                  className=" hover:bg-[rgba(66,82,110,0.03)] transition-all group  rounded-md z-[1]"
                   // layout
                   // exit={{
                   //   height: 0,

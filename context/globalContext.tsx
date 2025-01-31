@@ -99,11 +99,16 @@ interface CounterContextType {
   setDeleteItems: React.Dispatch<React.SetStateAction<boolean>>;
   functionName: string;
   setFunctionName: React.Dispatch<React.SetStateAction<string>>;
+  isVisible: boolean;
+  setIsVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const GlobalContext = createContext<CounterContextType | undefined>(undefined);
 
 export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
+  // reaction container show
+  const [isVisible, setIsVisible] = useState(false);
+
   const [convexFile, setConvexFile] = useState<convexFile | null>(null);
   const [functionName, setFunctionName] = useState("");
   const [replyMessageId, setReplyMessageId] = useState<replyMess | null>(null);
@@ -189,6 +194,8 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
         setDeleteItems,
         functionName,
         setFunctionName,
+        isVisible,
+        setIsVisible,
       }}
     >
       <DeleteItemsProvider>

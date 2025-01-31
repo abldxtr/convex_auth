@@ -11,6 +11,7 @@ import { Trash } from "lucide-react";
 import { useGlobalContext } from "@/context/globalContext";
 import { messageItem } from "./scroll-down";
 import { useDeleteItem } from "@/context/delete-items-context";
+import { User } from "./message.list";
 
 interface Position {
   x: number;
@@ -31,6 +32,7 @@ export type reaction = {
   setPosition: React.Dispatch<React.SetStateAction<Position>>;
   messageId: Id<"messages">;
   message: messageItem;
+  currentUserId: User | undefined;
 };
 
 export default function ReactionPicker({
@@ -40,6 +42,7 @@ export default function ReactionPicker({
   setPosition,
   messageId,
   message,
+  currentUserId,
 }: reaction) {
   // const [isVisible, setIsVisible] = useState(false);
   // const [position, setPosition] = useState<Position>({ x: 0, y: 0 });
@@ -51,15 +54,98 @@ export default function ReactionPicker({
   );
   const reactions = reactionsIcon;
 
-  const addReaction = useMutation(api.message.addReaction);
+  const addReaction = useMutation(api.message.addReaction).withOptimisticUpdate(
+    (localStore, mutationArg) => {
+      const { icon, messageId } = mutationArg;
+      const chatId = message.chatId;
+
+      const res = localStore.getQuery(api.message.messages, {
+        chatId,
+      });
+      if (res) {
+        const newMessage = res.find((m) => m._id === messageId);
+        const UsId = currentUserId?._id as Id<"users">;
+
+        // Initialize reactions array if it doesn't exist
+        const currentReactions = newMessage?.reaction || [];
+
+        // Check if user already reacted
+        const existingReactionIndex = currentReactions.findIndex(
+          (reaction) => reaction.userId === UsId
+        );
+        let updatedReactions;
+
+        if (existingReactionIndex !== -1) {
+          // Update existing reaction
+          if (currentReactions[existingReactionIndex].icon === icon) {
+            // Remove reaction if same icon is clicked
+            updatedReactions = currentReactions.filter(
+              (reaction) => reaction.userId !== UsId
+            );
+          } else {
+            // Update to new icon
+            updatedReactions = [...currentReactions];
+            updatedReactions[existingReactionIndex] = {
+              userId: UsId,
+              icon,
+            };
+          }
+        } else {
+          // Add new reaction
+          updatedReactions = [
+            ...currentReactions,
+            {
+              userId: UsId,
+              icon,
+            },
+          ];
+        }
+
+        // dddddddddddddd
+
+        // const re =
+        //   newMessage?.reaction && newMessage.reaction.length === 0
+        //     ? [{ userId: UsId, icon }]
+        //     : newMessage?.reaction?.map(
+        //         (r) => {
+        //           if (r.userId === UsId && r.icon === icon) return;
+        //           else if (r.userId === UsId && r.icon !== icon)
+        //             return { userId: UsId, icon };
+        //           else {
+        //             return r;
+        //           }
+        //         }
+        //         // r.userId === currentUserId?._id ? r.icon === icon ? null : r
+        //         // if(r.userId === UsId && r.icon === icon) return null
+        //         // else if (r.userId === UsId && r.icon !== icon) return { userId: UsId, icon }
+        //         // else return r
+
+        //         // r.userId === currentUserId?._id ? { ...r, icon } : r
+        //       );
+        if (!newMessage) return;
+        const optimisticMessage = {
+          ...newMessage,
+          reaction: updatedReactions,
+        };
+        const opt = res.map((m) => {
+          if (m._id === messageId) {
+            return optimisticMessage;
+          }
+          return m;
+        });
+
+        localStore.setQuery(api.message.messages, { chatId }, [...opt]);
+      }
+    }
+  );
 
   const handleReaction = async (icon: string, messageId: Id<"messages">) => {
     try {
+      setIsVisible(false);
       await addReaction({
         messageId,
         icon,
       });
-      setIsVisible(false);
     } catch (error) {
       toast.error("Failed to add reaction");
       setIsVisible(false);
@@ -138,7 +224,7 @@ export default function ReactionPicker({
         <div
           ref={containerRef}
           className="fixed 
-          bg-[#ffffffd9] backdrop-blur-[50px] flex items-center justify-center  rounded-full shadow-lg select-none reaction-container z-[1000] w-[290px] h-[40px] "
+          bg-[#ffffffd9] backdrop-blur-[50px]  flex items-center justify-center  rounded-full shadow-lg select-none reaction-container z-[2000] w-[290px] h-[40px] "
           style={{
             left: position.x,
             top: position.y,

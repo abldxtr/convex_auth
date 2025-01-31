@@ -320,11 +320,10 @@ export default function InputChat({
   const handleEmoji = (emoji: any) => {
     setInputValue(inputValue + emoji.native);
   };
-  const { deleteItems, setDeleteItems, items, setItems, DisableDeleteItmes } =
-    useDeleteItem();
+  const { deleteItems } = useDeleteItem();
 
   return (
-    <DragContainer className=" bg-transparent px-[12px]    py-1 isolate ">
+    <DragContainer className=" bg-transparent px-[12px] pb-[12px]    isolate ">
       <div className="  flex flex-col w-full h-full bg-[#eff3f4] rounded-[16px] relative">
         {/* wait for send audio */}
         {isPendingForUploadAudio && (

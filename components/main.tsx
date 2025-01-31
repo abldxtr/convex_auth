@@ -10,18 +10,6 @@ export default async function Main({ param }: { param: string }) {
   const token = await convexAuthNextjsToken();
   const user = await fetchQuery(api.user.getUser, {}, { token });
 
-  // const preloadedChatList = await preloadQuery(
-  //   api.chat.chatList,
-  //   { id: user?._id },
-  //   { token }
-  // );
-
-  // const chatList = await fetchQuery(
-  //   api.chat.chatList,
-  //   { id: user?._id! },
-  //   { token }
-  // );
-
   const preloadedChatList = await preloadQuery(
     api.chat.chatList,
     { id: user?._id },
@@ -36,7 +24,6 @@ export default async function Main({ param }: { param: string }) {
           user={user}
           preloadedChatList={preloadedChatList}
         />
-        {/* <Message_list user={user} preloadedChatList={preloadedChatList} /> */}
       </>
     );
   } else {
@@ -46,9 +33,6 @@ export default async function Main({ param }: { param: string }) {
           <div
             className={cn(
               " overflow-y-auto overflow-x-hidden z-[10] bg-[#fcfdfd]  scrl fixed top-0 left-0 h-dvh md:w-[400px] w-full  "
-              // mobileMenue
-              //   ? "  -translate-x-full pointer-events-none   "
-              //   : " translate-x-0 transition-all duration-300 "
             )}
           >
             <Message_list user={user} preloadedChatList={preloadedChatList} />

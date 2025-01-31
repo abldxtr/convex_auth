@@ -135,7 +135,7 @@ const MessRight: React.FC<{
   message: messageItem;
   children: React.ReactNode;
   current_user: User | undefined;
-}> = ({ message, children }) => {
+}> = ({ message, children, current_user }) => {
   const matches = useMediaQuery("(min-width: 768px)");
 
   const {
@@ -143,6 +143,8 @@ const MessRight: React.FC<{
     replyMessageIdScroll,
     setReplyMessageId,
     setFunctionName,
+    isVisible,
+    setIsVisible,
   } = useGlobalContext();
   const {
     deleteItems,
@@ -156,16 +158,24 @@ const MessRight: React.FC<{
   const [checkState, setCheckState] = useState(false);
 
   // reaction stuff
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisibleReaction, setIsVisibleReaction] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
+  // scroll disable reaction isVisible
+  useEffect(() => {
+    if (!isVisible) {
+      setIsVisibleReaction(false);
+    }
+  }, [isVisible]);
+
   const handleContextMenu = (e: React.MouseEvent) => {
-    e.preventDefault(); // جلوگیری از نمایش منوی راست کلیک مرورگر
-    setIsVisible(true);
+    e.preventDefault();
+    setIsVisibleReaction(true);
     setPosition({
       x: e.clientX,
       y: e.clientY,
     });
+    setIsVisible(true);
   };
 
   const bind = useLongPress(() => {
@@ -268,12 +278,13 @@ const MessRight: React.FC<{
   return (
     <>
       <ReactionPicker
-        isVisible={isVisible}
+        isVisible={isVisibleReaction}
         position={position}
-        setIsVisible={setIsVisible}
+        setIsVisible={setIsVisibleReaction}
         setPosition={setPosition}
         messageId={message._id}
         message={message}
+        currentUserId={current_user}
       />
       <AnimatePresence mode="wait">
         <motion.div
@@ -281,7 +292,6 @@ const MessRight: React.FC<{
             "  p-1  w-full group flex items-end gap-2 justify-end z-[9] rounded-md  relative isolate  ",
             backGroundColor && "bg-[rgba(66,82,110,0.1)]"
           )}
-          dir="auto"
           // className="md:p-2 "
           {...bind()}
           ref={setRefs}
@@ -332,9 +342,13 @@ const MessRight: React.FC<{
             initial={{ x: 0 }}
             animate={deleteItems ? { x: -5 } : { x: 0 }}
           >
-            <div className="bg-[#dcfaf5] rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl p-3 pt-1 pb-1 text-[#091e42]">
+            <motion.div
+              className="bg-[#dcfaf5] rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl p-3 pt-1 pb-1 text-[#091e42] "
+              dir="auto"
+              layout
+            >
               {children}
-            </div>
+            </motion.div>
           </motion.div>
           {/* checkbox */}
           {deleteItems && (
@@ -375,21 +389,31 @@ const MessLeft: React.FC<{
     replyMessageIdScroll,
     setReplyMessageId,
     setFunctionName,
+    isVisible,
+    setIsVisible,
   } = useGlobalContext();
   const { deleteItems, setDeleteItems, items, setItems, DisableDeleteItmes } =
     useDeleteItem();
   const [backGroundColor, setBackGroundColor] = useState(false);
   // reaction stuff
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisibleReaction, setIsVisibleReaction] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
+  // scroll disable reaction isVisible
+  useEffect(() => {
+    if (!isVisible) {
+      setIsVisibleReaction(false);
+    }
+  }, [isVisible]);
+
   const handleContextMenu = (e: React.MouseEvent) => {
-    e.preventDefault(); // جلوگیری از نمایش منوی راست کلیک مرورگر
-    setIsVisible(true);
+    e.preventDefault();
+    setIsVisibleReaction(true);
     setPosition({
       x: e.clientX,
       y: e.clientY,
     });
+    setIsVisible(true);
   };
   // const bind = useLongPress(() => {
   //   // alert("Long pressed!");
@@ -505,12 +529,13 @@ const MessLeft: React.FC<{
   return (
     <>
       <ReactionPicker
-        isVisible={isVisible}
+        isVisible={isVisibleReaction}
         position={position}
-        setIsVisible={setIsVisible}
+        setIsVisible={setIsVisibleReaction}
         setPosition={setPosition}
         messageId={message._id}
         message={message}
+        currentUserId={current_user!}
       />
       <div
         className={cn(
@@ -522,9 +547,13 @@ const MessLeft: React.FC<{
         onContextMenu={handleContextMenu}
       >
         <div className="flex flex-col items-start max-w-[75%]">
-          <div className="bg-[#f4f5f7] rounded-tr-2xl  rounded-br-2xl rounded-tl-2xl p-3 pt-1 pb-1 text-[#091e42] ">
+          <motion.div
+            className="bg-[#f4f5f7] rounded-tr-2xl  rounded-br-2xl rounded-tl-2xl p-3 pt-1 pb-1 text-[#091e42] "
+            dir="auto"
+            layout
+          >
             {children}
-          </div>
+          </motion.div>
         </div>
         {!deleteItems && (
           <div className=" opacity-0 group-hover:opacity-100 ">

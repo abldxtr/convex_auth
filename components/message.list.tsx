@@ -2,16 +2,11 @@
 
 import MessageHeader from "./message/m-header";
 import UserList, { Account, UserListLoading, userList } from "./message/m-list";
-import { useMediaQuery } from "usehooks-ts";
 import { useGlobalContext } from "@/context/globalContext";
-import { useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
 import { CreateChat, CreateChatIcon } from "./create-chat";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Preloaded, usePreloadedQuery } from "convex/react";
-import { cn } from "@/lib/utils";
-// import Main from "./main";
 
 export type users = {
   id: string;
@@ -79,30 +74,11 @@ export default function Message_list({
 }) {
   const { mobileMenue, setMobileMenue, chatIdActive, setChatIdActive } =
     useGlobalContext();
-  // const param = useParams<{ conversationId: string }>();
-  // const matches = useMediaQuery("(min-width: 768px)");
-
-  // useEffect(() => {
-  //   if (!!param.conversationId && matches) {
-  //     setMobileMenue(false);
-  //   } else if (!matches && !!param.conversationId) {
-  //     setMobileMenue(true);
-  //   }
-  //   setChatIdActive(param.conversationId);
-  // }, [param.conversationId, matches]);
 
   const chatlist = usePreloadedQuery(preloadedChatList);
 
   return (
     <>
-      {/* <div
-        className={cn(
-          " overflow-y-auto overflow-x-hidden z-[10] bg-[#fcfdfd]  scrl fixed top-0 left-0 h-dvh md:w-[400px] w-full  ",
-          mobileMenue
-            ? "  -translate-x-full pointer-events-none   "
-            : " translate-x-0 transition-all duration-300 "
-        )}
-      > */}
       <section className=" lg:flex  relative  border-x-[1px] border-[#eff3f4] h-full w-full  ">
         <CreateChatIcon />
         <div className="flex  w-full flex-col isolate ">
@@ -146,7 +122,6 @@ export default function Message_list({
           </div>
         </div>
       </section>
-      {/* </div> */}
       <CreateChat id={user!} />
     </>
   );
