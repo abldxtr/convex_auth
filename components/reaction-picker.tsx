@@ -30,8 +30,7 @@ export type reaction = {
   setIsVisible: React.Dispatch<React.SetStateAction<boolean>>;
   position: Position;
   setPosition: React.Dispatch<React.SetStateAction<Position>>;
-  messageId: Id<"messages">;
-  message: messageItem;
+  message: messageItem | null;
   currentUserId: User | undefined;
 };
 
@@ -40,7 +39,6 @@ export default function ReactionPicker({
   setIsVisible,
   position,
   setPosition,
-  messageId,
   message,
   currentUserId,
 }: reaction) {
@@ -57,6 +55,9 @@ export default function ReactionPicker({
   const addReaction = useMutation(api.message.addReaction).withOptimisticUpdate(
     (localStore, mutationArg) => {
       const { icon, messageId } = mutationArg;
+      if (message == null) {
+        return;
+      }
       const chatId = message.chatId;
 
       const res = localStore.getQuery(api.message.messages, {
@@ -101,27 +102,6 @@ export default function ReactionPicker({
           ];
         }
 
-        // dddddddddddddd
-
-        // const re =
-        //   newMessage?.reaction && newMessage.reaction.length === 0
-        //     ? [{ userId: UsId, icon }]
-        //     : newMessage?.reaction?.map(
-        //         (r) => {
-        //           if (r.userId === UsId && r.icon === icon) return;
-        //           else if (r.userId === UsId && r.icon !== icon)
-        //             return { userId: UsId, icon };
-        //           else {
-        //             return r;
-        //           }
-        //         }
-        //         // r.userId === currentUserId?._id ? r.icon === icon ? null : r
-        //         // if(r.userId === UsId && r.icon === icon) return null
-        //         // else if (r.userId === UsId && r.icon !== icon) return { userId: UsId, icon }
-        //         // else return r
-
-        //         // r.userId === currentUserId?._id ? { ...r, icon } : r
-        //       );
         if (!newMessage) return;
         const optimisticMessage = {
           ...newMessage,
@@ -139,7 +119,13 @@ export default function ReactionPicker({
     }
   );
 
-  const handleReaction = async (icon: string, messageId: Id<"messages">) => {
+  const handleReaction = async (
+    icon: string,
+    messageId: Id<"messages"> | null
+  ) => {
+    if (messageId === null) {
+      return;
+    }
     try {
       setIsVisible(false);
       await addReaction({
@@ -208,15 +194,9 @@ export default function ReactionPicker({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const {
-    setReplyMessageId,
-    replyMessageIdScroll,
-    setReplyMessageIdScroll,
-    setFunctionName,
-  } = useGlobalContext();
+  const { setReplyMessageId, setFunctionName } = useGlobalContext();
 
-  const { deleteItems, setDeleteItems, items, setItems, DisableDeleteItmes } =
-    useDeleteItem();
+  const { setDeleteItems } = useDeleteItem();
 
   return (
     <>
@@ -245,7 +225,9 @@ export default function ReactionPicker({
                   className={`relative w-8 h-8 flex items-center justify-center transition-transform cursor-pointer hover:scale-125 ${
                     selectedReaction?.id === reaction.id ? "scale-125" : ""
                   }`}
-                  onClick={() => handleReaction(reaction.alt, messageId)}
+                  onClick={() =>
+                    handleReaction(reaction.alt, message && message._id)
+                  }
                 >
                   <Image
                     src={reaction.url || "/placeholder.svg"}

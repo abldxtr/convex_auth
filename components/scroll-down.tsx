@@ -145,6 +145,12 @@ const MessRight: React.FC<{
     setFunctionName,
     isVisible,
     setIsVisible,
+    messageReaction,
+    setMessageReaction,
+    isVisibleReaction,
+    setIsVisibleReaction,
+    position,
+    setPosition,
   } = useGlobalContext();
   const {
     deleteItems,
@@ -158,8 +164,8 @@ const MessRight: React.FC<{
   const [checkState, setCheckState] = useState(false);
 
   // reaction stuff
-  const [isVisibleReaction, setIsVisibleReaction] = useState(false);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  // const [isVisibleReaction, setIsVisibleReaction] = useState(false);
+  // const [position, setPosition] = useState({ x: 0, y: 0 });
 
   // scroll disable reaction isVisible
   useEffect(() => {
@@ -170,6 +176,7 @@ const MessRight: React.FC<{
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
+    setMessageReaction(message);
     setIsVisibleReaction(true);
     setPosition({
       x: e.clientX,
@@ -277,15 +284,14 @@ const MessRight: React.FC<{
   }, [inView, replyMessageIdScroll, replyMessageId, message._id]);
   return (
     <>
-      <ReactionPicker
+      {/* <ReactionPicker
         isVisible={isVisibleReaction}
         position={position}
         setIsVisible={setIsVisibleReaction}
         setPosition={setPosition}
-        messageId={message._id}
         message={message}
         currentUserId={current_user}
-      />
+      /> */}
       <AnimatePresence mode="wait">
         <motion.div
           className={cn(
@@ -343,7 +349,7 @@ const MessRight: React.FC<{
             animate={deleteItems ? { x: -5 } : { x: 0 }}
           >
             <motion.div
-              className="bg-[#dcfaf5] rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl p-3 pt-1 pb-1 text-[#091e42] "
+              className="bg-[#dcfaf5] rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl p-3 pt-1 pb-1 text-[#091e42] origin-top-right "
               dir="auto"
               layout
             >
@@ -391,13 +397,18 @@ const MessLeft: React.FC<{
     setFunctionName,
     isVisible,
     setIsVisible,
+    isVisibleReaction,
+    setIsVisibleReaction,
+    position,
+    setPosition,
+    setMessageReaction,
   } = useGlobalContext();
   const { deleteItems, setDeleteItems, items, setItems, DisableDeleteItmes } =
     useDeleteItem();
   const [backGroundColor, setBackGroundColor] = useState(false);
   // reaction stuff
-  const [isVisibleReaction, setIsVisibleReaction] = useState(false);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  // const [isVisibleReaction, setIsVisibleReaction] = useState(false);
+  // const [position, setPosition] = useState({ x: 0, y: 0 });
 
   // scroll disable reaction isVisible
   useEffect(() => {
@@ -408,6 +419,8 @@ const MessLeft: React.FC<{
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
+    setMessageReaction(message);
+
     setIsVisibleReaction(true);
     setPosition({
       x: e.clientX,
@@ -528,15 +541,14 @@ const MessLeft: React.FC<{
 
   return (
     <>
-      <ReactionPicker
+      {/* <ReactionPicker
         isVisible={isVisibleReaction}
         position={position}
         setIsVisible={setIsVisibleReaction}
         setPosition={setPosition}
-        messageId={message._id}
         message={message}
         currentUserId={current_user!}
-      />
+      /> */}
       <div
         className={cn(
           " p-1 w-full group flex items-end gap-2 z-[9] transition-all duration-200 rounded-md  isolate "
@@ -548,7 +560,7 @@ const MessLeft: React.FC<{
       >
         <div className="flex flex-col items-start max-w-[75%]">
           <motion.div
-            className="bg-[#f4f5f7] rounded-tr-2xl  rounded-br-2xl rounded-tl-2xl p-3 pt-1 pb-1 text-[#091e42] "
+            className="bg-[#f4f5f7] rounded-tr-2xl  rounded-br-2xl rounded-tl-2xl p-3 pt-1 pb-1 text-[#091e42]  origin-top-left"
             dir="auto"
             layout
           >

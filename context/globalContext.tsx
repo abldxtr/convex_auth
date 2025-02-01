@@ -4,6 +4,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { DeleteItemsProvider } from "./delete-items-context";
 import { AudioCacheProvider } from "./audio-cache-context";
+import { messageItem } from "@/components/scroll-down";
 
 export type FileState = {
   file: File;
@@ -101,6 +102,20 @@ interface CounterContextType {
   setFunctionName: React.Dispatch<React.SetStateAction<string>>;
   isVisible: boolean;
   setIsVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  messageReaction: messageItem | null;
+  setMessageReaction: React.Dispatch<React.SetStateAction<messageItem | null>>;
+  position: {
+    x: number;
+    y: number;
+  };
+  setPosition: React.Dispatch<
+    React.SetStateAction<{
+      x: number;
+      y: number;
+    }>
+  >;
+  isVisibleReaction: boolean;
+  setIsVisibleReaction: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const GlobalContext = createContext<CounterContextType | undefined>(undefined);
@@ -108,6 +123,11 @@ const GlobalContext = createContext<CounterContextType | undefined>(undefined);
 export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
   // reaction container show
   const [isVisible, setIsVisible] = useState(false);
+  const [messageReaction, setMessageReaction] = useState<messageItem | null>(
+    null
+  );
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isVisibleReaction, setIsVisibleReaction] = useState(false);
 
   const [convexFile, setConvexFile] = useState<convexFile | null>(null);
   const [functionName, setFunctionName] = useState("");
@@ -196,6 +216,12 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
         setFunctionName,
         isVisible,
         setIsVisible,
+        messageReaction,
+        setMessageReaction,
+        position,
+        setPosition,
+        isVisibleReaction,
+        setIsVisibleReaction,
       }}
     >
       <DeleteItemsProvider>

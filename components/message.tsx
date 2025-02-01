@@ -29,6 +29,7 @@ import { useMessageScroll } from "@/hooks/use-message-scroll";
 import { otherUser } from "./chat.input";
 import { useMutation } from "convex/react";
 import { useDeleteItem } from "@/context/delete-items-context";
+import ReactionPicker from "./reaction-picker";
 
 export default function Messages({
   chatId,
@@ -147,6 +148,11 @@ export default function Messages({
     setReplyMessageId,
     isVisible,
     setIsVisible,
+    messageReaction,
+    isVisibleReaction,
+    setIsVisibleReaction,
+    position,
+    setPosition,
   } = useGlobalContext();
   const {
     deleteItems,
@@ -253,80 +259,74 @@ export default function Messages({
   }
 
   return (
-    <div className=" flex-1 overflow-hidden relative isolate ">
-      <ScrollDown
-        goDown={goDown}
-        func={HandleScrollDown}
-        chatId={paramValue!}
-        userId={currentUser!}
-        unreadMessagesCount={unreadMessagesCount}
-        mutate={makeAllMessageSeen}
+    <>
+      <ReactionPicker
+        isVisible={isVisibleReaction}
+        position={position}
+        setIsVisible={setIsVisibleReaction}
+        setPosition={setPosition}
+        message={messageReaction}
+        currentUserId={user}
       />
-      <motion.div
-        className={cn(
-          "w-full    overflow-y-auto flex  flex-col h-full  ",
-          "[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-md"
-          // "  messages-parent "
-        )}
-        ref={chatRef}
-      >
-        {/* <AnimatePresence initial={false}> */}
-        {Object.entries(groupedMessages).map(([date, msgs], index) => (
-          <div key={`${index}-${date}`} className="mb-4 isolate z-[1]  ">
-            <div className="text-center text-sm text-gray-500 my-2 sticky z-[100] top-0 rtlDir  w-full flex items-center justify-center">
-              <div
-                className="px-2 py-1 bg-gray-100 rounded-full mt-2  "
-                // onClick={() => DisableDeleteItmes()}
-              >
-                {date}
-              </div>
-            </div>
-            {msgs.map((message, index) => {
-              const isFirstUnread = message._id === firstUnreadRef.current;
-              return (
-                <motion.div
-                  key={message._id}
-                  id={`message-${message._id}`}
-                  className=" hover:bg-[rgba(66,82,110,0.03)] transition-all group  rounded-md z-[1]"
-                  // layout
-                  // exit={{
-                  //   height: 0,
-                  //   opacity: 0,
-                  //   transition: {
-                  //     // opacity: {
-                  //     //   duration: 0.2,
-                  //     // },
-                  //     duration: 3,
-                  //     layout: {
-                  //       duration: index * 5,
-                  //     },
-                  //   },
-                  // }}
-                >
-                  {isFirstUnread && (
-                    <div className="bg-yellow-100 text-yellow-800 text-center py-1 rounded-md ">
-                      پیام‌های خوانده‌نشده
-                    </div>
-                  )}
-                  <ChatMessage
-                    key={message._id}
-                    message={message}
-                    isCurrentUser={message.senderId === currentUser}
-                    current_user={user}
-                    other_user={otherUser}
-                  />
-                </motion.div>
-              );
-            })}
-          </div>
-        ))}
-        <div ref={bottomRef} />
 
-        {presentOthers && presentOthers.data.typing && (
-          <TypingLeft message="typing..." />
-        )}
-        {/* </AnimatePresence> */}
-      </motion.div>
-    </div>
+      <div className=" flex-1 overflow-hidden relative isolate ">
+        <ScrollDown
+          goDown={goDown}
+          func={HandleScrollDown}
+          chatId={paramValue!}
+          userId={currentUser!}
+          unreadMessagesCount={unreadMessagesCount}
+          mutate={makeAllMessageSeen}
+        />
+        <motion.div
+          className={cn(
+            "w-full    overflow-y-auto flex  flex-col h-full  ",
+            "[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-md"
+            // "  messages-parent "
+          )}
+          ref={chatRef}
+        >
+          {/* <AnimatePresence initial={false}> */}
+          {Object.entries(groupedMessages).map(([date, msgs], index) => (
+            <div key={`${index}-${date}`} className="mb-4 isolate z-[1]  ">
+              <div className="text-center text-sm text-gray-500 my-2 sticky z-[100] top-0 rtlDir  w-full flex items-center justify-center">
+                <div className="px-2 py-1 bg-gray-100 rounded-full mt-2  ">
+                  {date}
+                </div>
+              </div>
+              {msgs.map((message, index) => {
+                const isFirstUnread = message._id === firstUnreadRef.current;
+                return (
+                  <motion.div
+                    key={message._id}
+                    id={`message-${message._id}`}
+                    className=" hover:bg-[rgba(66,82,110,0.03)] transition-all group  rounded-md z-[1]"
+                  >
+                    {isFirstUnread && (
+                      <div className="bg-yellow-100 text-yellow-800 text-center py-1 rounded-md ">
+                        پیام‌های خوانده‌نشده
+                      </div>
+                    )}
+                    <ChatMessage
+                      key={message._id}
+                      message={message}
+                      isCurrentUser={message.senderId === currentUser}
+                      current_user={user}
+                      other_user={otherUser}
+                    />
+                  </motion.div>
+                );
+              })}
+            </div>
+          ))}
+          <div ref={bottomRef} />
+
+          {presentOthers && presentOthers.data.typing && (
+            <TypingLeft message="typing..." />
+          )}
+          {/* </AnimatePresence> */}
+        </motion.div>
+      </div>
+    </>
   );
 }
