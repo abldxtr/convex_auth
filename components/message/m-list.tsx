@@ -120,14 +120,6 @@ export default function UserList({ user }: { user: userList }) {
           chatIdActive === user.id && "border-r-2 border-[#1d9bf0]"
         )}
       >
-        {/* <div
-          className={cn(
-            " absolute bottom-2 flex items-center justify-center right-4 size-6 rounded-full bg-[#1d9bf0] text-white font-semibold  ",
-            user.unReadMess === 0 && "hidden "
-          )}
-        >
-          {user.unReadMess > 0 && user.unReadMess}
-        </div> */}
         <NumberCount
           num={user.unReadMess}
           condition={user.unReadMess === 0}
@@ -153,7 +145,7 @@ export default function UserList({ user }: { user: userList }) {
         <div className="flex h-full grow flex-1 flex-col gap-2 ">
           <div className="text-[15px] font-semibold leading-[20px] text-[#0f1419] whitespace-nowrap ">
             <div className=" flex items-center justify-between ">
-              <div className="text-[16px] font-medium text-[#091e42]">
+              <div className="text-[16px] font-medium text-[#091e42] [-webkit-text-stroke-width:_thin] ">
                 {/* {user.name} */}
                 {user.channelName}
               </div>

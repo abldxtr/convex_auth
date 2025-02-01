@@ -284,14 +284,6 @@ const MessRight: React.FC<{
   }, [inView, replyMessageIdScroll, replyMessageId, message._id]);
   return (
     <>
-      {/* <ReactionPicker
-        isVisible={isVisibleReaction}
-        position={position}
-        setIsVisible={setIsVisibleReaction}
-        setPosition={setPosition}
-        message={message}
-        currentUserId={current_user}
-      /> */}
       <AnimatePresence mode="wait">
         <motion.div
           className={cn(
@@ -349,7 +341,7 @@ const MessRight: React.FC<{
             animate={deleteItems ? { x: -5 } : { x: 0 }}
           >
             <motion.div
-              className="bg-[#dcfaf5] rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl p-3 pt-1 pb-1 text-[#091e42] origin-top-right "
+              className="bg-[#dcfaf5] rounded-tl-2xl rounded-tr-2xl [-webkit-text-stroke-width:_thin] rounded-bl-2xl p-3 pt-1 pb-1 text-[#091e42] origin-top-right "
               dir="auto"
               layout
             >
@@ -541,14 +533,6 @@ const MessLeft: React.FC<{
 
   return (
     <>
-      {/* <ReactionPicker
-        isVisible={isVisibleReaction}
-        position={position}
-        setIsVisible={setIsVisibleReaction}
-        setPosition={setPosition}
-        message={message}
-        currentUserId={current_user!}
-      /> */}
       <div
         className={cn(
           " p-1 w-full group flex items-end gap-2 z-[9] transition-all duration-200 rounded-md  isolate "
@@ -560,7 +544,7 @@ const MessLeft: React.FC<{
       >
         <div className="flex flex-col items-start max-w-[75%]">
           <motion.div
-            className="bg-[#f4f5f7] rounded-tr-2xl  rounded-br-2xl rounded-tl-2xl p-3 pt-1 pb-1 text-[#091e42]  origin-top-left"
+            className="bg-[#f4f5f7] rounded-tr-2xl [-webkit-text-stroke-width:_thin] rounded-br-2xl rounded-tl-2xl p-3 pt-1 pb-1 text-[#091e42]  origin-top-left"
             dir="auto"
             layout
           >
@@ -1118,6 +1102,7 @@ const MessageFooter: React.FC<{
         "text-[#6a7485] text-[0.65rem] leading-4 mt-1 flex  items-center  ",
         isCurrentUser && "justify-end "
       )}
+      dir="ltr"
     >
       {message !== undefined &&
         message?.reaction?.length !== undefined &&
