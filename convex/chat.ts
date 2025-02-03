@@ -117,10 +117,15 @@ export const createChat = mutation({
   handler: async (ctx, args) => {
     const { first, second } = args;
 
-    await ctx.db.insert("chats", {
+    const res = await ctx.db.insert("chats", {
       initiatorId: first,
       participantId: second,
     });
+    if (res) {
+      return "success";
+    } else {
+      return "fail";
+    }
   },
 });
 

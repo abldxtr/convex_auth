@@ -341,7 +341,7 @@ const MessRight: React.FC<{
             animate={deleteItems ? { x: -5 } : { x: 0 }}
           >
             <motion.div
-              className="bg-[#dcfaf5] rounded-tl-2xl rounded-tr-2xl [-webkit-text-stroke-width:_thin] rounded-bl-2xl p-3 pt-1 pb-1 text-[#091e42] origin-top-right "
+              className="bg-[#dcfaf5] rounded-tl-2xl rounded-tr-2xl [-webkit-text-stroke-width:_thin] rounded-bl-2xl p-3 pt-1 pb-1 text-[#091e42] origin-right "
               dir="auto"
               layout
             >
@@ -544,7 +544,7 @@ const MessLeft: React.FC<{
       >
         <div className="flex flex-col items-start max-w-[75%]">
           <motion.div
-            className="bg-[#f4f5f7] rounded-tr-2xl [-webkit-text-stroke-width:_thin] rounded-br-2xl rounded-tl-2xl p-3 pt-1 pb-1 text-[#091e42]  origin-top-left"
+            className="bg-[#f4f5f7] rounded-tr-2xl [-webkit-text-stroke-width:_thin] rounded-br-2xl rounded-tl-2xl p-3 pt-1 pb-1 text-[#091e42]  origin-left"
             dir="auto"
             layout
           >
@@ -1102,7 +1102,7 @@ const MessageFooter: React.FC<{
         "text-[#6a7485] text-[0.65rem] leading-4 mt-1 flex  items-center  ",
         isCurrentUser && "justify-end "
       )}
-      dir="ltr"
+      // dir={isCurrentUser ? "ltr" : "rtl"}
     >
       {message !== undefined &&
         message?.reaction?.length !== undefined &&

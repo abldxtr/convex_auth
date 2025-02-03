@@ -4,18 +4,17 @@ import ChatHeader from "./chat-header";
 import InputChat from "./chat.input";
 import Messages from "./message";
 import { api } from "@/convex/_generated/api";
-import { Id } from "@/convex/_generated/dataModel";
-import Message_list, { Chat, User } from "./message.list";
+import type { Id } from "@/convex/_generated/dataModel";
+import Message_list, { type Chat, type User } from "./message.list";
 import { useQuery } from "convex-helpers/react/cache/hooks";
-import { Preloaded } from "convex/react";
+import type { Preloaded } from "convex/react";
 import { useGlobalContext } from "@/context/globalContext";
 import { useMediaQuery } from "usehooks-ts";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
-  MotionConfig,
-  PanInfo,
+  type PanInfo,
   motion,
   useAnimation,
   useMotionValue,
@@ -50,12 +49,24 @@ export default function Chat_text(props: {
   const matches = useMediaQuery("(min-width: 768px)");
 
   useEffect(() => {
-    if (!!param.conversationId && matches) {
-      setMobileMenue(false);
-    } else if (!matches && !!param.conversationId) {
-      setMobileMenue(true);
-    }
-    setChatIdActive(param.conversationId);
+    const handleLayoutChange = async () => {
+      if (!!param.conversationId && matches) {
+        await controls.start({
+          x: -SIDEBAR_WIDTH,
+          transition: { duration: 0.3, ease: "easeInOut" },
+        });
+        setMobileMenue(false);
+      } else if (!matches && !!param.conversationId) {
+        await controls.start({
+          x: 0,
+          transition: { duration: 0.3, ease: "easeInOut" },
+        });
+        setMobileMenue(true);
+      }
+      setChatIdActive(param.conversationId);
+    };
+
+    handleLayoutChange();
   }, [param.conversationId, matches]);
 
   const other =
@@ -72,11 +83,15 @@ export default function Chat_text(props: {
   const x = useMotionValue(mobileMenue ? -SIDEBAR_WIDTH : 0);
 
   // Use spring for smoother motion
-  // const springConfig = { damping: 25, stiffness: 200, mass: 0.5 };
-  const springConfig = { bounce: 0 };
+  const springConfig = {
+    stiffness: 300,
+    damping: 30,
+    bounce: 0,
+    duration: 0.3,
+  };
   const springX = useSpring(x, springConfig);
 
-  const [isOpen, setIsOpen] = React.useState(!mobileMenue);
+  const [isOpen, setIsOpen] = useState(!mobileMenue);
 
   // Transform spring value instead of raw x
   const sidebarX = useTransform(
@@ -222,26 +237,16 @@ export default function Chat_text(props: {
         </motion.div>
         <motion.div
           style={{ x: sidebarX }}
+          initial={false}
           className={cn(
             " overflow-y-auto overflow-x-hidden z-[1000] bg-[#fcfdfd]  scrl fixed top-0 left-0 h-dvh md:w-[400px] w-full  ",
             mobileMenue ? "  -translate-x-full    " : " translate-x-0  "
-
-            // mobileMenue
-            // ? "  -translate-x-full pointer-events-none   "
-            // : " translate-x-0  "
-
-            // : " translate-x-0 transition-all duration-300 "
           )}
-          // transition={{
-          //   type: "spring",
-          //   stiffness: 300,
-          //   damping: 30,
-          //   mass: 1,
-          // }}
-          //     <motion.div
-          //   style={{ x: sidebarX }}
-          //   className="fixed left-0 top-0 z-40 h-full w-[300px] bg-sidebar shadow-lg will-change-transform"
-          // ></motion.div>
+          transition={{
+            type: "spring",
+            bounce: 0,
+            duration: 0.3,
+          }}
         >
           <Message_list
             user={props.user}

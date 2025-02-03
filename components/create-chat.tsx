@@ -41,6 +41,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import VaulDrawer from "./vaul-drawer";
 
 export function CreateChat({ id }: { id: User }) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -72,13 +73,16 @@ export function CreateChat({ id }: { id: User }) {
 
   async function handleSubmit() {
     startTransition(async () => {
-      await createChat({
+      const res = await createChat({
         first: id?._id!,
         second: userId as Id<"users">,
       }).catch(() => {
         toast.error("error to create Chat!");
         console.log("error to create Chat!!!");
       });
+      if (res === "success") {
+        toast.success("channel created!");
+      }
 
       setOpenChatCreate(false);
     });
@@ -139,53 +143,50 @@ export function CreateChat({ id }: { id: User }) {
     );
   } else {
     return (
-      <Drawer open={openChatCreate} onOpenChange={handleOpenChange}>
-        <DrawerTrigger asChild>
-          <Button variant="outline">Edit Profile</Button>
-        </DrawerTrigger>
-        <DrawerContent>
-          <DrawerHeader className="text-left">
-            <DrawerTitle>Create chat channel</DrawerTitle>
-          </DrawerHeader>
-          <form
-            className="space-y-4 mx-auto w-full  px-4 !h-[220px] "
-            onSubmit={handleSubmit}
-          >
-            <div className=" relative ">
-              <Input
-                value={userId}
-                onChange={(e) => setUserId(e.target.value)}
-                autoFocus
-                placeholder="userId"
-                required
-                maxLength={100}
-                className=" focus:outline-none outline-none !focus:ring-0 !focus-within:outline-none !focus-within:ring-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0   "
-                disabled={pending}
-              />
-              {!userId ? (
-                <div
-                  className=" absolute right-2 inset-y-0 flex items-center justify-center hover:bg-gray-200 transition-colors rounded-md px-1 cursor-pointer my-1  "
-                  onClick={handlePaste}
-                >
-                  <ClipboardCheck className=" size-[20px] shrink-0 opacity-70  " />
-                </div>
-              ) : (
-                <div
-                  className=" absolute right-2 inset-y-0 flex items-center justify-center hover:bg-gray-200 transition-colors rounded-md px-1 cursor-pointer my-1  "
-                  onClick={() => setUserId("")}
-                >
-                  <X className=" size-[20px] shrink-0 opacity-70 " />
-                </div>
-              )}
-            </div>
-            <div className="flex w-full items-center justify-center ">
-              <Button className="w-full bg-[#1d9bf0] hover:bg-[#1d9cf0b9]">
-                {pending ? <BeatLoader size={5} color="#ffffff" /> : "create"}
-              </Button>
-            </div>
-          </form>
-        </DrawerContent>
-      </Drawer>
+      <VaulDrawer
+        // title="Custom Drawer Title"
+        // description="This is a custom drawer component built with Vaul and styled with Tailwind CSS."
+        open={openChatCreate}
+        setOpen={setOpenChatCreate}
+      >
+        <form
+          className="space-y-4 mx-auto w-full  px-4 !h-[220px] "
+          onSubmit={handleSubmit}
+        >
+          <div className=" relative ">
+            <Input
+              value={userId}
+              onChange={(e) => setUserId(e.target.value)}
+              autoFocus
+              placeholder="userId"
+              required
+              maxLength={100}
+              className=" focus:outline-none outline-none !focus:ring-0 !focus-within:outline-none !focus-within:ring-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0   "
+              disabled={pending}
+            />
+            {!userId ? (
+              <div
+                className=" absolute right-2 inset-y-0 flex items-center justify-center hover:bg-gray-200 transition-colors rounded-md px-1 cursor-pointer my-1  "
+                onClick={handlePaste}
+              >
+                <ClipboardCheck className=" size-[20px] shrink-0 opacity-70  " />
+              </div>
+            ) : (
+              <div
+                className=" absolute right-2 inset-y-0 flex items-center justify-center hover:bg-gray-200 transition-colors rounded-md px-1 cursor-pointer my-1  "
+                onClick={() => setUserId("")}
+              >
+                <X className=" size-[20px] shrink-0 opacity-70 " />
+              </div>
+            )}
+          </div>
+          <div className="flex w-full items-center justify-center ">
+            <Button className="w-full bg-[#1d9bf0] hover:bg-[#1d9cf0b9]">
+              {pending ? <BeatLoader size={5} color="#ffffff" /> : "create"}
+            </Button>
+          </div>
+        </form>
+      </VaulDrawer>
     );
   }
 }
