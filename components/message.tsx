@@ -145,14 +145,14 @@ export default function Messages({
     toScroll,
     setToScroll,
     setScrollBound,
-    setReplyMessageId,
-    isVisible,
     setIsVisible,
     messageReaction,
     isVisibleReaction,
     setIsVisibleReaction,
     position,
     setPosition,
+    scrollPos,
+    scrollBound,
   } = useGlobalContext();
   const {
     deleteItems,
@@ -172,6 +172,11 @@ export default function Messages({
   //   convexQuery(api.message.messages, { chatId: cc })
   // );
   const messages = useQuery(api.message.messages, { chatId: cc });
+  useEffect(() => {
+    if (scrollPos < scrollBound) {
+      setToScroll(true);
+    }
+  }, [messages]);
 
   useEffect(() => {
     const chatContainer = chatRef?.current;
