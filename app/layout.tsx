@@ -5,6 +5,8 @@ import { GlobalProvider } from "@/context/globalContext";
 import { ConvexQueryCacheProvider } from "convex-helpers/react/cache/provider";
 import { Toaster } from "@/components/ui/sonner";
 import type { Metadata, Viewport } from "next";
+import { EmojiProvider } from "@/context/EmojiContext";
+import { VoiceRecorderProvider } from "@/context/audio-context";
 
 const APP_NAME = "kchat";
 const APP_DEFAULT_TITLE = "kchat";
@@ -62,10 +64,14 @@ export default function RootLayout({
         <body className="">
           <ConvexClientProvider>
             <GlobalProvider>
-              <ConvexQueryCacheProvider>
-                {children}
-                <Toaster position="top-center" />
-              </ConvexQueryCacheProvider>
+              <EmojiProvider>
+                <VoiceRecorderProvider>
+                  <ConvexQueryCacheProvider>
+                    {children}
+                    <Toaster position="top-center" />
+                  </ConvexQueryCacheProvider>
+                </VoiceRecorderProvider>
+              </EmojiProvider>
             </GlobalProvider>
           </ConvexClientProvider>
         </body>
