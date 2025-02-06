@@ -1,0 +1,10 @@
+{
+    "name": "kchat",
+    "short_name": "kchat",
+   
+    "theme_color": "#FFFFFF",
+    "background_color": "#FFFFFF",
+    "start_url": "/",
+    "display": "standalone",
+    "orientation": "portrait"
+  }

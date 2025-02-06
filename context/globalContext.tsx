@@ -5,6 +5,8 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { DeleteItemsProvider } from "./delete-items-context";
 import { AudioCacheProvider } from "./audio-cache-context";
 import { messageItem } from "@/components/scroll-down";
+import { EmojiProvider } from "./EmojiContext";
+import { VoiceRecorderProvider } from "./audio-context";
 
 export type FileState = {
   file: File;
@@ -224,9 +226,13 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
         setIsVisibleReaction,
       }}
     >
-      <DeleteItemsProvider>
-        <AudioCacheProvider>{children}</AudioCacheProvider>
-      </DeleteItemsProvider>
+      <EmojiProvider>
+        <VoiceRecorderProvider>
+          <DeleteItemsProvider>
+            <AudioCacheProvider>{children}</AudioCacheProvider>
+          </DeleteItemsProvider>
+        </VoiceRecorderProvider>
+      </EmojiProvider>
     </GlobalContext.Provider>
   );
 };
