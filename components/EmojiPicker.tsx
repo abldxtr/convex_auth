@@ -90,7 +90,7 @@ export const EmojiPicker = forwardRef<
             perLine={matches ? 8 : 6}
             showPreview={false}
             previewPosition="none"
-            set="twitter"
+            // set="twitter"
             skin={2}
           />
         </div>
