@@ -35,15 +35,7 @@ export default function Chat_text(props: {
   });
   const { mobileMenue, setMobileMenue, chatIdActive, setChatIdActive } =
     useGlobalContext();
-  const {
-    deleteItems,
-    setDeleteItems,
-    items,
-    setItems,
-    DisableDeleteItmes,
-    isDragging,
-    setIsDragging,
-  } = useDeleteItem();
+  const { setIsDragging } = useDeleteItem();
   const param = useParams<{ conversationId: string }>();
 
   const matches = useMediaQuery("(min-width: 768px)");

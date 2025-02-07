@@ -113,7 +113,7 @@ export const ChatMessage = ({
         )}
         {message.type === "AUDIO" && <AudioMessage message={message} />}
         {message.content && (
-          <span className={cn(" ", ii !== null && "pt-1")}>
+          <span className={cn(" ", ii !== null && "pt-1")} dir="auto">
             {/* <span className={cn("break-all  ", ii !== null && "pt-1")}> */}
 
             {message.content}
@@ -342,7 +342,7 @@ const MessRight: React.FC<{
           >
             <motion.div
               className="bg-[#dcfaf5] rounded-tl-2xl rounded-tr-2xl [-webkit-text-stroke-width:_thin] rounded-bl-2xl p-3 pt-1 pb-1 text-[#091e42] origin-right "
-              dir="auto"
+              // dir="auto"
               layout
             >
               {children}
@@ -545,7 +545,7 @@ const MessLeft: React.FC<{
         <div className="flex flex-col items-start max-w-[75%]">
           <motion.div
             className="bg-[#f4f5f7] rounded-tr-2xl [-webkit-text-stroke-width:_thin] rounded-br-2xl rounded-tl-2xl p-3 pt-1 pb-1 text-[#091e42]  origin-left"
-            dir="auto"
+            // dir="auto"
             layout
           >
             {children}
