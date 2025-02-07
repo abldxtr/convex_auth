@@ -172,8 +172,12 @@ export default function Messages({
   //   convexQuery(api.message.messages, { chatId: cc })
   // );
   const messages = useQuery(api.message.messages, { chatId: cc });
+  // let messLenght = messages?.length;
+  // console.log({ scrollPos });
+  // console.log({ scrollBound });
+
   useEffect(() => {
-    if (scrollPos < scrollBound) {
+    if (scrollPos === 0) {
       setToScroll(true);
     }
   }, [messages]);
