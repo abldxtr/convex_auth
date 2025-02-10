@@ -159,14 +159,8 @@ export default function InputChat({
       duration,
     } = mutationArg;
 
-    // ایجاد پیام موقت
-    // const typeImg = !!images?.length && "IMAGE";
-    // const imgSrc = new Blob([img!]);
-    // if (type === "AUDIO") {
-    //   return;
-    // }
     const optimisticMessage = {
-      _id: `optimistic-${opupId}` as Id<"messages">, // تبدیل به نوع مناسب
+      _id: `optimistic-${opupId}` as Id<"messages">,
       _creationTime: Date.now() as number,
       type,
       content,
